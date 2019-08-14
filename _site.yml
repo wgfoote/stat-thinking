@@ -1,0 +1,13 @@
+name: "Statistical Thinking"
+output_dir: "."
+navbar:
+  title: "Statistical Thinking"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+output:
+  html_document:
+    theme: flatly
+    css: style.css

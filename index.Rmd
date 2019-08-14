@@ -1,0 +1,67 @@
+---
+title: "What is Statistical Thinking?"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Welcome to Statistical Reasoning
+
+You may, or may not, realize that you have been thinking statistically all your like. Have you ever thought or uttered:
+
+- I probably have!
+
+- On average classes here are very hard!
+
+- How often can I skip a meeting before they fire me?
+
+- How sure am I that I will get promoted?
+
+If you have ever made (or thought) statements and questions like these, you are _de facto_ thinking statistically.
+
+Why do we reason statistically?
+
+- We very well know our exprerience of ignorance
+
+- We are often prone to error (and try to learn from our mistakes!)
+
+- We still have to make assertions of all sorts when we decide to act on anything
+
+## What is statisical reasoning?
+
+Statistical reasoning is a process for **generating knowledge under uncertainty**.
+
+- a **process** has inputs, activities (including decisions), and outputs, so what are the inputs, operations, results?
+
+- To **generate** something is to develop (specify, design) and implement (build, test, operate, update) something, so what would we develop and implement?
+
+**Knowledge** is not just
+
+- taking a look
+
+- being aware of something
+
+- understanding how to do something
+
+All of these are components of knowledge, but we want results, we want a **judgment** that is reasonable! Our definition of knowledge is
+
+- truth-claim that something is or not (probably), 
+
+- based on available evidence 
+
+- and relevant methodology
+
+Knowledge thus
+
+- includes truth-claims that we are aware of this or that and might even understand how
+
+- above all knowledge is an assertion of TRUE or FALSE
+
+- With uncertainty about the future we append **probably* TRUE or FALSE.
+
+Overall for the purposes of statistical reasoning there are always three broad components of knowledge and a product:
+
+1. Data collection: results in observations, data, imagination,  
+
+### Learn by doing this
