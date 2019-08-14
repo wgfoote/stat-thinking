@@ -5,8 +5,8 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
+    - text: "Shiny"
+      href: https://wgfoote.shinyapps.io/finalytics-live-5/
 output:
   html_document:
     theme: flatly
