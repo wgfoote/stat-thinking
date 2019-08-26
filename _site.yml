@@ -2,11 +2,44 @@ name: "Statistical Thinking"
 output_dir: "."
 navbar:
   title: "Statistical Thinking"
+  type: inverse
   left:
     - text: "Home"
+      icon: fa-home
       href: index.html
-    - text: "Shiny"
-      href: https://wgfoote.shinyapps.io/finalytics-live-5/
+    - text: "About"
+      icon: fa-info
+      menu:
+      - text: "About reasoning"
+        href: https://wgfoote.shinyapps.io/stat-thinking-1-reasoning/
+      - text: "Readiness"
+        href: https://wgfoote.shinyapps.io/stat-thinking-0-diagnostic/
+      - text: "A first exploration"
+        href: https://wgfoote.shinyapps.io/stat-thinking-0-bullet/
+      - text: "Data"
+        href: html/qq-data.html
+    - text: "Explore"
+      menu:
+      - text: "Distribution"
+      - text: "Tendency"
+      - text: "Deviation"
+    - text: "Anticipate"
+      menu:
+      - text: "Basics"
+      - text: "Binomial"
+      - text: "Poisson"
+      - text: "Normal"
+      - text: "Students-t"
+    - text: "Infer"
+      menu:
+      - text: "Confidence"
+      - text: "Hypothesis"
+    - text: "Relate"
+      menu:
+      - text: "Regression"
+      - href: html/qq-regress.html
+      - text: "ANOVA"  
+    
 output:
   html_document:
     theme: flatly

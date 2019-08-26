@@ -12,7 +12,7 @@
 
 
 
-<title>What is Statistical Thinking?</title>
+<title>Imagine this</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,6 +23,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -261,7 +263,7 @@ $(document).ready(function () {
 
 
 
-<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
@@ -274,10 +276,85 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
 </li>
-<li>
-  <a href="https://wgfoote.shinyapps.io/finalytics-live-5/">Shiny</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-info"></span>
+     
+    About
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://wgfoote.shinyapps.io/stat-thinking-1-reasoning/">About reasoning</a>
+    </li>
+    <li>
+      <a href="https://wgfoote.shinyapps.io/stat-thinking-0-diagnostic/">Readiness</a>
+    </li>
+    <li>
+      <a href="https://wgfoote.shinyapps.io/stat-thinking-0-bullet/">A first exploration</a>
+    </li>
+    <li>
+      <a href="html/qq-data.html">Data</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Explore
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Distribution</li>
+    <li class="dropdown-header">Tendency</li>
+    <li class="dropdown-header">Deviation</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Anticipate
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Basics</li>
+    <li class="dropdown-header">Binomial</li>
+    <li class="dropdown-header">Poisson</li>
+    <li class="dropdown-header">Normal</li>
+    <li class="dropdown-header">Students-t</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Infer
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Confidence</li>
+    <li class="dropdown-header">Hypothesis</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Relate
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Regression</li>
+    <li>
+      <a href="html/qq-regress.html"></a>
+    </li>
+    <li class="dropdown-header">ANOVA</li>
+  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -291,60 +368,37 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What is Statistical Thinking?</h1>
+<h1 class="title toc-ignore">Imagine this</h1>
 
 </div>
 
 
-<div id="welcome-to-statistical-reasoning" class="section level2">
-<h2>Welcome to Statistical Reasoning</h2>
-<p>You may, or may not, realize that you have been thinking statistically all your like. Have you ever thought or uttered:</p>
+<p><img src="img/gapminder.gif" /></p>
+<div id="watch-and-question" class="section level2">
+<h2>Watch and question</h2>
+<blockquote>
+<p>Are Africa and Oceania stagnating while other regions improve?</p>
+</blockquote>
+<blockquote>
+<p>Is Europe always in the lead to better health and wealth?</p>
+</blockquote>
+<blockquote>
+<p>How fast is India and China catching up with Europe?</p>
+</blockquote>
+<blockquote>
+<p>How might the US (big Americas bubble) lead nearly all other regions?</p>
+</blockquote>
+<blockquote>
+<p>Are the rest of the Americas being left in the dust?</p>
+</blockquote>
+<p>Suppose your organization helps to prioritize aid to various countries and regions. As part of support for managers to allocation scarce funding from individuals and governments, you examine the characteristics of recipient countries.</p>
 <ul>
-<li><p>I probably have!</p></li>
-<li><p>On average classes here are very hard!</p></li>
-<li><p>How often can I skip a meeting before they fire me?</p></li>
-<li><p>How sure am I that I will get promoted?</p></li>
+<li><p>One criterion used by the World Bank is the relationship between life expectancy and gross domestic product per capita.</p></li>
+<li><p>The analysis would identify trends, deviations from trend, and outliers in the data. The data are for each of several countries across several years.</p></li>
 </ul>
-<p>If you have ever made (or thought) statements and questions like these, you are <em>de facto</em> thinking statistically.</p>
-<p>Why do we reason statistically?</p>
-<ul>
-<li><p>We very well know our exprerience of ignorance</p></li>
-<li><p>We are often prone to error (and try to learn from our mistakes!)</p></li>
-<li><p>We still have to make assertions of all sorts when we decide to act on anything</p></li>
-</ul>
-</div>
-<div id="what-is-statisical-reasoning" class="section level2">
-<h2>What is statisical reasoning?</h2>
-<p>Statistical reasoning is a process for <strong>generating knowledge under uncertainty</strong>.</p>
-<ul>
-<li><p>a <strong>process</strong> has inputs, activities (including decisions), and outputs, so what are the inputs, operations, results?</p></li>
-<li><p>To <strong>generate</strong> something is to develop (specify, design) and implement (build, test, operate, update) something, so what would we develop and implement?</p></li>
-</ul>
-<p><strong>Knowledge</strong> is not just</p>
-<ul>
-<li><p>taking a look</p></li>
-<li><p>being aware of something</p></li>
-<li><p>understanding how to do something</p></li>
-</ul>
-<p>All of these are components of knowledge, but we want results, we want a <strong>judgment</strong> that is reasonable! Our definition of knowledge is</p>
-<ul>
-<li><p>truth-claim that something is or not (probably),</p></li>
-<li><p>based on available evidence</p></li>
-<li><p>and relevant methodology</p></li>
-</ul>
-<p>Knowledge thus</p>
-<ul>
-<li><p>includes truth-claims that we are aware of this or that and might even understand how</p></li>
-<li><p>above all knowledge is an assertion of TRUE or FALSE</p></li>
-<li><p>With uncertainty about the future we append **probably* TRUE or FALSE.</p></li>
-</ul>
-<p>Overall for the purposes of statistical reasoning there are always three broad components of knowledge and a product:</p>
-<ol style="list-style-type: decimal">
-<li>Data collection: results in observations, data, imagination,</li>
-</ol>
-<div id="learn-by-doing-this" class="section level3">
-<h3>Learn by doing this</h3>
-</div>
+<p>We use <strong>statistical thinking</strong> to support decision makers with evidenced-based conclusions that derive from answers to questions like those posed above.</p>
+<p><a href="https://www.gapminder.org/data/">Source: gapminder.org 1952-2007</a>.</p>
+<p>This animation is based on Hans Roslings’ engaging discussion of <a href="https://www.youtube.com/watch?v=jbkSRLYSojo">200 years, 200 countries</a>.</p>
 </div>
 
 

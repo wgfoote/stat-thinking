@@ -1,67 +1,53 @@
 ---
-title: "What is Statistical Thinking?"
+title: "Imagine this"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Welcome to Statistical Reasoning
+```{r gapminder, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 5, fig.align = "center", message = FALSE, warning = FALSE, include = FALSE}
+library(gapminder)
+library(ggplot2)
+library(magick)
+library(plotly)
+img <- image_graph(1000, 600, res = 96)
+datalist <- split(gapminder, gapminder$year)
+out <- lapply(datalist, function(data){
+  p <- ggplot(data, aes(gdpPercap, lifeExp, size = pop, color = continent)) +
+    scale_size("population", limits = range(gapminder$pop)) + geom_point() + ylim(20, 90) +
+    scale_x_log10(limits = range(gapminder$gdpPercap)) + ggtitle(data$year) + theme_classic()
+  print(p)
+})
+while (!is.null(dev.list()))  dev.off()
+img <- image_background(image_trim(img), 'white')
+animation <- image_animate(img, fps = 2)
+print(animation)
+image_write(animation, "img/gapminder2.gif")
+```
 
-You may, or may not, realize that you have been thinking statistically all your like. Have you ever thought or uttered:
+![](img/gapminder.gif)
 
-- I probably have!
+## Watch and question
 
-- On average classes here are very hard!
+> Are Africa and Oceania stagnating while other regions improve?
 
-- How often can I skip a meeting before they fire me?
+> Is Europe always in the lead to better health and wealth?
 
-- How sure am I that I will get promoted?
+> How fast is India and China catching up with Europe?
 
-If you have ever made (or thought) statements and questions like these, you are _de facto_ thinking statistically.
+> How might the US (big Americas bubble) lead nearly all other regions?
 
-Why do we reason statistically?
+> Are the rest of the Americas being left in the dust?
 
-- We very well know our exprerience of ignorance
+Suppose your organization helps to prioritize aid to various countries and regions. As part of support for managers to allocation scarce funding from individuals and governments, you examine the characteristics of recipient countries.
 
-- We are often prone to error (and try to learn from our mistakes!)
+- One criterion used by the World Bank is the relationship between life expectancy and gross domestic product per capita.
 
-- We still have to make assertions of all sorts when we decide to act on anything
+- The analysis would identify trends, deviations from trend, and outliers in the data. The data are for each of several countries across several years.
 
-## What is statisical reasoning?
+We use **statistical thinking** to support decision makers with evidenced-based conclusions that derive from answers to questions like those posed above.
 
-Statistical reasoning is a process for **generating knowledge under uncertainty**.
+[Source: gapminder.org 1952-2007](https://www.gapminder.org/data/).
 
-- a **process** has inputs, activities (including decisions), and outputs, so what are the inputs, operations, results?
-
-- To **generate** something is to develop (specify, design) and implement (build, test, operate, update) something, so what would we develop and implement?
-
-**Knowledge** is not just
-
-- taking a look
-
-- being aware of something
-
-- understanding how to do something
-
-All of these are components of knowledge, but we want results, we want a **judgment** that is reasonable! Our definition of knowledge is
-
-- truth-claim that something is or not (probably), 
-
-- based on available evidence 
-
-- and relevant methodology
-
-Knowledge thus
-
-- includes truth-claims that we are aware of this or that and might even understand how
-
-- above all knowledge is an assertion of TRUE or FALSE
-
-- With uncertainty about the future we append **probably* TRUE or FALSE.
-
-Overall for the purposes of statistical reasoning there are always three broad components of knowledge and a product:
-
-1. Data collection: results in observations, data, imagination,  
-
-### Learn by doing this
+This animation is based on Hans Roslings' engaging discussion of [200 years, 200 countries](https://www.youtube.com/watch?v=jbkSRLYSojo).
