@@ -1,0 +1,539 @@
+---
+title: "Quick Quiz: how probable is that?"
+subtitle: "Probability 101"
+output:
+  html_document:
+    toc: true
+    toc_float: true 
+---
+ 
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+options(digits = 4, scipen = 99999)
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(dplyr))
+```
+
+## Define away
+
+- Probability
+
+- Impact
+
+- Risk
+
+## Invitation to a formal
+
+- Sample space $S$: all possible outcomes of an experiment $E$
+Example: "Raining two days in a row" $S = \{ (rain, not), (not, rain), (rain, rain), (not, not) \}$ 
+
+- Events in a sample sample $F$: subset of sample space
+Example: "If it rains today, then"" $F = \{ (rain, not), (rain, rain) \}$
+
+- Measure of probability $P$: maps $F$ to the real numbers between $[0,1]$
+
+1. $p \in [0,1]$
+2. for all events $i \in F$: $\Sigma_i p_i = 1$
+3. the union of any disjoint events $A_j \in F$: $\cup_i\,P(A_j) = \Sigma_i\,p(A_j)$
+
+
+
+## A bit of English
+
+```{r}
+data <- read.csv("data/qq-prob101.csv")
+data %>% 
+  kable("html", escape = F) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+## Dress down a bit
+
+Suppose the experiment $E$ consists of stock price moves UP (U) and DOWN (D). The sample space may be represented by S = {UU, UD, DU, DD}, just like a toss of a coin. Here the coin is the "market." Given that the coin is fair and that the coin is tossed in an independent and identical manner, it is reasonable to apply the equally likely model.
+
+1. What is P(at least 1 UP tick(Head))? Looking at the sample space we see the elements $\{UU, UD, DU\}$  have at least one UP; thus, P(at least 1 UP) = 3/4 = 75\%.
+
+2. What is P(no UP ticks)? Notice that the event \{no UPs\} = \{at least one UP$\}^c$ = \{all DOWN \}, so that
+$$
+P(-UP) = 1 - P(at\,least\,one\,UP)  
+$$
+$$
+= P(\{UU\}\cup\{UD\}\cup\{DU\}) = 1 - 3/4 = 1/4.
+$$
+We will use this trick often.
+
+## Try another
+
+Suppose the experiment $E$ consists of 92 people some of whom are female, some of whom smoke.
+
+
+```{r}
+smokes <- read.csv("data/smokes.csv")
+smokes.table <- addmargins(table(smokes$gender, smokes$smokes))
+knitr::kable(smokes.table, caption = "Counts: Gender x Smoking")
+```
+
+## What is...
+
+1. What is the probability of being both a female and a smoker?
+
+2. What is the probability of either being a female or a smoker?
+
+3. If you are a female, what is the probability of being a smoker?
+
+We can use this table to help us with our inquiries.
+
+```{r}
+probtable <- addmargins(prop.table(table(smokes)))
+knitr::kable(probtable*100, caption = "Unconditional Probabilities: Gender x Smoking", digits = 2)
+```
+
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+1. What is the probability of being both a female (F) and a smoker (S)?
+Find the percentage of each cell relative to the whole sample (93).
+$$
+p(F \cap N) = \frac{n(F\cap N)}{n(S)} = \frac{8}{92} = 8.70\%
+$$
+
+2. What is the probability of either being a female or a smoker?
+
+Find the probability of being a female $P(F) = 38.04\%$. 
+
+Find the probability of being a smoker $P(S) = 30.43\%$. 
+
+Then find the probability of being both a female and a smoker $P(F \cap S) = 8.70\%$. 
+
+Finally,
+
+$$
+P(F\,\,or\,\,S) = P(F \cup S) = P(F) + P(S) - P(F \cap S)
+$$
+$$
+= 38.04\% + 30.43\% - 8.70\% = 59.77\%
+$$
+
+Why?
+
+3. If you are a female, what is the probability of being a smoker?
+
+Focus on females only (look at the row in the table for females). Use this as the basis (your denominator) for figuring out the probability.
+
+Look at these tables for insight:
+
+```{r}
+knitr::kable(smokes.table, caption = "Counts: Gender x Smoking")
+(probtable <- addmargins(prop.table(table(smokes), 2)))
+#knitr::kable(probtable[1:2,]*100, caption = "Conditional (Gender) Probabilities: Gender x Smoking", digits = 2)
+```
+
+$$
+P(S\,\, given\,\,F) = P(S\mid F) = \frac{n(S\cap F) / n(S)}{n(F) / n(S)} = \frac{n(S\cap F)}{n(F)}
+$$
+or
+$$
+P(S \mid F) = \frac{P(S\cap F)}{P(F)} = \frac{8.70}{38.04} =  22.87\%
+$$
+
+***
+But...what is $P(F \mid S)$? Use this table for insights now
+
+```{r}
+#knitr::kable(smokes.table, caption = "Counts: Gender x Smoking")
+(probtable <- addmargins(prop.table(table(smokes), 1)))
+#knitr::kable(probtable[, 1:2], caption = "Conditional (Gender) Probabilities: Gender x Smoking", digits = 2)
+```
+Again, using the original counts, we get the same result.
+$$
+P(F|S) = \frac{P(F\cap S)}{P(S)} = \frac{8/92}{28/92} =  28.57\%
+$$
+</div>
+
+## Law of Conditional Probability (Bayes)
+
+Our female smokers lead us to a more general approach here. If we know $P(B \mid A)$, can we find $P(A \mid B)$?
+$$
+P(B \mid A) =\frac{P(A \cap B)}{P(A)} = \frac{P(B \cap A)}{P(A)}
+$$
+$$
+P(A \cap B) = P(B \mid A) P(A)
+$$
+$$
+P(A \cap B) = \frac{n(B)}{n(A)} \frac{n(A)}{n(S)} = \frac{n(B)}{n(S)}
+$$
+
+***
+But then we also have
+$$
+P(B \cap A) = P(A \mid B) P(B)
+$$
+$$
+P(B \cap A) = \frac{n(A)}{n(B)} \frac{n(B)}{n(S)} = \frac{n(A)}{n(S)}
+$$
+But from our work on contingency tables we also know that $ P(B \cap A) = P(A \cap B)$, and this means that
+
+$$
+P(B \cap A) = P(A \mid B) P(B) = P(A \cap B) = P(B \mid A) P(A)
+$$
+$$
+P(A \mid B) P(B) = P(B \mid A) P(A)
+$$
+Bayes' Rule (Theorem)
+$$
+P(A \mid B) = \frac{P(B \mid A) P(A)}{P(B)}
+$$
+Yes we can.
+
+## Practice 1
+
+Your company keeps detailed records of quality metrics for its manufacturing operations. At the gargleblaster plant in West Adelbrad the morning shift ("M"), 200 gargleblasters are defective ("D") for every 100,000 produced. For the evening shift ("E"), 500 items are defective per 100,000 produced. In the average 24 hour period 1,000 items are produced by the morning shift and 600 by the evening shift.
+
+What is the probability that an item picked at random from the average total output produced in the 24 hour period:
+
+1. Was produced by the morning shift and is defective?
+2. Was produced by the evening shift and is defective?
+3. Was produced by the evening shift and is not defective?
+4. Is defective, whether produced by the evening or the morning shift?
+5. Is defective and was produced only by the morning shift?
+6. Is not defective and was produced only by the evening shift?
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+
+What is the probability, $P()$, that an item picked at random from the average total produced in the 24 hour period:
+
+1. Was produced by the morning shift and is defective?
+
+We are looking for the probability of output that is from "both the morning shift and is defective," that is, $P(M \cap D)$. This probability is found from the multiplication law of probability which states
+
+\[
+P(M \cap D) = P(M) P(D \mid M)
+\]
+
+and similarly for $P(E \cap D)$.
+
+The marginal probabilities of picking an item when produced by the morning shift ("M") is
+
+\[
+P(M) = \frac{1,000}{1,600} = 0.625
+\]
+
+and by the evening shift ("E")
+\[
+P(E) = \frac{600}{1,600} = 0.375
+\]
+
+These are marginal probabilities across both defective and not defective items.
+
+The probability of picking a defective item ("D") from the morning shift is
+
+\[
+P(D \mid M) = \frac{200}{100,000} = 0.002
+\]
+
+This conditional probability examines the split of defective and not defective items within the sample of morning shift items.
+
+The conditional probability of picking a defective item from the sample of evening shift output is
+
+\[
+P(D \mid E) = \frac{500}{100,000} = 0.005
+\]
+
+The probability that an item is picked at random from a total of 1,600 items produced during a 24 hour period was produced by the morning shift and is defective is
+
+\[
+P(M \cap D) = P(M) P(D \mid M) = (0.625)(0.002) = 0.00125
+\]
+
+2. Was produced by the evening shift and is defective?
+
+\[
+P(E \cap D) = P(E) P(D \mid E) = (0.375)(0.005) = 0.001875
+\]
+
+3. Was produced by the evening shift and is not defective?
+
+The conditional probability that given the evening shift output only, the probability of no defects ($\neg$ means "not") is
+
+\[
+P(\neg D \mid E) = 1 - P(D \mid E) = 1 - 0.005 = 0.995
+\]
+
+so we then have
+
+\[
+P(E \cap \neg D) = P(E) P(\neg D \mid E) = (0.375)(0.995) = 0.373125
+\]
+
+4. Is defective and produced by the morning or the evening shift?
+
+The expected number of defective items from the morning shift equals the probability of a defective item from the morning shift times the number of items produced only by the morning shift.
+
+\[
+P(D \mid M)count(M) = (0.002)(1,000) = 2
+\]
+
+defective items. 
+
+From the evening shift we expect
+
+\[
+P(D \mid E)Count(E) = (0.005)(600) = 3
+\]
+
+defective items. Thus we expect $2 + 3 = 5$ defective items to be produced during a 24 hour period.
+
+If there were to be 5 defective items, then the probability of a random pick of 5 defective items out of a total of 1,600 items is 
+
+\[
+P(D) = 5/1,600 = 0.003125
+\]
+
+5. Is defective and was produced only by the morning shift?
+
+We are looking for $P(M \mid D)$. We already have $P(D \mid M)$. Here we can use Bayes' theorem to retrieve $P(M \mid D)$. 
+
+Let's derive Bayes' theorem first.  We already know that according to the multiplication law of probability we have
+
+\[
+P(D \cap M) = P(M)P(D \mid M)
+\]
+
+Dividing both sides of this equation by $P(M)$, and rearranging, gives us a formula for conditional probability
+
+\[
+P(D \mid M) = \frac{P(D \cap M)}{P(M)}
+\]
+
+We also know that $P(D \cap M) = P(M \cap D)$ from our work on contingency tables. Thus substituting $P(M \cap D)$ for $P(D \cap M)$ we get
+
+\[
+P(D \mid M) = \frac{P(M \cap D)}{P(M)} = \frac{P(D)P(M \mid D)}{P(M)}
+\]
+
+Solving for $P(M \mid D)$ we finally have Bayes' theorem
+
+\[
+P(M \mid D) = \frac{P(M)P(D \mid M)}{P(D)}
+\]
+
+For our data, $P(M) = 0.625$, $P(D \mid M) = 0.002$, and $P(D) = 0.003125$, so we have
+
+\[
+P(M \mid D) = \frac{(0.625)(0.002)}{0.003125} = 0.60
+\]
+
+The probability that a defective item picked at random from the total 24 hour output is produced by the morning shift is 60\%. This probability expresses the contribution of defective items by the morning shift only.
+
+6. Is not defective and was produced only by the evening shift?
+
+Now we look for $P(E \mid \neg D)$. Using Bayes' theorem we have
+
+\[
+P(E \mid \neg D) = \frac{P(E)P(\neg D \mid E)}{P(\neg D)}
+\]
+
+For our data, $P(E) = 0.375$, $P(\neg D \mid E) = 1 - 0.005 = 0.995$, and $P(\neg D) = 1- 0.003125 = 0.996875$, so we have
+
+\[
+P(E \mid \neg D) = \frac{(0.375)(0.995)}{0.996875} = 0.3742947
+\]
+
+</div>
+
+The probability that there are no defective items picked at random from the total 24 hour output when produced by the evening shift is 37.43\%. This probability expresses the contribution of not defective items by the evening shift only.
+
+## Practice 2
+
+The marketing department of a everyday-low-price retailer is attempting to optimize marketing promotions. The department analysts estimate that approximately 1 in 50 potential buyers of a product will see the ad after hearing about the ad from a friend, and 1 in 5 sees a corresponding ad on the internet. One in 100 potential buyers will either hear about the ad or see it on the internet. One in 3 actually purchases the product after seeing the ad, while 1 in 10 without seeing it. 
+
+- What is the probability that a randomly selected potential customer will purchase the product?
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+
+Define the following events:
+
+- A: buyer hears about the ad from a friend ("word of mouth")
+- B: buyer sees only the internet ad
+- C: buyer purchases the product
+
+1. What is the probability that the buyer hears about the ad through word of mouth?
+
+\[
+P(A) = \frac{1}{50} = 0.02
+\]
+
+2. What is the probability that the buyer sees only the internet ad?
+
+\[
+P(B) = \frac{1}{5} = 0.20
+\]
+
+3. What is the probability that a buyer knows about the ad?
+
+\[
+P(A \cap B) = \frac{1}{100} = 0.01
+\]
+
+4. What is the probability that a buyer hears about the ad and sees it on the internet?
+
+\[
+P(A \cup B) = P(A) + P(B) - P(A \cap B) = 0.02 + 0.20 - 0.01 = 0.21
+\]
+
+5. What is the probability that buyer does not see or does not hear about an ad?
+
+\[
+P(\neg A \cup \neg B) = 1 - P(A \cup B) = 1 - P(A \cup B) = 1 - 0.21 = 0.79
+\]
+
+6. What is the probability that a buyer will purchase after knowing about the ad?
+
+\[
+P(C \mid (A \cup B)) = \frac{1}{3} = 0.33
+\]
+
+7. What is the probability that a buyer will purchase without knowing about the ad?
+
+\[
+P(C \mid (\neg A \cup \neg B)) = \frac{1}{10} = 0.1
+\]
+
+8. Finally, we get to answer the question: What is the probability that a buyer will purchase the item?
+
+- There are two ways the buyer would purchase the item. One way is through the ad channel, so that the probability of buying is composed of the probability that a buyer hears about the ad and sees it on the internet _and_ the probability that a buyer will purchase after knowing about the ad. Here $Ads = (A \cup B)$, so that
+
+\[
+P(Buying \cap Ads) = P(A \cup B)P(C \mid (A \cup B)) = (0.21)(0.33) = 0.0693
+\]
+
+- The second channel is without knowledge of ads. The probability of buying is composed of the probability that a buyer does not hear about the ad and does not see it on the internet _and_ the probability that a buyer will still purchase after not knowing about the ad. Here $\neg Ads = (\neg A \cup \neg B)$ so that
+
+\[
+P(Buying \cap \neg Ads) = P(\neg A \cup \neg B)P(C \mid (\neg A \cup \neg B)) = (0.79)(0.10) = 0.0790
+\]
+
+- Combining the two channels we have 
+
+\[P(Buying) = 0.0693 + 0.0790 = 0.1483\]
+
+The probability that a randomly picked customer buys the product is 14.83\%.
+
+</div>
+
+## Nothing is random!
+
+well not quite? Many outcomes are simply uncertain:
+
+- there's a 20\% chance of rain: will it rain? it might (rain = 1, with probability 0-20\%) it might not (rain = 0, with probability 80\%)
+
+Rain as defined here is a so-called _random variable_. Any random variable (really a functional mapping) is a set of possible outcomes, each of which is assigned a probability of occurrence.
+
+- a number of outcomes \{1, 0\}
+
+- each outcome assigned a probability \{20\%, 80\%}
+
+
+### Suppose 20% of the people in a city prefer Pepsi-Cola as their soft drink of choice. 
+
+1. If a random sample of six people is chosen, the number of Pepsi drinkers could range from?
+
+<button onclick="showText('myDIV4')">show / hide</button>
+<div id="myDIV4" style="display:none;">
+
+zero to six
+
+</div>
+
+Shown here are the possible numbers of Pepsi drinkers in a sample of six people and the probability of that number of Pepsi drinkers occurring in the sample. 
+
+```{r}
+data <- read.csv("data/qq-5-4.csv")
+data %>% 
+  kable("html", escape = F) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+2. Is there a random variable in our midst?
+
+<button onclick="showText('myDIV5')">show / hide</button>
+<div id="myDIV5" style="display:none;">
+
+YES!
+
+Let $D$ equal the number of drinkers from zero to six. Each outcome has a probability of occurrence associated with the outcome.
+
+We have outcomes mapped to probabilities and thus we have a random variable.
+
+Actually we have a binomial process at work here: 6 drinkers taken from 0 to 6 at a time when there is a 20\% probability of finding a Pepsi-Cola (YUCK!) drinker.
+
+</div>
+
+3. Is this a discrete or a continuous random variable?
+
+<button onclick="showText('myDIV6')">show / hide</button>
+<div id="myDIV6" style="display:none;">
+
+It is discrete: a set of integers describes the outcomes. There is no number allowed here between any two of these outcomes. Why? It is simply nonsensical to have 1/3 of a drinker. Add a drinker to the mythical 1/3 drinker and you have a just as mythical 1 and 2/3 drinker, and so on.
+
+If we allowed parts of drinkers, then maybe we would have a continuous random variable.
+
+</div>
+
+4. What is the probability that 2 or more drinkers are Pepsi-cola drinkers?
+
+<button onclick="showText('myDIV7')">show / hide</button>
+<div id="myDIV7" style="display:none;">
+
+First, the probability of either 0 or 1 drinker: $P(D < 2) = `r sum(data[[2]][1:2])`$
+
+Second, the probability of 2 or more drinkers: $P(D \geq 2) = 1 - P(D < 2) = 1 - `r sum(data[[2]][1:2])` = `r 1 - sum(data[[2]][1:2])`$
+
+</div>
+
+4. What is the mean and standard deviation of the random variable drinkers of Pepsi, which we will call $D$?
+
+<button onclick="showText('myDIV8')">show / hide</button>
+<div id="myDIV8" style="display:none;">
+See this worksheet:
+
+```{r}
+data <- read.csv("data/qq-5-4-calc.csv", stringsAsFactors = F)
+colnames(data) <- c("Index",	"Drinkers",	"Probability",	"Expected Outcome",	"Expected Deviation Squared")
+data %>% 
+  kable("html", escape = F) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+data <- read.csv("data/qq-5-4-data.csv", stringsAsFactors = F)
+colnames(data) <- c("Drinkers",	"Probability",	"Expected Outcome",	"Expected Deviation Squared")
+data <- lapply(data, as.numeric)
+mu <- sum(data[[3]])
+variance <- sum(data[[4]])
+sigma <- variance^0.5
+```
+
+where
+
+$\mu = `r mu`$, $\sigma = \sqrt{variance} = `r sigma`$
+
+</div>

@@ -1,0 +1,98 @@
+---
+title: "Workbook: how are data related?"
+output: html_document
+---
+
+<style>
+pre {
+  font-family: 'Calibri';
+  font-size: 11pt;
+  white-space: pre;
+  padding: 5px;    
+  border: 2px solid blue;
+  dispay: block;
+}
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+
+
+library(htmltools)
+
+q_num <- 1
+q_inc <- function(q_exp) {
+  q_num <<- q_num + 1
+  return(div(div(id=sprintf("q%d", q_num-1), 
+                 style="display:none;font-family:'Calibri'", 
+                 pre(deparse(substitute(q_exp)), q_exp)),
+              HTML(sprintf('<button type="button" onclick="toggle(%d);" class="btn btn-success">show answer</button>',
+                           q_num-1))))
+}
+```
+
+<script>
+  var toggle = function(i) {
+  var mydiv = document.getElementById('q' + i);
+  if (mydiv.style.display === 'block' || mydiv.style.display === '')
+    mydiv.style.display = 'none';
+  else
+    mydiv.style.display = 'block'
+  }
+</script>
+<br />
+
+Are the advertising dollars spent by a company related to total sales revenue? The following data represent the advertising dollars and the sales revenues (in million USD) for various companies in a given industry during a recent year. Construct a scatter plot of the data from the two variables and discuss the relationship between the two variables.
+
+```{r }
+scatter_data <- read.csv("data/qq-2-21.csv")
+scatter_data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+```{r}
+#calls <- sample(2:8, 78, prob = c(0.115384615, 0.08974359, 0.128205128, 0.076923077, 0.166666667, 0.192307692, 0.230769231), replace = TRUE)
+p_blank <- ggplot(scatter_data, aes(x = advertising, y = sales))
+ggsave("images-2-21/blank.png")
+p_calls <- ggplot(scatter_data, aes(x = advertising, y = sales)) + geom_point() + ggsave("images-2-21/scatter.png")
+
+plots <- paste0(list.files("images-2-21", full.names = TRUE))
+names(plots) <- str_replace_all(plots, 
+                                      c("\\.png" = "", 
+                                        "images-2-21/" = ""))
+
+bsselect(plots, type = "img", selected = "blank", 
+         live_search = TRUE, show_tick = TRUE)
+```
+
+A customer relations expert for a retail tire company is interested in determining if there is any relationship between a customer's level of education and his or her rating of the quality of the tire company's service. The tire company administers a very brief survey to each customer who buys a pair of tires and has them installed at the store. The customer is asked to respond to the quality of the service rendered as either "acceptable" or "unacceptable." In addition, each respondent is asked the level of education attained from the categories of "high school only" or "college degree." These data are gathered on 25 customers and are given below. Use this information to construct a cross-tabulation table. Comment on any relationships that may exist in the table.
+
+```{r }
+table_data <- read.csv("data/qq-2-24.csv")
+table_data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+1. Verify this tabulation.
+
+
+```{r}
+#calls <- sample(2:8, 78, prob = c(0.115384615, 0.08974359, 0.128205128, 0.076923077, 0.166666667, 0.192307692, 0.230769231), replace = TRUE)
+library(gridExtra)
+table_df <- table(table_data[,-1])
+table_df %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+2. What is the relative frequency of those with college degrees, but whose rating is unacceptable? How does this compare with the relative frequency of those with high school degrees with an acceptable rating?

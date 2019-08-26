@@ -1,0 +1,1287 @@
+---
+title: 'TUTORIAL: Simple Linear Regression'
+subtitle: "OLS and Quantile Regression"
+author: "William G. Foote"
+date: "November 21, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
+knitr::opts_chunk$set(size = "small")
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+knitr::opts_hooks$set(fig.width = function(options) {
+  if (options$fig.width < options$fig.height) {
+    options$fig.width = options$fig.height
+  }
+  options
+})
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+
+require(ggplot2)
+require(openintro)
+require(ggthemes)
+# r_moments function
+# INPUTS: r vector
+# OUTPUTS: list of scalars (mean, sd, median, skewness, kurtosis)
+data_moments <- function(data){
+  require(moments)
+  mean.r <- mean(data)
+  sd.r <- sd(data)
+  median.r <- median(data)
+  skewness.r <- skewness(data)
+  kurtosis.r <- kurtosis(data)
+  result <- data.frame(mean = mean.r, std_dev = sd.r, median = median.r, skewness = skewness.r, kurtosis = kurtosis.r)
+  #result <- data.frame(result, table = t(result))
+  return(result)
+}
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+# Linear regression writ large
+
+## The perfect relationship
+
+This figure shows two variables whose relationship can be modeled perfectly with a straight line. The equation for the line is
+$$
+y = 10 + 20x
+$$
+The line cross the vertical y-axis at $y=10$ and $x = 0$. The slope is $20$, that is, if $x$ increases by one unit, then $y$ increases by $20$ units.
+
+
+
+```{r}
+x <- sample(33, 12, prob = c(33:24, 11:33))
+y <- 10 + 20 * x
+xy_df <- data.frame(y = y, x = x)
+fig_title <- "Figure 1: Perfectly straight line"
+ggplot(data = xy_df, aes(x=x, y=y)) + geom_line() + ggtitle(fig_title)
+
+```
+
+
+Imagine what a perfect linear relationship would mean:
+
+- You would know the exact value of $y$ just by knowing the value of $x$.
+This is unrealistic in almost any natural process.
+
+- For example, if we took family income $x$, 
+this value would provide some useful information about 
+how much financial support $y$ a college may offer a prospective student. 
+
+- However, there would still be variability in financial support, 
+even when comparing students whose families have similar financial backgrounds.
+
+## Linear regression
+
+Linear regression assumes that the relationship between two variables, $x$ and $y$, can be modeled by a straight line:
+
+$$
+y = \beta_0 + \beta_1x
+$$
+
+Here $\beta_0$ is the intercept and $\beta_1$ is the slope of the straight line.
+
+It is rare for all of the data to fall on a straight line, as seen in the three scatterplots in the next figure. 
+
+
+
+```{r}
+n <- c(75, 49, 376)
+set.seed(1016)
+#myPDF('imperfLinearModel.pdf', 5.814, 1.875,
+ #     mfrow = c(1, 3),
+#      mar = c(2, 2.5, 1, 2),
+#      mgp = c(1.9, 0.6, 0),
+#      las = 0)
+x <- rnorm(n[1], 16, 33)
+y <- 14 - 0.8 * x + rnorm(n[1], sd = 12)
+xy_df <- data.frame(x = x, y = y)
+p1 <- ggplot(data = xy_df, aes(x = x, y = y)) + geom_point() + geom_smooth(se = FALSE, method = "lm") + ggtitle("Negative")
+x <- rnorm(n[2], 1052, 300)
+y <- 1400 + 7 * x + rnorm(n[2], sd = 4020)
+xy_df <- data.frame(x = x, y = y)
+p2 <- ggplot(data = xy_df, aes(x = x, y = y)) + geom_point() + geom_smooth(se = FALSE, method = "lm")+ ggtitle("Positive")
+x <- c(rnorm(100, 20, 8), runif(n[3] - 100, -10, 52))
+y <- 140 - 0.15 * x + rnorm(n[3], sd = 102)
+xy_df <- data.frame(x = x, y = y)
+p3 <- ggplot(data = xy_df, aes(x = x, y = y)) + geom_point() + geom_smooth(se = FALSE, method = "lm")+ ggtitle("A bit negative")
+x <- rnorm(n[3], sd = 99)
+y <- rnorm(n[3], sd = 102)
+xy_df <- data.frame(x = x, y = y)
+p4 <- ggplot(data = xy_df, aes(x = x, y = y)) + geom_point() + geom_smooth(se = FALSE, method = "lm")+ ggtitle("Cloud of unknowing")
+multiplot(p1, p2, p3, p4, cols=2)
+```
+
+
+In each case, the data falls around a straight line, even if none of the observations fall exactly on the line. 
+
+1. The first plot shows a relatively strong downward linear trend, where the remaining variability in the data around the line is minor relative to the strength of the relationship between $x$ and $y$. 
+2. The second plot shows an upward trend that, while evident, is not as strong as the first. 
+3. The last plot shows a very weak downward trend in the data, so slight we can hardly notice it. 
+
+In each of these examples, we will have some uncertainty regarding our estimates of the model parameters, $\beta_0$ and $\beta_1$. For instance, we might wonder, should we move the line up or down a little, or should we tilt it more or less?
+
+
+
+# Ordinary least squares
+
+Here we begin to calculate the intercept and slope of that linear relationship we just looked at. The way to do this is to minimize the a measure of the errors (residuals) around this line. The traditional approach calculated deviations of the model from the dependent variable, then squares these deviations, and finally looks for the intercept and slope that minimizes the sum of the squared deviations. All of this is due to Carl Friedrich Gauss. It was later called "ordinary" least squares. There are definitely variants that are far from "ordinary" in the menagerie of statistical techniques.
+
+## Residual interests
+
+Every $(x_i,y_i)$, for $i = 1 \dots N$ points in the scatterplots above can be conceived a straight line plus or minus a "residual" $\varepsilon$ 
+$$
+y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+$$
+Here we conceive of the $\beta_0$ and $\beta_1$ as _population_ parameters and $\varepsilon_i$ as a population variate, a _sample_ of which produces estimates $b_0$ and $b_1$. The job at hand is to find the unique combination of $b_0$ and $b_1$ such that all of $N$ sample observations of the $\varepsilon_i$ taken together are as small a distance from $(x_i,y_i)$ to the straight line as possible.
+
+
+Let's look at simple data set before we go any further.Here is data from 10/1/2016 through 9/1/2017 on real consumption and disposable income from FRED.
+
+```{r}
+ci <- read.csv("consumption_income.csv")
+fit <- lm(consumption ~ income, data = ci)
+ci$predicted <- predict(fit)
+ci$residuals <- residuals(fit)
+```
+
+First a scatterplot. We have 12 monthly observations of two variables, consumption and income.
+
+
+```{r}
+p <- ggplot(data = ci, aes(x = income, y = consumption)) + geom_point()
+p
+```
+
+
+Second, suppose we think that the marginal propensity to consume out of disposable income is 0.9 and that even at zero disposable income, the residents of the U.S. would still consume 136. 
+
+Thus let's run this straight line through the scatter of data.
+
+$$
+\hat{Y} = b_0 + b_1 X
+$$
+$$
+\hat{Y} = 136 + 0.9 X
+$$
+
+where $\hat{Y}$ is our estimated model of consumption versus income $X$. Don't confuse $X$ as income here with the $X$ from our scatter plot story above!
+
+- $Y$ is also called the _dependent_ variable
+
+- $X$ is the _independent_ variable
+
+
+```{r}
+p <- ggplot(data = ci, aes(x = income, y = consumption)) + geom_point() + geom_smooth(se = FALSE, method = "lm") + theme_bw()
+p
+```
+
+
+- Some points are practically on the line, others are pretty far away.
+
+- The vertical distance from a consumption-income point to the line is the residual.
+
+- Our next step: draw error bars to visualize the residuals.
+
+Each sample residual $e_i$ is calculated from the model for consumption:
+
+$$
+Y_i = \hat{Y_i} + e_i
+$$
+$$
+Y_i = b_0 + b_1 X_i + e_i
+$$
+$$
+Y_i = 136 + 0.9 X_i + e_i
+$$
+That is,
+$$
+e_i = Y_i - (136 + 0.9 X_i)
+$$
+
+
+```{r}
+p <- ggplot(data = ci, aes(x = income, y = consumption)) + geom_point() + geom_smooth(se = FALSE, method = "lm") + geom_segment(aes(xend = income, yend = predicted), alpha = 0.3) + geom_point(aes(y = predicted), shape = 1) + geom_point(aes(color = abs(residuals))) + scale_color_continuous(low = "black", high = "red") + guides(color = FALSE) + theme_bw()
+p
+```
+
+
+What we really want is to have a line go through this data such that it is the _best_ line. We define "best" as the smallest possible sum of squared residuals for this data set and a straight line that runs through the scatterplot.
+
+We are looking for estimates of $\beta_0$ and $\beta_1$, namely $b_0$ and $b_1$ that minimize the sum of squared residuals $SSR$. Let's remember that there are as many possible estimates $b_0$ and $b_1$ as there are potential samples from the population of all consumption-income combinations.
+
+
+$SSE$ is the sum of squared residual errors
+$$
+SSE = e_1^2 + e_2^2 + \dots + e_N^2
+$$
+$$
+SSE = \sum_{i=1}^{N}\varepsilon_i^2
+$$
+Substitute our calculation for $\varepsilon_i$. Our job is to find the $b_0$ and $b_1$ that minimizes
+$$
+SSE = \sum_{i=1}^{N}[Y_i - (b_0 + b_1 X_i)]^2
+$$
+for all $N$ observations we sampled from the consumption ($Y$) - income ($X$) population.
+
+## A dash of calculus
+
+Now let's find the best $b_0$ and $b_1$. To do this recall (with great affection!) the following two rules of differentiation (yes, the calculus). Suppose we have a function $u = v^2$. Then
+$$
+\frac{du}{dv} = 2v^{2-1} = 2v^1 = 2v
+$$
+Not so bad! But let's mix it up a bit and suppose we have another function $w = (1-v^2) = w(u(v))$? We need to use the chain rule of differentiation of a function of a function to get at a derivative. The rule is this: if w(v) = w(u(v)), then
+$$
+\frac{dw}{dv} = \frac{dw}{du}\frac{du}{dv}
+$$
+
+
+We already know what $du/dv = 2v$. What is $dw/du$? If we let $u=v^2$, then $w=1-u$
+$$
+\frac{dw}{du}=-1
+$$
+That's it. Putting the two derivatives together we have
+$$
+\frac{dw}{dv} = \frac{dw}{du}\frac{du}{dv} = (-1)(2v) = -2v
+$$
+
+
+Back to the $SSE$ story, We have 12 terms like this
+$$
+SSE_i = (Y_i - b_0 - b_1 X_i)^2
+$$
+Overall we have two variables for which we want together to minimize $SSR$. We take them one at a time, holding the other "constant." We take the "partial" derivative to accomplish this task. First, for $b_0$ and for each $i$.
+$$
+\frac{\partial SSE_i}{\partial b_0} = -2(Y_i - b_0 - b_1 X_i)
+$$
+Then we calculate the partial of $SSE_i$ with respect to $b_1$.
+$$
+\frac{\partial SSE_i}{\partial b_1} = -2X_i(Y_i - b_0 - b_1 X_i)
+$$
+
+
+we can summarize the overall effect of changing first $b_0$ and then $b_1$ by summing the partial derivatives for $i=1 \dots N$, where $N=12$ in our consumption-income example. Here are the first order conditions (FOC) around $SSE(b_0,b_1)$:
+
+$$
+\frac{\partial SSE_i}{\partial b_0} = -2\sum_{i=1}^{N}[Y_i - (b_0 + b_1 X_i)] = 0
+$$
+$$
+\frac{\partial SSE_i}{\partial b_1} = 2\sum_{i=1}^{N}[Y_i - (b_0 + b_1 X_i)](-X_i) = 0
+$$
+Here we have factored out the $-2$ across the sum of residuals. We can solve these two simultaneous equations for $b_0$ and $b_1$ to get
+
+
+$$
+b_0 = \frac{\sum_{i=1}^N Y_i}{N} - b_1 \frac{\sum_{i=1}^N X_i}{N}
+$$
+
+$$
+b_1 = \frac{N\sum_{i=1}^N X_i Y_i - \sum_{i=1}^N X_i \sum_{i=1}^N Y_i}{N\sum_{i=1}^N X_i^2 - (\sum_{i=1}^N X_i)^2}
+$$
+Next we perform some arithmetic.
+
+
+Here is a table of sums we need:
+
+\begin{center}
+\begin{tabular}{c|l|r}
+\hline
+term & Excel name & result\\ \hline
+$N$ & `n` & 12 \\
+$\sum_{i=1}^N Y_i$ & `sumY` & 141.7 \\
+$\sum_{i=1}^N X_i$ & `sumX` & 152.6 \\
+$\sum_{i=1}^N X_i Y_i$ & `sumXY` & 1801.7\\
+$\sum_{i=1}^N X_i^2$ & `sumX2` & 1939.8\\
+\hline
+\end{tabular}
+\end{center}
+
+
+We insert these amounts into the formulae for $b_0$ and $b_1$. We start with 
+
+$$
+b_1 = \frac{n \times sumXY - (sumX) \times (sumY)}{n \times sumX2 - (sumX)^2}
+$$
+This translates into the following result:
+
+$$
+b_1 = \frac{12 \times 1801.7 - 152.6 \times 141.7 }{12 \times 1939.8- (152.6)^2} = 0.918
+$$
+And then we get
+$$
+b_0 = sumY/N - b_1 \times sumX/N
+$$
+$$
+b_0 = 141.7/12 - 0.918 (152.6/12) = 0.136
+$$
+We can summarize our results using our understanding of macroeconomics:
+
+- The _marginal propensity to consume_ out of disposable income is 91.8\%. The rest is "savings."
+
+- Structural consumption, _almost_ an idea of _permanent consumption_, is \$136 billion over this sample period.
+
+# Now for the residuals
+
+From our definition of residuals we can compute
+$$
+e_i = Y_i - b_0 -b_1 X_i
+$$
+The sample mean of the residuals is
+$$
+\bar e = \bar Y - b_0 - b_1 \bar X
+$$
+$$
+= \bar Y -  (\bar Y - b_1 \bar X) - b_1 \bar X
+$$
+$$
+= (\bar Y - \bar Y) + b_1 \bar X - b_1 \bar X = 0
+$$
+The mean of resisuals, by definition, is just zero!
+
+The variance (standard deviation squared) of the residuals is
+$$
+var(e_i) = s_e^2 = \frac{\sum_{i=1}^N (e_i - \bar e)^2}{n - k} = \frac{\sum_{i=1}^N e_i^2}{N - k}
+$$
+so that the standard error is:
+$$
+s_e = \sqrt{var(e)}
+$$
+Here we have $k=2$ sample estimators $b_0$ and $b_1$ and thus $n-k = 12 - 2 = 10$ degrees of freedom. These are "freely" varying observations. This means that if we have 12 observations and have estimated 2 parameters, in effect, we have only 10 freely varying observations and can infer the other 2 by using the two estimated parameters.
+
+From our data
+
+$$
+var(e) = \frac{\sum_{i=1}^N e_i^2}{n - k} = \frac{0.0171}{10} = 0.00171
+$$
+$$
+s_e = \sqrt{var(e)} = \sqrt{0.00171} = 0.0414
+$$
+Let's construct a 95\% prediction confidence interval around the ability of this model to predict consumption when we forecast a new level of disposable income. We know that the critical $t$ scores for a two-tailed (2.5\% in each tail) 95\% confidence region are $+/- 2.2281$.
+
+The variance of a forecasted level of consumption given an estimate of the forecasted level of disposable income $Y_F$ is, through quite a bit of algebraic rearrangement, 
+
+$$
+s_F^2 = s_e^2\left[1 + \frac{1}{N} + \frac{(X_F - \bar X)^2}{\sum_{i=1}^N (X_i - \bar X)^2}\right]
+$$
+$$
+= (0.00171)\left[1 + \frac{1}{12} + \frac{(13 - 12.7139)^2}{0.0962}\right] 
+=0.003342
+$$
+$$
+s_F = \sqrt{0.03342} = 0.0578
+$$
+The forecasted consumption is
+$$
+\hat Y = Y_F =  0.136 + 0.0918 \times 13 = 12.07
+$$
+
+# Have some confidence
+
+If we need _confidence_ that must mean we are unsure about something. That something is the reliability of our forecast and the underlying estimates of $b_0$ and $b_1$.
+
+## Central to our discussion
+
+Take any distribution, say the Poisson with $\lambda = 3$. Run many, many samples of this distribution of size $x = 10$. Calculate the sums, means (that is, the sums divided by the sample size $x$), and the variances (square of the standard deviation) of each sampling. Suppose now we take 10,000 samples. 
+
+Here are the results visualized as distributions.
+
+```{r}
+data_sim <- function(n,data_dist=NULL,param1=NULL,param2=NULL) {
+   r <- 10000  # Number of replications/samples - DO NOT ADJUST
+   # This produces a matrix of observations with  
+   # n columns and r rows. Each row is one sample:
+   data_samples <- switch(data_dist,
+	"E" = matrix(rexp(n*r,param1),r),
+	"N" = matrix(rnorm(n*r,param1,param2),r),
+	"U" = matrix(runif(n*r,param1,param2),r),
+	"P" = matrix(rpois(n*r,param1),r),
+  "B" = matrix(rbinom(n*r,param1,param2),r),
+	"G" = matrix(rgamma(n*r,param1,param2),r),
+	"X" = matrix(rchisq(n*r,param1),r),
+	"T" = matrix(rt(n*r,param1),r))
+   data_sample_sums <- apply(data_samples,1,sum)
+   data_sample_means <- apply(data_samples,1,mean)   
+   data_sample_vars <- apply(data_samples,1,var) 
+   par(mfrow=c(2,2))
+   hist(data_samples[1,],col="gray",main="Distribution of One Sample")
+   hist(data_sample_sums,col="gray",main="Sampling Distribution\nof
+	the Sum")
+   hist(data_sample_means,col="gray",main="Sampling Distribution\nof the Mean")
+   hist(data_sample_vars,col="gray",main="Sampling Distribution\nof
+	the Variance")
+}
+data_sim(10,data_dist="P",param1=3)
+```
+
+The main take away is that with sampled means we get approximately normal distributions. A t-distribution is indicated when the sampled standard deviations are also random, as they appear to be here.
+
+## On to the unknown
+
+Let's suppose we _do not know_ the population standard deviation. Now the sample standard deviation is also a random variable, like the sample mean. In practice this is nearly always the case. What do we do now?
+
+- Use the Student's t distribution to correct for confidences that are, well, not so confident.
+
+- Here's a plot of the Student's t overlaid with the normal distribution.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+require(ggplot2)
+require(ggthemes)
+n.sample <- 12
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "z and t scores"
+y.title <- "Probability"
+line.size <- 1.5
+main.title <- "Normal and t Distribution Comparison"
+ggplot(data.frame(x = c(-4,4)),aes(x = x)) + stat_function(fun=dt, args = list(df = df.sample ), aes(colour = "Student's t"), size = line.size) + stat_function(fun = dnorm, args = list(0,1), aes(colour = "Normal"), size = line.size) + scale_x_continuous(name = x.title)  + scale_y_continuous(name = y.title) + scale_colour_manual("Groups", values = c("#4271AE", "#1F3552")) + theme_economist() + theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9))  + ggtitle(main.title)
+```
+
+What do we notice?
+
+- Normal is more pinched in than the $t$ (kurtosis? right!)
+
+- $t$ has thicker tails than normal
+
+Let's check that: in Excel use `=T.INV(2.5%, 10)` which returns `-2.23`, and where the degrees of freedom $df$ of our 12 sample observations is $df = n - k = 12 - 2 = 2$. Thus for the t distribution it takes 2.23 standard deviations below the mean to hit the 2.5\% level of cumulative probability. It only took 1.96 standard deviations on the normal distribution. There are 10 degrees of freedom because it only takes 10 out of the 12 sampled consumption-disposable income pairs to get the eleventh and twelth observations (we do this by using 2 estimators, the mean y-intercept $b_0$ and the mean slope $b_1$ we calculated).
+
+- That it took fewer standard deviations for the normal than for the t distribution to hit the 2.5\% level of cumulative probability means that the t distribution is thicker tailed than the normal.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggthemes)
+n.sample <- 12
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- 0.05
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+ann.line<-data.frame(xmid1=min.a,xmid2=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(-5.5,0,5.5),y=c(.15,.15,.15),label=c("Lower\nOutlying\nRegion","Region of\nConfidence","Upper\nOutlying\nRegion"))
+main_title <- substitute(paste("Sample Means: ", alpha == a, ", df = 10", ", |t| = 2.23"), list(a = alpha, df.sample = df, max.a = t))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < min.a | x > max.a] <- NA
+  return(y)
+}
+
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) 
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmid2,y=y0,yend=y2),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmid1,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main_title)
+p1
+```
+
+## By the way, who is Student?
+
+You may have seen the slogan "Guiness is Good for You." William Gosset (1876-1937) was a modest, well-liked Englishman who was a brewer and agricultural statistician for the famous Guinness brewing company in Dublin. 
+
+Guiness insisted that its employees keep their work secret, so Gosset published  the distribution under the pseudonym "Student" in 1908. This was one of the first results in modern small-sample statistics.
+
+## In all confidence: forecasting for fun and ...
+
+A confidence interval has the estimate in the middle with upper and lower bounds on the estimate determined by the number of standard deviations away from the estimate that are tolerable. If there is a tolarance of 5\% error, then there are 2.5\% tolerances above the upper and 2.5\% tolerances below the lower bounds. Another way of putting this is to say that between the upper and lower bounds of the interval we are 95\% confident in the range of the population forecast. All of this depends on the assumption that the residuals are normally distributed with zero mean and a constant standard deviation (variance).
+
+The 95/% confidence interval of the _population_ forecast $Y_F$ is this probability statement.
+$$
+Prob[\hat Y - t_{0.025}s_F \leq Y_F \leq \hat Y + t_{0.975}s_F ] = 0.95
+$$
+The lower bound of the population forecast of consumption $Y_F$ is $t_{0.025}$ standard deviations $s_F$ below the estimated forecast $\hat Y$, and similarly for the upper bound. In Excel we can find the number of standard deviations from zero that corresponds to a probability of 2.5\% using `T.INV(0.025, 10)`, where $10$ is the degrees of freedom $N - k = 12 - 2 = 10$. This number is $-2.23$. Because the $t-$distribution is symmetric about zero, we can use the absolute value of the same number in the upper end of the interval.
+
+$$
+Prob[12.07 - (2.23)(0.0578) \leq Y_F \leq 12.07 + (2.23)(0.0578) ] = 0.95
+$$
+$$
+Pr[11.9 \leq Y_F \leq 12.2] = 0.95
+$$
+There is a 95\% probability that forecasted consumption conditional on a forecast of disposable income equal to \$$13$ trillion will lie between $\$11.9$ and $\$12.2$ trillion.
+
+## How confident are we in our estimates?
+
+Let's put $b_0$ and $b_1$ into a form that will be really useful when we try to infer the confidence interval for these parameters. This form will also allow us to interpret the $b_1$ estimate in terms of the correlation estimate $r_{cy}$ and the consumption elasticity of income $\eta_{cy}$. 
+
+Let's start with
+$$
+b_1 = \frac{N\sum_{i=1}^N X_i Y_i - \sum_{i=1}^N X_i \sum_{i=1}^N Y_i}{N\sum_{i=1}^N X_i^2 - (\sum_{i=1}^N X_i)^2}
+$$
+Multiply both sides by $1 = N^2 / N^2$. This manuever will allow us to restate $b_1$ in an algebraicly equivalent way (shout out to Huygens, the astronomer b. 1629).
+$$
+b_1 = \frac{\frac{\sum_{i=1}^N X_i Y_i}{N} - \left(\frac{\sum_{i=1}^N X_i}{N}\right) \left(\frac{\sum_{i=1}^N Y_i}{N}\right)}{\frac{\sum_{i=1}^N X_i^2}{N} - \left(\frac{\sum_{i=1}^N X_i}{N}\right)^2}
+$$
+
+
+We rearrange the numerator and denominator into this slightly neat(er) result.
+
+$$
+b_1 = \frac{\frac{\sum_{i=1}^N X_i Y_i}{N} - \bar{X}\bar{Y}}{\frac{\sum_{i=1}^N X_i^2}{N} - \bar{X}^2}
+$$
+In turn we can express this as
+
+$$
+b_1 = \frac{\sum_{i=1}^N (X_i - \bar{X})(Y_i - \bar Y)}{\sum_{i=1}^N (X_i - \bar X)^2} = \frac{cov(X,Y)}{ var(X)}
+$$
+where $cov(X,Y)$ is the covariance of $X$ and $Y$ and $var(X)$ is the variance (standard deviation squared) of $X$.
+
+Using this form we can derive the variance of the random variable $b_1$. 
+
+Here goes for consumption $Y$ and disposable income $X$:
+
+$$
+s_{b_1}^2 = \frac{s_e^2}{\sum_{i=1}^N (X_i - \bar X)^2} = \frac{0.00171}{0.0962} = 0.01777
+$$
+
+$$
+s_{b_1} = \sqrt{0.01777} = 0.134
+$$
+with rounding.
+
+The 95\% confidence interval for estimating the population parameter $\beta_1$ is this probability statement.
+$$
+Prob[b_1 - t_{0.025}s_{b_1} \leq \beta_1 \leq b_1 + t_{0.025}s_{b_1} ] = 0.95
+$$
+$$
+Pr[0.918 - (2.23)(0.134) \leq \beta_1 \leq 0.918 + (2.23)(0.134) ] = 0.95
+$$
+$$
+Pr[0.619 \leq \beta_1 \leq 1.217] = 0.95
+$$
+There is a 95\% probability that the population marginal propensity to consume out of disposable income will lie between $0.619$ and $1.219$. Decision makers might do well to plan for considerable movement in this number when formulating policy.
+
+Again the estimation cuts a wide swathe. This width may be the cause of the wide forecast interval for predicted consumption we noticed above.
+
+
+Let's compute the variance of the random variable $b_0$. Here it goes:
+
+$$
+s_{b_0}^2 = s_e^2\left[\frac{1}{N} + \frac{\bar X^2}{\sum_{i=1}^N (X_i - \bar X)^2}\right] = 0.00171\left(0.0833 + \frac{12.71^2}{0.0962}\right) = 2.9036
+$$
+$$
+s_{b_0} = \sqrt{2.9036} = 1.701
+$$
+with rounding. Remember that $X$ is the independent variable disposable income.
+
+The 95\% confidence interval for estimating the population parameter $\beta_0$ is this probability statement. 
+$$
+Prob[b_0 - t_{0.025}s_{b_0} \leq \beta_0 \leq b_0 + t_{0.025}s_{b_0} ] = 0.95
+$$
+$$
+Prob[0.136 - (2.23)(1.701) \leq \beta_0 \leq 0.136 + (2.23)(1.701) ] = 0.95
+$$
+$$
+Prob[-3.661 \leq \beta_0 \leq 3.993] = 0.95
+$$
+There is a 95\% probability that the population structural level of consumption (intercept term) will lie between $-3.661$ and $3.993$.
+
+We have further probable evidence that our estimation has a fairly high degree of uncertainty as parameterized by this probability statement for the $\beta_0$ confidence interval.
+
+## Next let's hypothesize
+Herein we test the hypothesis that $b_0$ and $b_1$ are no different than zero. This is called the _null hypothesis_ or $H_0$. The _alternative hypothesis_ or $H_1$ is that the estimators are meaningful, namely, they do not equal zero.
+
+Two errors are possible
+
+```{r}
+library(kableExtra)
+header <- c("True", "False")
+margin <- c("Accept", "Reject")
+row_1 <- c("Correct", "II: False Negative")
+row_2 <- c("I: False Positive", "Correct")
+table <- rbind(row_1, row_2)
+colnames(table) <- header
+rownames(table) <- margin
+table %>% 
+  kable() %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+1. **Type I Error**: A type I error occurs when the null hypothesis ($H_0$) is true, but is rejected. It is asserting something that is absent, a false hit. A type I error is often called a false positive (a result that indicates that a given condition is present when it actually is not present).
+
+2. **Type II Error**: A type II error occurs when the null hypothesis ($H_0) is false, but is accepted. It is asserting something that is there, but really is not. A type II error is often called a false negative (a result that indicates that a given condition is absent when it actually is present).
+
+How can we control for error? 
+
+Here is what we can do:
+
+1. Management makes an assumption and forms a hypothesis about the population $\beta_0$ and $\beta_1$ estimates. This is a precise statement about two specific metrics. Let's work with $\beta_0$. All the same can, and will be said of $\beta_1$.
+
+- The _null hypothesis_ ($H_0$) is that the population metric equals a target value $\beta_0^*$ or $H_0: \beta_0 = \beta_0^*$. Suppose that $H_0: \beta_0 = 0$. 
+
+- The _alternative hypothesis_ ($H_1$) is that the population metric does not equal (or is just greater or less than) the target value. Thus we would have $H_1: \beta_0 \neq 0$.
+
+
+2. A decision maker sets a degree of confidence in accepting as true the assumption or hypothesis about the metric. The decision maker determines that 95\% of the time $\beta_0 = 0$. This means there is an $\alpha =$ 5\% significance that the company would be willing to be wrong about rejecting the assertion that $H_0: \beta_0 = 0$ is true.
+
+- Under the null hypothesis it is probable that above or below a mean value of zero there is a Type I error of $\alpha = 0.05$ over the entire distribution of $b_0$ or of $b_1$. This translates into $\alpha / 2 = 0.025$ above and $\alpha / 2 = 0.025$ below the mean.
+
+- Because management expresses the null hypothesis as "not equal," then this translates into a two-tailed test of the null hypothesis.
+
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+require(ggplot2)
+require(ggthemes)
+n.sample <- 12
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- 0.05
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+ann.line<-data.frame(xmid1=min.a,xmid2=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(-5.5,0,5.5),y=c(.15,.15,.15),label=c("Reject\nH0","Accept\nH0","Reject\nH0"))
+main_title <- substitute(paste("Sample Means: ", alpha == a, ", df = 10", ", |t| = 2.23"), list(a = alpha, df.sample = df, max.a = t))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < min.a | x > max.a] <- NA
+  return(y)
+}
+
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) 
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmid2,y=y0,yend=y2),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmid1,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main_title)
+p1
+```
+
+
+3. We have a sample of $N = 12$ observations of consumption and disposable income. We then computed the sample estimate $b_0 = 0.136$ for the average intercept with sample standard deviation $s_{b_0} = 1.701$, and in trillions of USDs. 
+
+4. Now compute the $t$ score
+
+$$
+t = \frac{b_0 - 0}{s_{b_0}} = \frac{0.136 - 0}{1.701} = 0.0799
+$$
+
+and compare this value with the the acceptance region of the null hypotheses $H_0$.
+
+
+5. For a sample size of $n = 12$ and $k = 2$ estimators ($\bar X$), then the degrees of freedom $df = n - k = 12 - 2 = 10$. Under a Student's t distribution with 10 $df$, and using Excel's `=T.INV(0.025, 10)`, the region is bounded by t scores between $-2.23$ and $+2.23$.
+
+- The computed t score is 0.0799 and falls in the _acceptance_ region of the null hypothesis $H_0: \beta_0 = 0$.
+
+- We can now report that we are 95\% confident that a decision maker may _accept the null hypothesis_ that the consumption-income intercept is no different than zero. 
+
+- Another way of reporting this is that there is a 5\% probability that we analysts could be wrong in concluding that the intercept is zero.
+
+## Yet another school of thought
+
+we could ask this question:
+
+- If we know the _t-score_, what is the probability that any other t-scores are greater than this computed t-score?
+
+- Find the _p-value_ $= Pr(|t|)$
+
+If this _p-value_ is "small" enough, then our parameter estimate is "far enough" away from zero to reject the null hypothesis.
+
+- Compare with criterion $t^*$ value that is the probability of being wrong about rejecting the null hypothesis and $1-Pr(t^*)$ being right about accepting the alternative hypothesis.
+
+Calculating $\dots$
+
+Use $1-$`T.DIST(abs(score), df, TRUE)`
+
+- This gets us the probability from the score all the way to the end of the distribution (infinity and beyond!)
+
+- This is the probability that you would be wrong if you accepted the null hypothesis
+
+- $1-$_p-value_ is the probability that you would be correcct if you rejected the null hypothesis (accepted the alternative hypothesis)
+
+
+For $b_0$, $t = 0.080$
+
+1. Set acceptance criterion: at $t^* 1\%$ probability of being wrong about rejecting the null hypothesis
+
+2. Calculate $1-Pr(|t|)$ = $1-$`T.DIST(abs(0.0799), 10, TRUE)` $=1-0.47 = 0.53$
+
+3. Test: _p-value_ $> 1\%$, therefore accept the null hypothesis that $b_0 = 0$
+
+
+For $b_1$, $|t| = 6.8503$
+
+1. Set acceptance criterion: at $t^* = 1\%$ probability of being wrong about rejecting the null hypothesis
+
+2. Calculate $1-Pr(|t|)$ = $1-$`T.DIST(abs(6.8503), 10, TRUE)` $=1- 0.999978 = 0.00002$
+
+3. Test: _p-value_ $< 1\%$, therefore accept the alternative hypothesis that $b_1 \neq 0$
+
+# Summary of simple linear regression estimation
+
+
+For the model
+$$
+Y_i = b_0 + b_1 X_i + e_i
+$$
+
+```{r}
+table <- read.csv("data/regress-summary.csv")
+table %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+
+
+
+\begin{center}
+\begin{tabular}{c|c|c|c}
+\hline
+parameter   & estimator & standard deviation & t-value \\ \hline
+$b_0$       & $\bar Y - b_1 \bar X$  & $\sqrt{s_e^2\left[\frac{1}{N} + \frac{\bar X^2}{\sum_{i=1}^N (X_i - \bar X)^2}\right]}$ & $\frac{b_0}{s_{b0}}$ \\ \hline
+$b_1$       & $\frac{N\sum_{i=1}^N X_i Y_i - \left(\sum_{i=1}^N X_i\right) \left(\sum_{i=1}^N Y_i\right)}{N\sum_{i=1}^N X_i^2 - (\sum_{i=1}^N X_i)^2}$ & $\sqrt{\frac{s_e^2}{\sum_{i=1}^N (X_i - \bar X)^2}}$ & $\frac{b_1}{s_{b1}}$ \\ \hline
+\end{tabular}
+\end{center}
+
+
+# How good a fit?
+
+Even though we just examined parameter-specific hypotheses:
+
+- Is $b_0$ far enough away from $0$ to claim that $b_0 \neq 0$?
+
+- Is $b_1$ far enough away from $0$ to claim that $b_1 \neq 0$?
+
+We still need to ask (and answer _probably_)
+
+- Is the model any better than just noise?
+
+- Are $b_0$ and $b_1$ jointly not far enough away from $0$?
+
+$$
+H_0: b_0 = b_1 = 0
+$$
+$$
+H_1: b_0, b_1 \neq 0
+$$
+
+## Let's build more statistics!
+
+To answer these pressing questions we need to look at the variations in the model.
+
+- Calculate the total variation in $Y$ (consumption $c$) as the "sum of squares total" or $SST$ around its own mean $\bar Y$
+$$
+SST = \sum_{i=1}^N (Y_i - \bar Y)^2
+$$
+- Calculate the variation in the model itself from the average $Y$ as the "sum of squares of the regression" of $SSR$
+$$
+SSR = \sum_{i=1}^N ((b_0 + b_1 X_i) - \bar Y)^2
+$$
+- Calculate the variation in the error term (we already did this one!) as the "sum of squares of the error" or $SSE$
+$$
+SSE = \sum_{i=1}^N e_i^2
+$$
+
+
+From the model's point of view we have
+
+
+$$
+Y_i = b_0 + b_1 X_i + e_i
+$$
+Subtract $\bar Y$ (average disposable income) from both sides to get
+
+$$
+Y_i - \bar Y = b_0 + b_1 X_i + e_i - \bar Y = (b_0 + b_1 X_i)- \bar Y + e_i 
+$$
+We then square each side. But wait!
+
+Then we use a property of the model that there are no cross terms between the error $e_i$ terms and the model. This means that the model measures variations that are in no way at all related to the error terms. They are thus independent of one another. We get this
+$$
+(Y_i - \bar Y)^2 = (b_0 + b_1 X_i - \bar Y)^2 + e_i^2 + 2(b_0 + b_1 X_i - \bar Y)e_i
+$$
+$$
+(Y_i - \bar Y)^2 = (b_0 + b_1 X_i - \bar Y)^2 + e_i^2
+$$
+Then sum it all up to get
+$$
+\underbrace{\sum_{i=1}^N (Y_i - \bar Y)^2}_{SST} = \underbrace{\sum_{i=1}^N (b_0 + b_1 X_i - \bar Y)^2}_{SSR} + \underbrace{\sum_{i=1}^N  e_i^2}_{SSE}
+$$
+That is
+
+$$
+\underbrace{SST}_{total} = \underbrace{SSR}_{explained} + \underbrace{SSE}_{unexplained}
+$$
+Forever and for all time.
+
+
+For our consumption-income data we have $SST = 0.098$, $SSR = 0.082$, $SSE = 0.017$, so that
+$$
+SST = SSR + SSE
+$$
+
+$$
+0.098 = 0.082 + 0.017
+$$
+
+Now divide both sides by $SST$ to get the proportion of total variation due to the two components: the model and the error
+$$
+\frac{SST}{SST} = 1 = \frac{SSR}{SST} + \frac{SSE}{SST}
+$$
+Now define the $R^2$ statistic as the fraction of total variation that the regression "explains" or
+$$
+R^2 = \frac{SSR}{SST} = 1 - \frac{SSE}{SST}
+$$
+$$
+R^2 = \frac{0.082}{0.098} = 1 - \frac{0.017}{0.098} = 0.84
+$$
+In words: our model with disposable income explains 84\% of the total variation in the consumption data.
+
+How good is this? We had to ask $\dots$!
+
+## Analyze this ...
+
+We have just decomposed the total variation into two components: 
+
+- the model and the error term (explained and the unexplained)
+
+- ratios of model variation and error variation to the total variation ($R^2$)
+
+The null hypothesis is the average variation in the model is no different from zero. This means that under the null hypothesis, the model does not explain anything at all:
+$$
+H_0: b_0 = b_1 = 0
+$$
+
+It's all just noise. Our job now is to compare the regression variation with the error variation. If the regression variation is very small relative to the error variation then we (probably) have reason to accept the null hypothesis that the model explains nothing much at all.
+
+We calculate (SS = Sum of Squares, df = degrees of freedom, MS = Mean Square, F = (F)isher's statistic)
+
+\begin{center}
+\begin{tabular}{|c|r|r|r|r|} 
+\hline
+variation & SS & df & MS & F \\ \hline
+SSR & $\sum_{i=1}^N (b_0 + b_1 X_i - \bar Y)^2$ & $k - 1$ & $SSR / (k-1)$ & $MSR / MSE$ \\ \hline
+SSE & $\sum_{i=1}^N e_i^2$ & $N - 2$ & $SSE / (N-2)$ & \\ \hline
+SST & $\sum_{i=1}^N (Y_i - \bar Y)^2$ & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|c|r|r|r|r|} 
+\hline
+variation & SS & df & MS & F \\ \hline
+SSR & 0.081 & 1 & 0.081 & 46.297 \\ \hline
+SSE & 0.017 & 10 & 0.002 & \\ \hline
+SST & 0.098 & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+Let's dig into the $F$ statistic.
+
+- Just like the $t$ statistic it is a "score"
+
+- Measures the relative variation  of two sums of squares
+
+- Student's-t composed of the _ratio_ of a normal distribution to a _chi-squared_ distribution
+
+- Different from the Student's-t: composed of the ratio of two _chi-squared_ distributions, each with a different degree of freedom
+
+$$
+F(k-1, N-k) \approx \frac{SSR / (k-1)}{SSE / (N-k)}
+$$
+
+
+```{r}
+require(ggplot2)
+x_low <- 0
+x_high <- 10
+ggplot(data.frame(x = c(x_low, x_high)), aes(x = x)) + xlim(c(x_low, x_high)) + stat_function(fun = df, args = list(df1 = 1, df2 = 10), geom = "area", fill = "green", alpha = 0.25) + labs(x = "\n x", y = "f(x) \n", title = "F distribution with 1 and 10 degrees of freedom \n") 
+```
+
+1. Set the probability that we are wrong about accepting the null hypotheses $= 1\%$
+
+2. Calculate $F = "explained" variation / "unexplained" variation = MSR / MSE = 46.3$
+
+3. Calculate the _p-value_ using $1-$ `F.DIST(46.9, 1, 10, TRUE)` $= 1 - 0.999955 = 0.000045$
+
+4. Reject the null hypothesis with a probability that you might be wrong $0.0045\%$ of the time and accept the alternative hypothesis that this model with disposable income sufficiently explains the variation in total consumption $99.99\%$ of the time.
+
+## Two samples -- same population?
+
+We often take samples of the same variable at different times or as subsets of a larger pool of observations.
+
+Suppose we wonder if the marginal propensity to consume out of disposable income was different before the Volker era of the Federal Reserve, say, early 1980, versus long after, in late 2017. To do this we take two samples of consumption-income at two different times: 1980's and the very recent past. We find that
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c}
+sample & parameter & estimate & standard deviation & sample size \\ \hline
+1980 & $b_1$ & 0.86 & 0.201 & 14 \\ \hline
+2017 & $b_1$ & 0.92 & 0.134 & 12 \\ \hline
+\end{tabular}
+\end{center}
+
+Here is a procedure we can follow:
+
+1. Set the significance level to 1\% (or some other level).
+
+2. Form the null and alternative hypotheses:
+$$
+H_0: \beta_{1,2017} = \beta_{1,1980}
+$$
+$$
+H_1: \beta_{1,2017} \neq \beta_{1,1980}
+$$
+where the $\beta_1$s are the population parameters for the marginal propensity to consume out of disposable income. This formulation is equivalent to
+$$
+H_0: \beta_{1,2017} - \beta_{1,1980} = 0
+$$
+$$
+H_1: \beta_{1,2017} - \beta_{1,1980} \neq 0
+$$
+
+
+3. Calculate the pooled standard deviation of the two samples as
+$$
+s_{pool} = \sqrt{s_{1,2017}^2 + s_{1,1980}^2}
+$$
+$$
+s_{pool} = \sqrt{0.134^2 + 0.501^2} = 0.242
+$$
+
+
+4. Calculate the t-ratio
+
+$$
+t = \frac{b_{1,2017}-b_{1,1980}}{s_{pool}} = \frac{0.92 - 0.86}{0.242} = 0.248
+$$
+
+Correcting for the two regression error standard deviations embedded in each of the two standard deviations of the $b_1$s, the degrees of freedom are 
+
+$$
+df_{pool} = (N_{2017} - 2) + (N_{1980} - 2) = (12-2)+(14-2) = 22
+$$
+
+
+5. Calculate $Pr(>|t|)$ using `=1 - T.DIST(0.248, 22, TRUE)` $=1-0.594 = 0.406$, the cumulative probability in the tail of the distribution. 
+
+6. Accept the null hypothesis and reject the alternative hypothesis since
+$$
+Pr(>|t|)= 0.406 > 0.01
+$$
+far in excess of the significance level. We would be wrong (probably) over 40\% of the time if we were to reject the null hypothesis that the two marginal propensities to consume out of disposable income were equal.
+
+# Anything abnormal?
+
+We have assumed thruoghout our statistical inference that underlying variables and their statistical estiamtes are normally distributed. Is this so?
+
+```{r}
+data_ci <- read.csv("consumption_income.csv")
+error <- data_ci$consumption - 0.136 - 0.918*data_ci$income
+error_sim <- data.frame(e =sample(error, 1000, replace = TRUE))
+require(ggplot2)
+ggplot(data = error_sim, aes(x=e)) + geom_histogram()
+```
+This doen't look symmetric with thin tails.
+
+
+```{r, echo = FALSE}
+require(moments)
+error_table <- data.frame(mean = mean(error) , median = quantile(error, 0.5), skewness = skewness(error), kurtosis = kurtosis(error))
+rownames(error_table) <- "error statistics"
+knitr::kable(error_table)
+```
+
+The mean and median are fairly close together. There is some positive (right side) skewness. Kurtosis is not very far from mesokurtic value of 3.0 for the normal distribution. All in all, the errors do not look so non-normal after all.
+
+
+We can bootstrap a confidence interval for the kurtosis of the error term by creating a sample of 1000 of the error terms. For each replication we then calculate the kurtosis. The result is 1000 random samples of kurtosis. Here is the distribution of the kurtosis from this experiment.
+
+
+```{r}
+error_kurtosis <- data.frame(e_k = replicate(1000, kurtosis(sample(error, replace = TRUE))))
+ggplot(error_kurtosis, aes(x = e_k)) + geom_density()
+```
+
+
+We can then build this 95\% confidence interval around the kurtosis:
+
+```{r}
+probs <- c(0.025, 0.25, 0.50, 0.75, 0.975)
+error_quantile <- quantile(error_kurtosis$e_k, probs = probs)
+error_quantile <- matrix(error_quantile, nrow = 1, byrow = TRUE, dimnames = list("error quantiles", probs))
+rownames(error_quantile) <- "error quantiles"
+knitr::kable(error_quantile)
+
+```
+
+
+The median tells us that the kurtosis is very close the 3.0 value of a normal distirbution with little kurtosis in excess of 3.0. However, there is again a skewness in that the distance between the 2.5\% and 50\%tile versus the distance between the 50\% and 97.5\%tile are quite different. There is a higher probability of values above the median than below, thus the skewness.
+
+# Quantile regression
+
+## What is it?
+
+When we think "regression" we usually think of linear regression where we estimate parameters based on the mean of the dependent variable. This mean is conditional on the various levels of the independent variables. what we are doing is explaining the variability of the dependent variable around its arithmetic mean. But we all know that this will only work if that mean is truly indicative of the central value of the dependent variable. What if it isn't? What if the distribution of the dependent variable has lots of skewness, and thick (or very thin) tails? 
+
+What if we do not have to use the mean? What if we can use other measures of position in the distribution of the dependent variable? We can and we will. These other positions are called quantiles. They measure the fraction of observations of the dependent variable less than the quantile position. Even more, we can measure the deviations of a variable around the quantile conditional on a meaningful list of independent explanatory variables.
+
+But we don’t have to always estimate the conditional mean. We could estimate the median, or the 0.25 quantile, or the 0.90 quantile. That’s where quantile regression comes in. The math under the hood is a little different, but the interpretation is basically the same. In the end we have regression coefficients that estimate an independent variable’s effect on a specified quantile of our dependent variable. 
+
+## An example
+
+Here is a motivating "toy" example. Below we generate data with non-constant variance then plot the data using the ggplot2 package:
+
+```{r}
+# generate data with non-constant variance
+#
+x <- seq(0,100,length.out = 100)        # independent variable
+sig <- 0.1 + 0.05*x                     # non-constant variance
+b_0 <- 6                                # true intercept
+b_1 <- 0.1                              # true slope
+set.seed(1016)                             # make the next line reproducible
+e <- rnorm(100,mean = 0, sd = sig)      # normal random error with non-constant variance
+y <- b_0 + b_1*x + e                    # dependent variable
+dat <- data.frame(x,y)
+library(ggplot2)
+ggplot(dat, aes(x,y)) + geom_point()
+```
+
+What do we observe from this scatter plot? We see the relationship of the dependent variable `y` gets more and more dispersed in its relationship (conditional) with the independent variable `x`, a well-known condition called _heteroskedasticity_. This condition fundamentally violates even the weaker of assumptions around the ordinary least squares (OLS) regression model.
+
+Our errors are normally distributed, but the variance depends on `x`. OLS regression in this scenario is of limited value. It is true that the estimated mean of `y` conditional on `x` is unbiased and as good an estimate of the mean as we could hope to get, but it doesn’t tell us much about the relationship between `x` and `y`, especially as `x` gets larger. Let's build a plot of the confidence interval for predicted mean values of `y` using just OLS. The geom_smooth() function regresses y on x, plots the fitted line and adds a confidence interval.
+
+```{r}
+# another layer
+#
+p <- ggplot(dat, aes(x,y)) + geom_point() + geom_smooth(method="lm")
+p
+```
+
+we immediately are taken aback by the incredibly small confidence interval relative to all of the rest of the scatter dots of data! But small `x` does seem to predict `y` fairly well. What about mid and higher levels of the relationship between `y` and `x`? There's much more at work here.
+
+## Even in ggplot2
+
+Just like we used `geom_smooth()` to get the OLS line (through the `lm` method), we can use `geom_quantile()' to build a similar line that estimates intercept (`b_0`) and slope (`b_1`) of a line that runs not through the arithmetic mean of `y` but through a quantile of `y` instead.
+
+Let's try the 1 in 10 quantile of 90/%. We will look at how `x` explains deviation of `y` around the `0.90` quantile of `y` instead of the mean of `y`.
+
+```{r}
+p <- p + geom_quantile(quantiles = 0.90)
+p
+```
+
+Here a lot of the relationship between `y` and `x` is captured at the higher end of the `y` distribution.
+
+## Interpretations
+
+Let's use the `quantreg` package to gain further insight and inference into our toy model. The variable `taus` captures a range of quantiles in steps of `0.10`. The `rq` function is the quantile regression replacement for the OLS `lm` function. We display results using `summary()` with the `boot` option to calculate standard errors `se`.
+
+```{r}
+taus <- 1:9/10
+qreg_fit <- rq(y ~ x, data=dat, tau = taus)
+summary(qreg_fit, se = "boot")
+```
+
+The intercepts and slopes change with the quantiles. We can depict these changes in this plot.
+
+```{r}
+p <- ggplot(dat, aes(x,y)) + geom_point() + geom_quantile(quantiles = taus)
+p
+```
+
+We now have a distribution of intercepts and slopes that more completely describe the relationship between `y` and `x`. The `t-stats` and `p-values` indicate a rejection of the null hypotheses that `b_0 = 0` or that `b_1 = 0`.
+
+The `quantreg` package includes a plot method to visualize the change in quantile coefficients along with their confidence intervals. We use the parm argument to indicate we only want to see the slope (or intercept) coefficients.
+
+```{r}
+plot(summary(qreg_fit), parm="x")
+```
+
+Each dot is the slope coefficient for the quantile indicated on the `x` axis with a line connecting them. The red lines are the least squares estimate and its confidence interval. The lower and upper quantiles well exceed the OLS estimate. 
+
+Let's compare this whole situation of non-constant variance errors with data that has both normal errors and constant variance. Then let's run quantile regression.
+
+```{r}
+x <- seq(0,100,length.out = 100)
+b_0 <- 6
+b_1 <- 0.1
+set.seed(1016)
+e <- rnorm(100,mean = 0, sd = 0.5) # constant variance sd^2 = 0.5^2
+y <- b_0 + b_1*x + e
+dat_normal <- data.frame(x, y)
+qreg_fit_normal <- rq(y ~ x, data = dat_normal, tau = taus)
+plot(summary(qreg_fit_normal))
+```
+
+The fit looks good for and OLS version of the "truth." All of the quantile slopes are within the OLS confidence interval of the OLS slope. Nice. However, the quantile estimates of confidence intervals are far outside the OLS ("red") bounds. This might lead us to question OLS inference in general.
+
+# Exercises
+
+1. Repeat the forecast confidence intervals for disposable income equal to 15, 20, 25. What do you observe about the width of the interval as the forecast increases?
+
+2. Test the hypothesis that the population marginal propensity to consume out of disposable income is no different than zero with a probability of type II error equal to 95\%.
+
+3. Using the following data sets to compute all regression estimates, standard deviations, a forecast confidence interval for a forecasted independent variable observation, confidence intervals and hypothesis testing for each of the estimators, and $R^2$ and $F$ hypothesis testing for the overall model. For each data set and model extract the error terms and review the percentiles, mean, standard deviation, skewness, and kurtosis. Do they look like they were drawn from a normal distribution? Test this claim using quantile regression. Plot the quantile estimates against quantiles with confidence intervals. If the quantile confidence intervals are wider than the OLS confidence intervals, the OLS hypothesis testing might be suspect! Show all work. Interpret your findings.
+
+- Peruvian anchovies
+- Bronx corn
+- US House of Representatives
+
+## US House of Representatives seats and unemployment
+
+```{r}
+data <- read.csv("unemployment-seats.csv")
+#str(data)
+lm_fit <- lm(unemployment ~ house.seats, data)
+summary(lm_fit)
+taus <- 1:9/10
+rq_fit <- rq(unemployment ~ house.seats, data, tau = taus)
+rq_plot <- summary(rq_fit, se = "boot")
+plot(rq_plot)
+```
+
+## Peruvian anchovies
+
+```{r}
+data <- read.csv("peruvian_anchovies.csv")
+#str(data_peru)
+lm_fit <- lm(price ~ catch, data)
+summary(lm_fit)
+rq_fit <- rq(price ~ catch, data, tau = taus)
+rq_plot <- summary(rq_fit, se = "boot")
+plot(rq_plot) #, xlim=c(0.001,10), ylim=c(0.001,10))
+```
+
+## Bronx corn
+
+```{r}
+data <- read.csv("corn_bronx.csv")
+#str(data)
+lm_fit <- lm(corn ~ fertilizer, data)
+summary(lm_fit)
+rq_fit <- rq(corn ~ fertilizer, data, tau = taus)
+rq_plot <- summary(rq_fit, se = "boot")
+plot(rq_plot)
+```
+
+## Consumption and disposable income
+
+```{r}
+data_cdi <- read.csv("consumption_income.csv")
+#str(data_cdi)
+lm_fit <- lm(consumption ~ income, data_cdi)
+summary(lm_fit)
+```
+
+
+```{r}
+data_cdi <- read.csv("consumption_income.csv")
+#str(data_cdi)
+lm_fit <- lm(log(consumption) ~ log(income), data_cdi)
+lm_summary <- summary(lm_fit)
+lm_summary
+```
+
+Is the slope estimate no different than 1? That is, is the elasticity of consumption with respect to disposable income unitary so that a 10% change in income will probably produce a 10% change in consumption?
+
+```{r, echo = TRUE}
+# H_0: \beta_1 = 1 <=> \beta_1 - 1 = 0
+b_1 <- lm_fit$coefficients[2] # extract slope estimate
+s_b1 <- coef(lm_summary)[,2][2]  # extract slope estimate standard error
+t_score <- (b_1 - 1) / s_b1
+pr_t <- 1-pt(t_score,nrow(data_cdi)-2)
+t_score
+ifelse(pr_t > 0.01, "Accept $H_0: \beta_1 = 1$", "Reject $H_0: \beta_1 \neq 1$")
+```
+
+Yes, a 10\% change in income will probably produce a 10\% in consumption in this sample.
+
+## References
+
+Koenker, Roger (2005), Quantile Regression (Econometric Society Monographs), Cambridge University Press.
+

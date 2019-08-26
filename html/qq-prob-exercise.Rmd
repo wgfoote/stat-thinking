@@ -1,0 +1,90 @@
+---
+title: "Workbook: how probable?"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+##  Age and gender of U.S. physicians in a recent year, as reported by the American Medical Association.
+
+```{r}
+data <- read.csv("data/qq-4-37.csv")
+colnames(data) <- c("factor",	"< 35",  "35-44",	"45-54",	"55-65",	"> 65",	"gender")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+
+a. What is the probability that one randomly selected physician is 35-44 years old?
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+.28
+
+</div>
+
+b. What is the probability that one randomly selected physician is both a woman and 45-54 years old?
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+
+.04
+
+</div>
+
+c. What is the probability that one randomly selected physician is a man or is 35-44 years old?
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+
+.86
+
+</div>
+
+d. What is the probability that one randomly selected physician is less than 35 years old or 55-64 years old?
+
+<button onclick="showText('myDIV4')">show / hide</button>
+<div id="myDIV4" style="display:none;">
+
+.32
+
+</div>
+
+e. What is the probability that one randomly selected physician is a woman if she is 45-54 years old?
+
+<button onclick="showText('myDIV5')">show / hide</button>
+<div id="myDIV5" style="display:none;">
+
+.1739
+
+</div>
+
+f. What is the probability that a randomly selected physician is neither a woman nor 55-64 years old?
+
+<button onclick="showText('myDIV6')">show / hide</button>
+<div id="myDIV6" style="display:none;">
+
+.66
+
+</div>

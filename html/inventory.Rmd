@@ -1,0 +1,88 @@
+---
+title: "Inventory"
+date: "11/28/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+```
+
+## Data wrangling
+
+```{r }
+table_all <- read.csv("KP Direct_Raw.csv", stringsAsFactors = FALSE)
+table_all$Lead.Time <- as.numeric(table_all$Lead.Time)
+table_all$Amount <- as.numeric(table_all$Amount)
+table_all$Quantity <- as.numeric(table_all$Quantity)
+str(table_all)
+head(table_all)
+names(table_all)
+table_10_Quantity <- table_all %>%
+  group_by(Account) %>%
+  top_n(n = 10, wt = Quantity)
+p <- table_10_Quantity %>%
+  ggplot(aes(x = Quantity, fill = Account)) + geom_histogram()
+p
+p <- table_10_Quantity %>%
+  ggplot(aes(x = Quantity, fill = Account)) + geom_histogram()
+p
+p <- table_10_Quantity %>%
+  ggplot(aes(x = Lead.Time, fill = Account)) + geom_histogram()
+p
+summary(na.omit(table_all$Lead.Time))
+```
+
+
+```{r}
+
+#
+# t copula
+#
+set.seed(1016) ## Freezes the random seed to reproduce results exactly
+n_risks <- 3 ## Number of risk factors
+m <- n_risks
+n_sim <- 1000
+sigma <- matrix(c(1, 0.4, 0.2,
+                  0.4, 1, -0.8,
+                  0.2, -0.8, 1), 
+                nrow = m)
+t <- rmvt(n_sim, delta = rep(0, nrow(sigma)),sigma = sigma, df = 6, type = "shifted")
+u_t <- pt(t, df = 6)
+#
+# Reshape
+#
+p <- 0.3 #probability that revenue growth is positive
+growth_gamma_t <- qgamma(u_t[,1],shape=0.25, scale=0.4)
+growth_t <- ifelse(rbinom(u_t[,1], 1, p) > 0, growth_gamma_t, -growth_gamma_t)
+vc_ratio_t <- qbeta(u_t[,2],3,2) # variable cost / revenue
+fc_ratio_t <- abs(qt(u_t[,3],df=5))
+factors_t <- cbind(growth_t, vc_ratio_t, fc_ratio_t)
+colnames(factors_t) <- c("Revenue", "Variable Cost", "Fixed Cost")
+factors_t_df <- as_data_frame(factors_t)
+ggpairs(factors_t_df)
+#
+rev_0 <- 1000
+revenue_t <- rev_0*(1+factors_t_df[,1])
+variable_cost_t <- revenue_t * factors_t_df[,2]
+fixed_cost_t <- revenue_t * factors_t_df[,3]
+total_cost_t  <- variable_cost_t + fixed_cost_t
+operating_margin_t  <- revenue_t - variable_cost_t - fixed_cost_t
+analysis_t  <- cbind(revenue_t, total_cost_t, operating_margin_t)
+colnames(analysis_t) <- c("Revenue", "Cost", "Margin")
+#
+loss_rf_t <- -operating_margin_t[operating_margin_t < 0] 
+## Assign metric of interest to reusable code
+# BE SURE TO LOAD data_moments() as well as mvtnorm 
+data_moments(as.matrix(loss_rf_t, nrow =1)) 
+## Always review a key variable's content
+alpha_tolerance_t <- .99 
+## Very intolerant!
+## Remember that putting a variable assignment in parentheses also prints the result
+(VaR_hat_t <- quantile(loss_rf_t, probs=alpha_tolerance_t, names=FALSE))
+### Just as simple Expected shortfall
+(ES_hat_t <- mean(loss_rf_t[loss_rf_t > VaR_hat_t]))
+### Margin loss retention
+(retention_t <- quantile(loss_rf_t, probs=0.75, names=FALSE))
+```

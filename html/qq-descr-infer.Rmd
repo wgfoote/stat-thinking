@@ -1,0 +1,113 @@
+---
+title: "Workbook -- What sorts of analysis would you do with what kinds of data?"
+output: html_document
+---
+<style>
+pre {
+  font-family: 'Calibri';
+  font-size: 11pt;
+  white-space: pre;
+  padding: 5px;    
+  border: 2px solid blue;
+  dispay: block;
+}
+}
+</style>
+
+```{r echo=FALSE}
+library(htmltools)
+
+q_num <- 1
+q_inc <- function(q_exp) {
+  q_num <<- q_num + 1
+  return(div(div(id=sprintf("q%d", q_num-1), 
+                 style="display:none;font-family:'Calibri'", 
+                 pre(deparse(substitute(q_exp)), q_exp)),
+              HTML(sprintf('<button type="button" onclick="toggle(%d);" class="btn btn-success">show answer</button>',
+                           q_num-1))))
+}
+```
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Learning outcomes
+
+1. Map types of data to business scenarios
+
+2. Identify data types and their usage
+
+3. Determine the difference between population and sample
+
+## A scenario
+
+1. How can a production manager in a start-up summarize and describe to the board of directors the results of testing the life of a sample of 100 revolutionary light-weight organic batteries?
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+There is too much raw data to show the board. The manager wants to summarize the results by displaying the average life and range of lives of the batteries. The manager might also divide the sample into low, medium, and high durations to illustrate the distribution of lives in the sample. Each of these is an example of descriptive statistics."
+
+</div>
+
+2. Why would the manager want to infer that the sample is representative of the whole output of batteries?
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+
+The manager can't test the life of all of the batteries -- that would destroy the output of the venture! Instead the manager might want to test the hypothesis that the average battery life is greater than, say, 1,000 hours, with a precision of 5% that the manager is wrong about this hypothesis."
+
+</div>
+
+3. Identify the population and sample in this situation.
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+
+The manager takes a sample of 100 batteries from a population that includes all of the venture's output. The manager would like to describe the sample in a way that is probably representative of the output of the venture."
+
+</div>
+
+4. The manager is putting together a testing database.
+
+a. What kind of data is the average life of the batteries? 
+
+<button onclick="showText('myDIV4b')">show / hide</button>
+<div id="myDIV4a" style="display:none;">
+
+Since life is greater than or equal to zero, life data would numeric. Because I can always find a life value between any two consecutive life values, the data is continuous.
+
+b. What about the number of batteries in each location?
+
+<button onclick="showText('myDIV4b')">show / hide</button>
+<div id="myDIV4b" style="display:none;">
+
+All counts are integers and thus discrete.
+
+</div>
+
+c. What if the batteries were produced in various locations. What kind of data might the locations be? 
+
+<button onclick="showText('myDIV4c')">show / hide</button>
+<div id="myDIV4c" style="display:none;">
+
+Location is a classification and thus nominal.
+
+</div>
+
+d. The manager asks experts to rate the reliability of the batteries. What kind of data are the ratings?
+
+<button onclick="showText('myDIV4d')">show / hide</button>
+<div id="myDIV4d" style="display:none;">
+
+Ratings rank in some order from bad to good, or unlikely to likely, or some other ordered range, and thus ordinal.
+
+</div>
+

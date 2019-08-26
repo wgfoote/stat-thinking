@@ -1,0 +1,136 @@
+---
+title: "Probability Distributions: Normal"
+author: "Copyright 2016. William G. Foote. All rights reserved."
+date: "October 17, 2016"
+theme: "Madrid"
+fontsize: 10pt
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
+knitr::opts_chunk$set(size = "small")
+knitr::opts_hooks$set(fig.width = function(options) {
+  if (options$fig.width < options$fig.height) {
+    options$fig.width = options$fig.height
+  }
+  options
+})
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+```
+
+# What is normal?
+
+Let's draw $X_i$ from $1$ to $n$ successes independently from a population where $\mu$ and $\sigma$ are known, then we would discover that the standardized average
+
+\[
+\frac{\bar{x} - \mu}{\sigma / \sqrt{n}}
+\]
+
+is asymptotically normal with mean 0 and variance 1 (often called normal(0,1)). 
+* This can be interpreted as when $n$ is large enough the
+average is approximately normal with mean $\mu$ and standard deviation $\sigma / \sqrt{n}$.
+
+* This result is also known as the _Central Limit Theorem_ (CLT), a cornerstone of classical statistics.
+
+* Normal means a symmetric distribution with _mesokurtic_ "tailedness", or kurtosis of 3. This implies there are not too many rare outcomes in the tails of the distribution.
+
+# How can we check this? 
+
+Simulation is an excellent way. Now to get your feet good and wet...
+
+Let???s first do this for the binomial distribution, the CLT translates into saying that if $x_n$ are binomial distribution outcomes with parameters $n$ and $p$ then
+
+\[
+z = \frac{x_n - np}{\sqrt{np(1-p)}}
+\]
+
+then the standardized $x$, called $z$, is approximately `Normal(0,1)`.
+
+# Let???s investigate
+
+* Create binomial random numbers in Excel using `BINOM.INV(n, p, RAND())`. 
+
+* `RAND()` is the randomly generated cumulative probability of a successful binomial outcome. 
+
+* Start with just a few trials: $n = 10$ and $p = 0.20$.
+
+* Then generate in 1000 separate cells 
+
+***
+
+```{r, echo = FALSE}
+n <- 10;p <- .25; n.sim <- 1000
+x <-  rbinom(n.sim, n, p)
+z <- (x - n*p) / sqrt(n*p*(1-p))
+z.mean <- mean(z)
+z.sd <- sd(z)
+hist(z, prob = TRUE, main = paste("Binomial (n = ",n, ", p = ", p, ")"))
+```
+
+***
+Almost bell-shaped. A little lop-sided too... Here are some statistics on our experimental runs.
+```{r, echo = FALSE, mysize=TRUE, size='\\footnotesize'}
+# r_moments function
+# INPUTS: r vector
+# OUTPUTS: list of scalars (mean, sd, median, skewness, kurtosis)
+data_moments <- function(data){
+  require(moments)
+  mean.r <- mean(data)
+  sd.r <- sd(data)
+  median.r <- median(data)
+  skewness.r <- skewness(data)
+  kurtosis.r <- kurtosis(data)
+  result <- data.frame(mean = mean.r, std_dev = sd.r, median = median.r, skewness = skewness.r, kurtosis = kurtosis.r)
+  #result <- data.frame(result, table = t(result))
+  return(result)
+}
+n <- 10;p <- .25; n.sim <- 1000
+x <-  rbinom(n.sim, n, p)
+z <- (x - n*p) / sqrt(n*p*(1-p))
+ans <- data_moments(z)
+ans <- round(ans, 4)
+require(knitr)
+knitr::kable(ans)
+```
+
+Almost a "normal" _mesokurtotic_ result of 3.0. A small skewness indicating a little asymmetry.
+
+***
+Now try
+
+* Use a lot more than a few trials: $n = 1000$ and $p = 0.20$.
+
+* Then generate in 1000 separate cells 
+
+```{r, echo = FALSE}
+n <- 1000;p <- .25; n.sim <- 1000
+x <-  rbinom(n.sim, n, p)
+z <- (x - n*p) / sqrt(n*p*(1-p))
+hist(z, prob = TRUE, main = paste("Binomial (n = ",n, ", p = ", p, ")"))
+ans <- data_moments(z)
+ans <- round(ans, 4)
+
+```
+
+***
+Much more symmetric. Here are some summary statistics.
+
+```{r, echo = FALSE}
+knitr::kable(ans)
+```
+
+* Slightly negatively skewed tail we can eyeball, but very small.
+
+* Mean is near zero, and median not far from zero too.
+
+* Standard deviation is nearly 1.
+
+* Kurtosis is almost on that magic normal mesokurtic number of 3.0.
+
+# 

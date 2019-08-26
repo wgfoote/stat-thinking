@@ -1,0 +1,223 @@
+---
+title: "Poisson Distribution"
+author: "Bill Foote."
+date: "October 18, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
+knitr::opts_chunk$set(size = "small")
+knitr::opts_hooks$set(fig.width = function(options) {
+  if (options$fig.width < options$fig.height) {
+    options$fig.width = options$fig.height
+  }
+  options
+})
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+```
+
+# Imagine this
+- Your corporate website get 2 hits per minute
+- There have been 3 pandemics in the last 100 years
+- Your satellite TV fails to record a show at least 4 times a month
+- Your most important client has 6 meltdowns a month
+
+## What do you want to know?
+How probable any and / or all of the events will happen!
+
+## Why?
+So you can plan your life a bit better -- allocation scarce time and money more efficiently, at the very least
+
+# Enter M. Poisson
+## Key assumptions
+The Poisson random variable satisfies the following conditions:
+
+1. The number of successes in two disjoint (non-overlapping) regional intervals is independent.
+2. The specified region could take many forms. For instance, it could be a length, an area, a volume, a period of time, etc.
+3. The probability of a success during a small regional interval is proportional to the entire length of the regional interval.
+4. The average number of successes is known (labeled $\lambda$).
+
+Apart from disjoint time intervals, the Poisson random variable thus applies to disjoint regions of any kind of space, such as geographical and market.
+
+# Applications
+
+- The number of deaths by horse kicking in the Prussian army (first application)
+- Birth defects and genetic mutations
+- Rare diseases
+- Car accidents
+- Traffic flow and ideal vehicle gap distance
+- Number of typing errors on a page
+- Hairs found in McDonald's hamburgers
+- Extinction of an endangered animal in Africa
+- Failure of a machine in one month
+- Frequency of cyber attacks in a year
+- The number of loan defaults in a month
+
+# Binomial or Poisson?
+
+## Use the binomial when
+you need to find the probability of the number of successes in _so many trials_.
+
+## Use the Poisson distribution when
+you need to find the probability of a number of successes per _unit of time or space_.
+
+# Let's calculate
+
+1. Define the number of success as $X$. 
+
+2. Suppose successes occur with intensity (same as: at a frequency or rate) of $\lambda$ per unit time or space. 
+
+3. Then, the probability of a specified number of successes $X = x$ per unit time (or space) is
+\[
+P(X = x) = \frac{\lambda^{x}e^{-x}}{x!}
+\]
+where $e = 2.71828$ is the base of the natural logarithm.
+
+4. The mean of the distribution is $\lambda$ and the standard deviation is $\sqrt{\lambda}$.
+
+# Try this
+
+A utility company is concerned about the ability of its vehicle operators to drive safely in its service region. It decides to sample a population of accidents in the 10461 zip code. One particular intersection comes to light. Analysts estimate that 6 accidents ("vehicular contacts") per month occur at the intersection of Crosby and Westchester Avenues in the 10461 zip code in the Bronx. 
+
+1. What is the probability of 3 accidents in any month?
+2. Plot the distribution of accidents from 0 to 20.
+3. what is the probability of 3 accidents or less in any month?
+
+# Results
+1. What is the probability of 3 accidents in any month? We let $X$ be the number of possible accidents per month at this intersection. Out data is $X = x = 3$ and $\lambda = 6$. We can then  compute
+\[
+\begin{array}{c}
+P(X = 3) = \frac{\lambda^{x}e^{-x}}{x!} \\ \\
+= \frac{6^{3}e^{-3}}{3!} \\ \\
+= \frac{(216)(0.002478)}{3x2x1} \\ \\
+= \frac{0.5354105}{6} \\ \\
+= 0.08923508
+\end{array}
+\]
+that is, 8.9\%.
+
+
+2. Plot the distribution of accidents from 0 to 20.
+
+```{r, echo = FALSE}
+gpois = function(mu, a=NA,b=NA,calcProb=(!is.na(a) | !is.na(b)),quantile=NA,calcQuant=!is.na(quantile),title=NA)
+{
+  sd = sqrt(mu)
+  low = max(0, round(mu - 3 * sd))
+  high = round(mu + 5 * sd)
+  values = low:high
+  probs = dpois(values, mu)
+  plot(c(low,high), c(0,max(probs)), type = "n", xlab = "Number of Occurrences",
+      ylab = "Probability",
+      main = paste(title))
+  lines(values, probs, type = "h", col = 2)
+  abline(h=0,col=3)
+  if(calcProb) {
+    if(is.na(a)){ a = 0 }
+    if(is.na(b)){
+     a = round(a)
+     prob = 1-ppois(a-1,mu)
+     sub(paste("P(",a," <= X <= ",b,") = ",round(prob,6),sep="") ,line=0,col.main=4)
+     u = seq(max(c(a,low)),high,by=1)
+    }
+    else {
+     if(a > b) {d = a; a = b; b = d;}
+     a = round(a); b = round(b)
+     prob = ppois(b,mu) - ppois(a-1,mu)
+     title(paste("P(",a," <= X <= ",b,") = ",round(prob,6),sep="") ,line=0,col.main=4)
+     u = seq(max(c(a,low)),min(c(b,high)),by=1)
+    }
+    v = dpois(u,mu)
+    lines(u,v,type="h",col=4)
+  }
+  else if(calcQuant==T) {
+    if(quantile < 0 || quantile > 1)
+      stop("quantile must be between 0 and 1")
+    x = qpois(quantile,mu)
+    title(paste("The ",quantile," quantile = ",x,sep=""),line=0,col.main=4)
+    u = 0:x
+    v = dpois(u,mu)
+    lines(u,v,type="h",col=4)
+  }
+  return(invisible())
+}
+gpois(6, a=0, b = 3, title="Accidents Will Happen")
+```
+
+
+3. What is the probability of 3 accidents or less in one month?
+
+```{r, echo = FALSE, eval = FALSE}
+dpois(0:3,6)
+```
+
+Add up the probabilities for observing 0, 1, 2, and 3 accidents in one month. This is the same as saying that these are the probabilities that 0, _or_ 1, _or_ 2, _or_ 3 accidents (**union**) occur.
+
+Sum up  0.002478752, 0.014872513, 0.044617539, and 0.089235078 to get 15.1\%.
+
+# Short exercises
+
+1. Customers pass through the doors of a retail outlet at an average rate of 300 per hour. 
+
+- Find the probability that none passes in a given minute.
+- What is the expected number passing in two minutes?
+- Find the probability that this expected number actually pass through in a given two-minute period.
+
+_Answers_ : 0.0006, 10, 12.5\%
+
+2. A company makes windmill rotors. The probability a rotor is defective is 0.01. What is the probability that a sample of 300 rotors will contain exactly 5 defective rotors? _[Use  both the Poisson and the Binomial distributions to arrive at an answer.]_
+
+_Answer_ : a little over 10\%
+
+# Not so short exercises
+
+The number of calls into your call center averages 3 per minute.
+
+(a) Find the probability that no calls come in a given 1 minute period. _Answer_: 4.978\%
+(b) Assume that the number of calls arriving in two different minutes
+are independent. Find the probability that at least two calls
+will arrive in a given two minute period. _Answer_: 98.26\%
+
+# Answers
+Let $X_1$ and $X_2$ be the number of calls coming in the first and second
+minutes respectively. We want $P(X_1 + X_2 \geq 2)$.
+
+1. Let's organize the answer this way
+\[
+P(X_1 + X_2 \geq 2) = 1-P(X_1 + X_2 < 2)
+\]
+In this way we only need to look at no calls (0 minutes) and 1 minute calls, or, for each possible sequence of 0 and 1 minute calls each sequence happening together (intersection) and independently. We have
+$1-P(X_1 + X_2 < 2) = 1-(P(X_1 = 0 \cap X_2 = 0)$
+$+ P(X_1 = 1 \cap X_2 = 0) + P(X_1 = 0 \cap X_2 = 1))$
+which, in turn, equals
+$= 1 - [P(X_1 = 0) P(X_2 = 0)$
+$+ P(X_1 = 1) P(X_2 = 0) + P(X_1 = 0) P(X_2 = 1)]$
+
+
+2. We already know from the first answer that
+\[
+P(X = 0) = \frac{e^{-3}3^0}{0!} = e^{-3} 
+\]
+which equals 0.0498. We can then compute
+\[
+P(X = 1) = \frac{e^{-3}3^1}{1!} = 3e^{-3}
+\]
+which equals 0.1494.
+
+
+3. Putting this altogether we have
+$P(X_1 + X_2 \geq 2) =$
+$1- [(0.0498)(0.0498)+(0.1494)(0.0498)+(0.0498)(0.1494)]$
+$= 1-0.01736$
+$= 0.9826$
+
+or 98.26\%.

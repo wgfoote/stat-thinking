@@ -1,0 +1,514 @@
+---
+title: 'Yet Another FINAL -- BUAN 227 -- Spring 2019'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+options(digits = 4, scipen = 9999)
+library(visNetwork)
+library(tidyverse)
+library(kableExtra)
+library(ggplot2)
+library(ggthemes)
+#
+name_Y0 <- "ungarbled price (Rs./Kg)"
+name_Y <- "garbled price (Rs./Kg)"
+name_X <- "quantity supplied"
+description <- "Cochin peppercorns"
+n <- 6
+m_x <- 100
+s_x <- 25
+s_e <- 10
+set.seed(1016)
+X <- abs(rnorm(n, m_x, s_x))
+Y <- abs(367 - 0.08 * X + rnorm(n, sd = s_e))
+Y_0 <- abs(347 - 0.06 * X + rnorm(n, sd = s_e*1.10))
+XY_df <- data.frame(X = X, Y = Y)
+fit <- lm(Y ~ X, data = XY_df)
+XY_df$predicted <- predict(fit)
+XY_df$residuals <- residuals(fit)
+e <- residuals(fit)
+#
+sumX <- sum(X)
+sumY <- sum(Y)
+sumY0 <- sum(Y_0)
+sumXY <- sum(X*Y)
+sumX2 <- sum(X^2)
+Xbar <- mean(X)
+Ybar <- mean(Y)
+Y0bar <- mean(Y_0)
+Xsd <- sd(X)
+Ysd <- sd(Y)
+Y0sd <- sd(Y_0)
+diffbar <- Y0bar - Ybar
+n0 <- n
+diffsd <- sqrt(Y0sd^2/n0 + Ysd^2/n)
+n0 <- n
+N <- n
+k <- 2
+df <- N-k
+b1 <- (N*sumXY - sumX*sumY) / (N*sumX2 - sumX*sumX)
+b0 <- Ybar - b1*Xbar
+sumY0dev2 <- sum((Y_0-Y0bar)^2)
+sumYdev2 <- sum((Y-Ybar)^2)
+sumXdev2 <- sum((X-Xbar)^2)
+SST <- sum((Y-Ybar)^2)
+SSE <- sum(e^2)
+s_e <- sqrt(SSE / df)
+s_b0 <- sqrt(s_e^2*(1/N + Xbar^2/sumXdev2))
+s_b1 <- sqrt(s_e^2 / sumXdev2)
+Rsq <- 1 - SSE / SST
+t_b0 <- b0 / s_b0
+t_b1 <- b1 / s_b1
+alpha <- 0.05
+tstar <- abs(qt(alpha / 2, df))
+L_b0 <- b0 - tstar*s_b0
+L_b1 <- b1 - tstar*s_b1
+U_b0 <- b0 + tstar*s_b0
+U_b1 <- b1 + tstar*s_b1
+y_intercept_comment <- ifelse(b0 >= 0 , "positive", "negative")
+slope_comment <- ifelse(b1 > 0, "positive", "negative")
+hypo_b0 <- ifelse(-tstar < t_b0 , ifelse( t_b0 < tstar, "accept the null hypothesis", "reject the null hypothesis"), "reject the null hypothesis")
+hypo_b1 <- ifelse(-tstar < t_b1 , ifelse( t_b1 < tstar, "accept the null hypothesis", "reject the null hypothesis"), "reject the null hypothesis")
+t_diff <- (diffbar - 0) / diffsd
+tstar_diff <- abs(qt(alpha / 2, n0 + n -2))
+hypo_diff <- ifelse(-tstar_diff < t_diff , ifelse( t_diff < tstar_diff, "accept the null hypothesis", "reject the null hypothesis"), "reject the null hypothesis")
+p_cum <- pt(t_diff, n0+n-2)
+p_diff <- ifelse(t_diff > 0, 1 - p_cum, p_cum)
+```
+
+## A problem
+
+Here is data for the `r name_Y0`, `r name_Y` and `r name_X` of `r description`. 
+
+```{r}
+#
+header <- c(name_Y0, name_Y, name_X)
+margin <- 1:N
+col_0 <- Y_0
+col_1 <- Y
+col_2 <- X
+table <- cbind(col_0, col_1, col_2)
+colnames(table) <- header
+rownames(table) <- margin
+table %>% 
+  kable(digits = 2) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+[Malabar pepper](https://en.wikipedia.org/wiki/Malabar_pepper) is classified under two grades known as garbled and un-garbled. The garbled variety (higher grade) is black in color with a wrinkled surface. The ungarbled variety has a wrinkled surface and the colour varies from dark brown to black.
+
+Here are calculations for the `r name_Y` and `r name_X` data:
+
+```{r}
+#
+header <- c("estimate", "standard deviation")
+margin <- c("intercept", "slope")
+row_1 <- c(b0, s_b0)
+row_2 <- c(b1, s_b1)
+table <- rbind(row_1, row_2)
+colnames(table) <- header
+rownames(table) <- margin
+table %>% 
+  kable(digits = 4) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+$N= `r N`$, $\Sigma_{i=1}^N Y_i= `r sumY`$, $\Sigma_{i=1}^N X_i= `r sumX`$, $\Sigma_{i=1}^N X_iY_i= `r sumXY`$, $\Sigma_{i=1}^N X_i^2= `r sumX2`$, $\Sigma_{i=1}^N (Y_i - \bar Y)^2= `r SST`$, $\Sigma_{i=1}^N (Y_i - \bar Y)^2= `r sumYdev2`$, $\Sigma_{i=1}^N (X_i - \bar X)^2= `r sumXdev2`$, $\Sigma_{i=1}^N e_i^2= `r SSE`$, $s_e= `r s_e`$, $R^2=`r Rsq`$, $\alpha = `r alpha`$ with $|t| = `r tstar`$ for appropriate degrees of freedom. 
+
+For the `r name_Y0` data here are additional calculations where $Y =$ `r name_Y0`:
+
+$\Sigma_{i=1}^N Y_i= `r sumY0`$, $\Sigma_{i=1}^N (Y_i - \bar Y)^2= `r sumY0dev2`$
+
+For complete credit you must draw pictures, show formulas, show all calculations needed, interpret process and results.
+
+## Question 1: Should we use two prices?
+
+We are going to try to forecast prices. There are two prices at Cochin. Do they act as if one world price? 
+
+a. Formulate an hypothesis to test a claim that there is one world price. 
+
+b. Test the hypothesis and interpret the results.
+
+</br>
+
+<button onclick="showText('myDIFF')">show / hide</button>
+<div id="myDIFF" style="display:none;">
+
+</br>
+
+1. The analyst formulates the null hypothesis that the mean price is the same for both grades, and thus their difference is zero, or as
+$$
+H_0: \mu_1 - \mu_2 = 0
+$$
+and the alternative hypothesis as 
+$$
+H_1: \mu_1 - \mu_2 \neq 0.
+$$
+
+2. This is a two-tailed test where the $\alpha = 0.05$ significance level region of the rejection of the null hypothesis $H_0$ is in the lower and upper tails of the Student's t distribution. 
+
+- The number of degrees of freedom now equal all of the observations from the two samples minus the number of estimators, now equal to 2, or, $n_1 + n_2 - 2$. 
+
+- If the analyst samples $n_1 =$ `r n0` observations from the `r name_Y0` and $n_2 =$ `r n` observations from the `r name_Y`, then the number of degrees of freedom is $n_1+n_2-2 =$ `r n+n0 - 2`.
+
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggthemes)
+n.sample <- n0 + n
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- alpha
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+ann.line<-data.frame(xmid1=min.a,xmid2=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(-4.5,0,4.5),y=c(.18,.18,.18),label=c(paste("Reject\nH0\nt < ",round(min.a,2)),"Accept\nH0",paste("Reject\nH0\nt > ",round(max.a,2))))
+main_title <- substitute(paste("Sample Means: ", alpha == a, ", ", "df" == df, ", ", "|t|" == t), list(a = alpha, df = df.sample, t = max.a))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < min.a | x > max.a] <- NA
+  return(y)
+}
+
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) 
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmid2,y=y0,yend=y2),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmid1,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main_title)
+p1
+```
+
+
+3. The analyst samples `r n0` observations from the `r name_Y0` (sample 1) and `r n` observations from the `r name_Y` (sample 2), and uses the same $\alpha =$`r alpha*100`\% significance level for rejection of the null hypothesis. She estimates
+
+- $\bar X_1 =$ `r Y0bar` with $s_{\bar X_1}=$ `r Y0sd`, and
+
+- $\bar X_2 =$ `r Ybar` with $s_{\bar X_2}=$ `r Ysd`. 
+
+
+4. Her next job is to pool (also known as "aggregate") the standard deviations together since the risk associated with the null hypothesis relates to two pooled sample means $\bar X_1 - \bar X_2 =$ `r Y0bar - Ybar` $=$ `r diffbar`. The analyst assumes that the two samples are not at all correlated with one another.
+$$
+s_{\bar X_1 - \bar X_2 } = \sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}
+$$
+$$
+= \sqrt{\frac{`r Y0sd`^2}{`r n0`}+\frac{`r Ysd`^2}{`r n`}} = `r diffsd` 
+$$
+and calculates the $t$ score as
+$$
+t = \frac{(\bar X_1 - \bar X_2) - (\mu_{0,1} - \mu_{0,2})}{s_{\bar X_1 - \bar X_2 }} = \frac{`r diffbar` - 0}{`r diffsd`} = `r t_diff` 
+$$
+
+5. A $t$ score of `r round(t_diff, 2)` means that the score, and the difference between the means, is in the region of acceptance of the null hypothesis.
+
+- There is at most a 5\% chance that management is wrong in its assertion that the prices are the same.
+
+- Another interpretation is possible. Using Excel the analyst can compute `= T.DIST( `r t_diff`, `r n0+n-2`)` to calculate `r p_diff`. When the t-stat is less than zero, use `T.DIST()`, else use `1 = T.DIST()`. This is the p-value which is the cumulative probability less than (or greater if positive) than $t=$`r t_diff` that she was wrong about the rejection of the null hypothesis. Since the p-value is greater than `r alpha/2 * 100`\% tolerated, she accepts the null hpythesis as probably true.
+
+- The analyst compares the `p-value` with the significance level of 5\% and sees that there is a stronger chance of a Type I false negative error than indicated simply by looking at the rejection region. The analyst then accepts as true the null hypothesis that there one world price for this new rare earth commodity.
+
+</div>
+
+## Question 2: What is the model?
+
+Assume a linear relationship between the independent variable `r name_X` and dependent variable `r name_Y`. Include in this description the following with interpretations:
+
+a. A scatterplot that depicts the relationship between dependent and independent variables. A straight line through the data, consistent with the calculations, that depicts deviations of scatter points from the line.
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+```{r}
+p_error <- ggplot(data = XY_df, aes(x = X, y = Y)) + geom_point() + geom_smooth(se = FALSE, method = "lm") + geom_segment(aes(xend = X, yend = predicted), alpha = 0.3) + geom_point(aes(y = predicted), shape = 1) + geom_point(aes(color = abs(residuals))) + scale_color_continuous(low = "black", high = "red") + guides(color = FALSE) + theme_bw() + xlab(name_X) + ylab(name_Y)
+p_error
+```
+
+The model is $Y_i= `r b0` + `r b1`X_i + e$, where $b_0 =`r b0`$ is the `r name_Y`-intercept and $b_1 =`r b1`$ is the slope, that is, the rate of change of `r name_Y` with respect to `r name_X`, and $e_i = Y_i - b_0 - b_1 X_i$ is the deviation of the observed `r name_Y` from the mean `r name_Y` conditional on `r name_X`, that is, $b_0 + b_1 X_i$. All of this represents a sample from an unknown population.
+
+There appears to be a `r slope_comment` slope with a `r y_intercept_comment` intercept.
+
+</div>
+
+
+c. Validate the calculations of the sample mean and standard deviation of the intercept parameter as well as the percentage of variation in the dependent variable explained by the model.
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+
+The sample slope is randomly sampled from the population slope $\beta_1$, as yet unknown. This indicates that the population slope is a random variable whose sampled values form a probability distribution. Using the data above, for the sampled mean slope of the probability distribution of $\beta_1$ is
+
+$$
+b_1 = \frac{N\sum_{i=1}^N X_i Y_i - \sum_{i=1}^N X_i \sum_{i=1}^N Y_i}{N\sum_{i=1}^N X_i^2 - (\sum_{i=1}^N X_i)^2} = \frac{(`r N`)(`r sumXY`) - (`r sumX`)(`r sumY`)}{(`r N`)(`r sumX2`) - (`r sumX`)(`r sumX`)}= `r b1`
+$$
+and for the sample standard deviation of the slope
+
+$$
+s_{b1} = \sqrt{\frac{s_e^2}{\Sigma_1^N (X_i- \bar X)^2}} = \sqrt{\frac{`r s_e`^2}{`r sumXdev2`}} = `r s_b1` 
+$$
+We calculate tha sampled mean of intercepts $b_0$ using $b_1$:
+$$
+b_0 = \bar{Y} - b_1 \bar{X}
+$$
+$$
+b_0 = `r Ybar` - (`r b1`)(`r Xbar`) = `r b0`
+$$
+
+The $R^2$ statistic measures the portion of the total variation of `r name_Y` about its arithmetic mean, that is explained by the model $b_0 + b_1 X_i$. This portion plus the variation of the error term $e_i$ about its zero mean equals the total variation in `r name_Y`.
+
+$$
+R^2 = 1 - \frac{\Sigma_1^N e_i^2}{\Sigma_1^N (Y_i - \bar Y)^2} = 1 - \frac{`r SSE`}{`r SST`} = `r 1 - SSE / SST`
+$$
+</div>
+
+## Question 3: How confident are we about the estimates?
+
+Given a level of significance of `r alpha*100`\%, 
+
+a. Draw an appropriate probability distribution to construct an estimate of the confidence interval for $b_0$ and $b_1$. Be sure to include the upper and lower bounds on the distribution in terms of the number of standard deviations from the mean zero of this distribution.
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+
+We use the Student's t distribution since we _do not know_ the population standard deviation. Now the sample standard deviation is also a random variable, like the sample mean. In practice this is nearly always the case. The Student's t distribution to correct for confidences that are, well, not so confident. It corrects for the risk that the standard deviations are randomly drawn.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggthemes)
+n.sample <- N
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- alpha
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+label_regions <- c(paste("Lower\nOutlying\nRegion\nt = ",round(min.a,2)),paste("Region of\nConfidence\n", (1-alpha)*100,"%"),paste("Upper\nOutlying\nRegion\nt = ", round(max.a,2)))
+ann.line<-data.frame(xmid1=min.a,xmid2=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(-4.5,0,4.5),y=c(.18,.18,.18),label=label_regions)
+main_title <- substitute(paste("Sample Means: ", alpha == a, ", ", "df" == df, ", ", "|t|" == t), list(a = alpha, df = df.sample, t = max.a))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < min.a | x > max.a] <- NA
+  return(y)
+}
+
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) 
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmid2,y=y0,yend=y2),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmid1,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main_title)
+p1
+```
+
+For our model, there are $N - k = `r N` - `r k` = `r df`$ degrees of freedom. This means that because we estimated two sample means, one for the sample Y-intercept $b_0$ and the sample slope $b_1$, we effectively lose two observations when we try to infer population values of the slope and Y-intercept.  
+
+The $\alpha = `r alpha*100`$\% significance level is the probability that we are wrong that the population slope and Y-intercept are between upper and lower bounds of the Student's t distribution. The confidence level is $1 - \alpha = 1 - `r alpha` = `r 1 - alpha`$, the cumulative probability in the blue shaded area of the t-distribution above. Each tail contains $\alpha / 2 = `r 100*alpha/2`$\% probability of error in our confidence. The lower bound is the t score associated with the $\alpha / 2 = `r 100*alpha/2`$\% cumulative probability, `r -tstar`. The upper bound is, by symmetry, `r tstar`. Both of these bounds are the number of standard deviations from the zero mean of the Student's t distribution for the `r (1- alpha)*100`\% confidence interval.
+
+</div>
+
+b. Calculate the upper and lower bounds for the confidence intervals of $b_0$ and $b_1$. Interpret the results.
+
+<button onclick="showText('myDIV4')">show / hide</button>
+<div id="myDIV4" style="display:none;">
+
+Using this calculation:
+
+The `r (1-alpha)*100`\% confidence interval for estimating the population parameter $\beta_0$ is this probability statement.
+$$
+Prob[b_0 - t_{`r alpha/2`}s_{b0} \leq \beta_0 \leq b_0 + t_{`r alpha/2`}s_{b0} ] = `r 1-alpha`
+$$
+$$
+Prob[`r b0` - (`r tstar`)(`r s_b0`) \leq \beta_0 \leq `r b0` + (`r tstar`)(`r s_b0`) ] = `r 1-alpha`
+$$
+$$
+Prob[`r L_b0` \leq \beta_0 \leq `r U_b0`] = `r 1-alpha`
+$$
+There is a `r (1-alpha)*100`\% probability that the population Y-intercept will lie between `r L_b0` and `r U_b0`. Decision makers might do well to plan for considerable movement in this number when formulating business plans.
+
+The `r (1-alpha)*100`\% confidence interval for estimating the population parameter $\beta_1$ is this probability statement.
+$$
+Prob[b_1 - t_{`r alpha/2`}s_{b1} \leq \beta_1 \leq b_1 + t_{`r alpha/2`}s_{b1} ] = `r 1-alpha`
+$$
+$$
+Prob[`r b1` - (`r tstar`)(`r s_b1`) \leq \beta_1 \leq `r b1` + (`r tstar`)(`r s_b1`) ] = `r 1-alpha`
+$$
+$$
+Prob[`r L_b1` \leq \beta_1 \leq `r U_b1`] = `r 1-alpha`
+$$
+
+There is a `r (1-alpha)*100`\% probability that the population slope will lie between `r L_b1` and `r U_b1`. Decision makers might do well to plan for movement in this number when formulating business plans.
+
+## Question 4: How meaningful are the estimates?
+
+a. Formulate testable hypotheses of the meaningfulness of the mean slope and Y-intercept of our model. Interpret.
+
+<button onclick="showText('myDIV5')">show / hide</button>
+<div id="myDIV5" style="display:none;">
+
+Herein we test the hypothesis that $\beta_0$ and $\beta_1$ are no different than zero. This is called the _null hypothesis_ or $H_0$. The _alternative hypothesis_ or $H_1$ is that the estimators are meaningful, namely, they do not equal zero.
+
+If $\beta_0 = 0$ under the null hypothesis, $H_0$, then the line through the scatter plot probably runs through the zero intersection of the `r name_X`-`r name_Y` axes.
+
+If $\beta_1 = 0$ under the null hypothesis, $H_0$, then the line through the scatter plot probably is just $Y_i = b_0 + e_i$. Equivalenly, the mean `r name_Y` is just the unconditional arithmetic mean. Then `r name_X` has no influence, probably, over `r name_Y`.
+
+Thus the first step is
+
+1. Management makes an assumption and forms a hypothesis about the population $\beta_0$ and $\beta_1$ estimates. This is a precise statement about two specific metrics. Let's work with $\beta_0$. All the same can, and will be said of $\beta_1$.
+
+- The _null hypothesis_ ($H_0$) is that the population metric equals a target value $\beta_0^*$ or $H_0: \beta_0 = \beta_0^*$. Suppose that $H_0: \beta_0 = 0$. 
+
+- The _alternative hypothesis_ ($H_1$) is that the population metric does not equal (or is just greater or less than) the target value. Thus we would have $H_1: \beta_0 \neq 0$.
+
+</div>
+
+b. Test the hypotheses and interpret.
+
+<button onclick="showText('myDIV6')">show / hide</button>
+<div id="myDIV6" style="display:none;">
+
+Here are the rest of the steps.
+
+2. A decision maker sets a degree of confidence in accepting as true the assumption or hypothesis about the metric. The decision maker determines that `r (1-alpha)*100`\% of the time $\beta_0 = 0$. This means there is an $\alpha = `r alpha`$\% significance level that the company would be willing to be wrong about rejecting the assertion that $H_0: \beta_0 = 0$ is true.
+
+- Under the null hypothesis it is probable that above or below a mean value of zero there is a Type I error of $\alpha = 0.05$ over the entire distribution of $b_0$ or of $b_1$. This translates into $\alpha / 2 = `r alpha/2`$ above and $\alpha / 2 = `r alpha/2`$ below the mean.
+
+- Because management expresses the alternative hypothesis as "not equal," this translates into a two-tailed test of the null hypothesis.
+
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggthemes)
+n.sample <- N
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- alpha
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+ann.line<-data.frame(xmid1=min.a,xmid2=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(-4.5,0,4.5),y=c(.18,.18,.18),label=c(paste("Reject\nH0\nt < ",round(min.a,2)),"Accept\nH0",paste("Reject\nH0\nt > ",round(max.a,2))))
+main_title <- substitute(paste("Sample Means: ", alpha == a, ", ", "df" == df, ", ", "|t|" == t), list(a = alpha, df = df.sample, t = max.a))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < min.a | x > max.a] <- NA
+  return(y)
+}
+
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) 
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmid2,y=y0,yend=y2),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmid1,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main_title)
+p1
+```
+
+
+3. We have a sample of $N = `r N`$ observations of `r name_Y` and `r name_X` of `r description`. We then computed the sample estimate $b_0 = `r b0`$ for the average intercept with sample standard deviation $s_{b_0} = `r s_b0`$. 
+
+4. Now compute the $t$ score under the null hypothesis value of zero. We will compare this with the t score associated with the upper and lower bounds for accepting the null hypothesis as true.
+
+$$
+t_{b0} = \frac{b_0 - 0}{s_{b_0}} = \frac{`r b0` - 0}{`r s_b0`} = `r b0/s_b0`
+$$
+
+and compare this value with the the acceptance region of the null hypotheses $H_0$.
+
+
+5. For the confidence interval calculations we determined that the lower and  upper t scores for a two tailed $\alpha = `r alpha`$ significance level are `r -tstar` and `r tstar`.
+
+- The computed t score is `r t_b0` and falls in the `r hypo_b0` region.
+
+- We can now report that we are 95\% confident that a decision maker may `r hypo_b0` that the intercept is no different than zero. 
+
+Under the null hypothesis that the population slope parameter $\beta_1 = 0$, we compute the t score as
+
+$$
+t_{b1} = \frac{b_1 - 0}{s_{b1}} = \frac{`r b1` - 0}{`r s_b1`} = `r b1/s_b1`
+$$
+
+and compare this value with the t scores for the acceptance region of the null hypotheses $H_0$.
+
+- The computed t score is `r t_b1` and falls in the `r hypo_b1` region.
+
+- We can now report that we are 95\% confident that a decision maker may `r hypo_b1` that the slope is no different than zero. 
+
+But always remember: **Absence of evidence is NOT evidence of absence!**
+
+</div>

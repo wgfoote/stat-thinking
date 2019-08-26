@@ -1,0 +1,181 @@
+---
+title: "What types of data are there?"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(visNetwork))
+```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Learning outomes
+
+1. Identify the different types of data
+
+2. Describe the use of different types of data to explore answers to business questions
+
+3. Identify a research question and justify the the use of different types of data
+
+## Air pollution and birth outcomes
+
+Businesses will often attempt to measure the impact of their operations on the populations they serve or are located near. Energy companies manufacture electricity, refined oil products, downstream basic and derived chemicals, and create polluting substances in the process. A California-based energy company wanted to gauge the impact of air pollution on births. Visit this [EPA site for more information on the management of air quality](https://www.epa.gov/air-quality-management-process/managing-air-quality-human-health-environmental-and-economic).
+
+Researchers collected data to examine the relationship between air pollutants and preterm births in Southern California. During the study air pollution levels were measured by air quality monitoring stations. Specifically, levels of carbon monoxide were recorded in parts per million, nitrogen dioxide and ozone in parts per hundred million, and coarse particulate matter (PM10) in $\mu / m*3$. Length of gestation data were collected on 143,196 births between the years 1989 and 1993, and air pollution exposure during gestation was calculated for each birth. The analysis suggested that increased ambient PM10 and, to a lesser degree, CO concentrations may be associated with the occurrence of preterm births.
+
+In this study, identify
+
+- the cases,
+
+- the variables and their types, and
+
+- the main research question.
+
+### Classifying data types
+
+A familiar example of a hierarchy is the organizational chart. This chart visualizes the reporting structure of an organization.
+
+```{r}
+visNetwork(main = list(text = "Hierarchy Example: Student Life",
+ style = "font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"),
+        dot = 'dinetwork{ node [shape=box];  
+           "VP Student Life" -> "Residence Director" ; 
+           "VP Student Life" -> "Program Director" ; 
+           "Residence Director" -> "Residence Advisor-Alpha" ;
+           "Residence Director" -> "Residence Advisor-Beta" ;
+           "Residence Director" -> "Residence Advisor-Gamma" ;     
+           }'
+           ) %>%  visNodes(color = list(background = "white", border = "blue", 
+    highlight = "yellow")) %>% visHierarchicalLayout(nodeSpacing = 200, sortMethod = "directed")
+```
+
+You can access this [article about hierarchy](https://en.wikipedia.org/wiki/Hierarchy) for more information.
+
+
+
+1. What is a hierarchy?
+
+</br>
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+</br>
+
+A hierarchy is an analytical technique that takes a group of objects and asks two questions:
+
+1. How are the objects (nodes) related to one another (edges)? (just a network)
+
+2. What objects are parents (higher level) or children (lower level) of one another
+
+Notice that the departments and their children nodes are mutually exclusive of one another.
+
+</div>
+</br>
+
+In each department of science there are hierarchies and networks of metadata. Metadata are data about data. Statistics mirror life, and in life we find ourselves classifying the world around us to make some systematic sense of it.
+
+Here is a potential data classification hierarchy we might use with this research example.
+
+```{r}
+visNetwork(main = list(text = "Data Classification",
+ style = "font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"),
+        dot = 'dinetwork{ node [shape=box];  
+           "Data" -> "Numeric" ;
+           "Data" -> "Categorical" ;
+           "Numeric" -> "Continuous" ;
+           "Numeric" -> "Discrete" ;
+           "Categorical" -> "Nominal" ; 
+           "Categorical" -> "Ordinal" ; 
+           }'
+           ) %>%  visNodes(color = list(background = "white", border = "blue", 
+    highlight = "yellow")) %>% visHierarchicalLayout(nodeSpacing = 200, sortMethod = "directed")
+```
+
+
+2. Map the data in the research example to the hierarchy.
+
+</br>
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+</br>
+
+Let's classify the data in the the research example with this hierarchy.
+
+- Cases: or "observations" include measurements relative to 143,196 births between the years 1989 and 1993.
+
+- Variables: air quality station (nominal), year (nominal) length of gestation (continuous), levels of carbon monoxide were recorded in parts per million (continuous), nitrogen dioxide and ozone in parts per hundred million (continuous), and coarse particulate matter (PM10) in $\mu / m^3$ (continuous).
+
+What further questions might be possibly related to these measures? Do these questions anticipate the collection of discrete or ordinal variables?
+
+</div>
+</br>
+
+3. Describe the usefulness of the components of your data classification hierarchy to answer the main research question above.
+
+The data classification hierarchy is a theory to be tested. A **canon** is a general law, rule, principle, or criterion by which something is judged. Let's test this hierarchy against these canons of empirical method, expressed as questions for consideration (see [and astrophysicist's view of these canons](https://adh-sj.info/canons.php), both based on [Bernard Lonergan's _Insight_, Longmans, London 1957, chapter III](https://www.amazon.com/Insight-Understanding-Collected-Bernard-Lonergan/dp/0802034551) :
+
+a. Relevance and Selection: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
+
+b. sufficiency: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
+
+c. Parsimony: is the hierarchical description of data itself verifiable in the data?
+
+d. Completeness: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+</br>
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+</br>
+
+By canon:
+
+a. Relevance and Selection: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
+
+Yes it does. Anticipated are variables that are non-integer (as well as integer) and simply unordered categorical data. Other types are possible, but not present.
+
+b. sufficiency: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
+
+No it does not. It seems that the continuous and discontinuous numeric variables are sufficient for numeric variables if only because they are mutually exclusive. The same for nominal (unordered) and ordinal (ordered). If fact the hierarchy _overfits_ the data in this exercise by the inclusion of discrete and ordinal data types. Including these anticipate relevancy and selection in other studies. 
+
+c. Parsimony: is the hierarchical description of data itself verifiable in the data?
+
+Yes it does. Again our data seems well matched to the lowest level of the hierarchy. Further levels might delineate attributes of the previous level. For example, add another component, say integer. But integer is just another way of saying discrete variable. so this doesn't add anything. Are there other categories of numeric or categorical data? There do not seem so.
+
+d. Completeness: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+
+Yes it does. The data in the example are continuous, discrete, nominal, and ordinal. There does not seem to be any other relevant data available within the field of this example.
+
+</div>
+</br>
+
+## What have we learned?
+
+**Why does any of this matter?** The general question is bias and manipulation are possible if we fail to select all relevant, verifiable data that sufficiently describes and explains our research, decisions, and raises questions for further inquiry.
+
+- Systematic inquiry uses structures to name, associate, analyze, and conclude the properties of data
+
+- A proposed classification hierarchy anticipates the data used to analyze a pratical research problem
+
+- A test of the hierarchy using rules of empirical methodology confirms the validity of the classifications of the data and reaches into further questions for inquiry
+
+- A provisional structure helps us to identify and correct bias
+
+

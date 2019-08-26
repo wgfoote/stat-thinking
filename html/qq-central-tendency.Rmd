@@ -1,0 +1,156 @@
+---
+title: "Quick Quiz: what do data tend to?"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Procedures
+
+- Mean: arithmetic mean
+
+- Median: another percentile?
+
+- Mode: good for nominal data
+
+- Percentile: or quantile
+
+### Mean
+
+If $X$ is all of the data (population) indexed by $i = 1 \dots N$ with $N$ elements, then
+
+$$
+\mu = \frac{\Sigma_{i=1}^N X_i}{N}
+$$
+If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
+
+$$
+\bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
+$$
+
+### Median
+
+The middle of the data. We can use the Percentile method below with $P = 50$.
+
+### Mode
+
+The most frequently occurring value in the data. 
+
+### Percentile
+
+How to compute? 
+
+1.Organize the numbers into an ascending-order array.
+
+2.Calculate the percentile location $i$
+
+$$
+i = \frac{P}{100}N
+$$
+where
+
+$P$ = the percentile of interest
+
+$i$ = percentile location
+
+$N$ = number of elements in the data set
+
+3.Determine the location by either (a) or (b).
+
+a. If $i$ is a whole number, the $P$th percentile is the average of the value at the $i$th location and the value at the $(i + 1)$st location.
+
+b. If $i$ is not a whole number, the $P$th percentile value is located at the whole number part of $i + 1$.
+
+For example, suppose you want to determine the 80th percentile of 1240 numbers. 
+
+- $P$ is 80 and $N$ is 1240. 
+
+1. Order the numbers from lowest to highest. 
+
+2. Calculate the location of the 80th percentile.
+
+$$
+i = \frac{80}{100}(1240) = 992
+$$
+
+Because $i = 992$ is a whole number, follow the directions in step 3a. The 80th percentile is the average of the 992nd number and the 993rd number.
+
+## Problems
+
+1.	Determine the median and the mode for the following numbers.
+
+2,4,8,4,6,2,7,8,4,3,8,9,4,3,5
+ 
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1">
+**Answer**  
+
+Both are 4
+
+1. Arrange in ascending order:
+	
+	2, 2, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8, 8, 8, 9
+	
+	There are 15 terms.
+	
+2. Since there are an odd number of terms, the median is the middle number. Using the formula, the median is located at the $(N + 1)/2$ = 8th term
+		
+The 8th term is	4
+
+For the mode
+	
+	2, 2, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8, 8, 8, 9
+
+The mode = 4, the most frequently occurring value
+
+</div>
+
+8.	The following list shows the 15 largest banks in the world by assets according to relbanks.com. Compute the median and the mean assets from this group. Which of these two measures do you think is most appropriate for summarizing these data and why? What is the value of Q2 and Q3? Determine the 63rd percentile for the data. Determine the 29th percentile for the data. 
+
+```{r}
+data <- read.csv("data/qq-3-8.csv")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2">
+**Answer**
+Mean :          
+
+$$
+\mu =  \frac{35412}{15} = 2360.8
+$$
+
+The median is located at the 8th term, $Q_2 =  2337$
+
+First, $Q_3 = P_{75}$ 
+
+For $Q_3$, 	$i=75/100 (15)=11.25$, then $Q_3$ is located at the $11 + 1 = 12$th term, $Q_3 = 2670$
+
+$P_{63}$ is located at the $9 + 1 = 10$th term, $P_{63} = 2584$
+
+$P_{29}$ is located at the $4 + 1 = 5$th term, $P_{29} = 2105$
+
+</div>
+

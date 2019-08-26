@@ -1,0 +1,37 @@
+---
+title: "Then there were Tweets"
+author: "William G. Foote"
+date: "3/8/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(twitteR)
+#library(Ra)
+api_key <- "YR6sfoHi1E1slkVZSwhe14wjN"
+api_key_secret <- "5K9O2tufRsUg5oCcGWRddDqb1EUaprgDub0EXaTp8IeL4RB5eO"
+access_token <- "1569330637-4WlCItiBJhx1yt4zHQXDhtxBsx2lWhfoCJf0BiP"
+access_token_secret <- "bTsjfmde15bcEgllO1qnEzLpEkW0FN2OTAyFe5xyRaO3n"
+setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
+```
+
+## Pull tweets
+
+```{r gettweets}
+search_string <- "rosneft" # TrumpSHaresinRosneft"
+tw <-  twitteR::searchTwitter(search_string, n = 1e4, since = '2018-11-08', retryOnRateLimit = 1e3)
+str(tw[1])
+d <-  twitteR::twListToDF(tw)
+str(d)
+```
+
+## Access text
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+unique(d$screenName)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

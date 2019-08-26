@@ -1,0 +1,55 @@
+---
+title: "Quick Quiz: Frequency Graphs"
+author: "Bill Foote"
+date: "September 3, 2018"
+output: html_document
+---
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+7. kkkkk
+
+table
+
+```{r}
+library(bsselectR)
+library(ggplot2)
+library(tidyverse)
+library(stringr)
+
+#calls <- sample(2:8, 78, prob = c(0.115384615, 0.08974359, 0.128205128, 0.076923077, 0.166666667, 0.192307692, 0.230769231), replace = TRUE)
+calls <- c(rep(11, 9), rep(21, 7), rep(31, 10), rep(41, 6), rep(51, 13), rep(61, 15), rep(71, 18))
+calls <- data.frame(calls = calls)
+p_blank <- ggplot(calls, aes(x = calls))
+ggsave("images/blank.png")
+p_calls <- ggplot(calls, aes(x = calls)) + geom_histogram() + stat_bin(binwidth= 10, geom="text", aes(label=..count..), vjust = -1) + scale_x_continuous(breaks=seq(0,max(calls$calls), 10)) + ylim(0, 25)
+ggsave("images/calls.png")
+
+plots <- paste0(list.files("images", full.names = TRUE))
+names(plots) <- str_replace_all(plots, 
+                                      c("\\.png" = "", 
+                                        "images/" = ""))
+
+bsselect(plots, type = "img", selected = "blank", 
+         live_search = TRUE, show_tick = TRUE)
+```
+
+
+```{r}
+quotes <- c("Look deep into nature, and then you will understand everything better.", 
+            "A fool thinks himself to be wise, but a wise man knows himself to be a fool.", 
+            "My mission in life is not merely to survive, but to thrive; and to do so with some passion, some compassion, some humor, and some style.")
+
+names(quotes) <- c("Einstein", "Shakespeare", "Angelou")
+
+bsselect(quotes, type = "text", show_tick = TRUE)
+```
+

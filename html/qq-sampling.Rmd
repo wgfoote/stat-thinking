@@ -1,0 +1,217 @@
+---
+title: "Workbook: how to build a sampling distribution"
+author: "Bill Foote"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+options(digits = 3, scipen = 9999)
+library(visNetwork)
+library(tidyverse)
+library(kableExtra)
+
+# Internal Rate of Return (IRR) function
+# Inputs: vector of cash flows (cashflows), scalar interations (maxiter)
+# Outputs: scalar net present value
+IRR <- function(cashflows, maxiter=1000) {
+  t <- seq_along(cashflows)-1
+  # rate will eventually converge to IRR
+  f <- function(rate)(sum(cashflows/(1+rate)^t))
+  # use uniroot function to solve for root (IRR = rate) of f = 0
+  # c(-1,1) bounds solution for only positive or negative rates
+  # select the root estimate
+  return(uniroot(f, c(-1,1), maxiter = maxiter)$root)
+}
+
+clt_sim <- function(n, source=NULL, param1=NULL, param2=NULL) {
+  r <- 10000  # Number of replications/samples - DO NOT ADJUST
+  # This produces a matrix of observations with  
+  # n columns and r rows. Each row is one sample:
+  my.samples <- switch(source,
+                       "E" = matrix(rexp(n*r,param1),r),
+                       "N" = matrix(rnorm(n*r,param1,param2),r),
+                       "U" = matrix(runif(n*r,param1,param2),r),
+                       "P" = matrix(rpois(n*r,param1),r),
+                       "C" = matrix(rcauchy(n*r,param1,param2),r),
+                       "B" = matrix(rbinom(n*r,param1,param2),r),
+                       "G" = matrix(rgamma(n*r,param1,param2),r),
+                       "X" = matrix(rchisq(n*r,param1),r),
+                       "T" = matrix(rt(n*r,param1),r))
+  all.sample.sums <- apply(my.samples,1,sum)
+  all.sample.means <- apply(my.samples,1,mean)   
+  all.sample.vars <- apply(my.samples,1,var) 
+  par(mfrow=c(2,2))
+  hist(my.samples[1,],col="gray",main="Distribution of One Sample")
+  hist(all.sample.sums,col="gray",main="Sampling Distribution \n of
+       the Sum")
+  hist(all.sample.means,col="gray",main="Sampling Distribution \n of the Mean")
+  hist(all.sample.vars,col="gray",main="Sampling Distribution \n of
+       the Variance")
+}
+# clt_sim(100,source="E",param1=1)
+```
+
+
+# Imagine this...
+
+Your team job is to handle the 579 current client billings in your team's book of business. You only can contact 10 clients in the short time between now and when you must estimate the range of billings for a revenue forecast for your team's managing director. Specifically,
+
+  1. What is the expected level of billings?
+
+  2. With a high degree of confidence, what is the range of billings we might expect?
+
+**What is a team member to do?**
+
+# Objectives
+
+With this unit, you will be able to:
+
+- Understand the reason for estimating with confidence interval
+
+- Calculate confidence intervals for population proportions
+
+- Interpret a confidence interval
+
+- Know the meaning of margin of error and its use
+
+- Compute sample sizes for different experimental setting
+
+- Know when and how to use t-score and interval to estimate the population mean
+
+- Compute sample sizes for estimating the population mean
+
+# Try this
+
+What is a team member to do? Experiment! That's what. 
+
+- Suppose there are only 10 billings. 
+
+- What if you take samples of 4 billings? There are $_{10}C_4 = 210$ combinations of samples.
+
+- Enumerate them all. Calculate means for each sample.
+
+- Calculate the mean of the sample means.
+
+- Compare with the mean of the population of the five experimental billings.
+
+```{r echo = FALSE, mysize=TRUE, size='\\normalsize'}
+# r_moments function
+# INPUTS: r vector
+# OUTPUTS: list of scalars (mean, sd, median, skewness, kurtosis)
+data_moments <- function(data){
+  require(moments)
+  mean.r <- mean(data)
+  sd.r <- sd(data)
+  median.r <- median(data)
+  skewness.r <- skewness(data)
+  kurtosis.r <- kurtosis(data)
+  result <- data.frame(mean = mean.r, std_dev = sd.r, median = median.r, skewness = skewness.r, kurtosis = kurtosis.r)
+  #result <- data.frame(result, table = t(result))
+  return(result)
+}
+```
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+</br>
+
+[In the simulation worksheet of the accompanying workbook](inference-of-data-1-confidence-interval.xlsx) is the experimental population of 10 billings and their mean. Next to the population are several samples of 4 each from this population with replacement. Means of each sample are tabulated along with the mean of the sample means.
+
+Below is the distribution the random variable, sample means. This figure along with summary statistics is in the summary worksheet.
+
+```{r, out.width = "75%", echo = FALSE}
+x <- c(177.67, 169.33, 149.67, 142.33, 126, 90, 86, 201, 111, 134 )
+N <- 10
+n <- 4
+n_samples <- choose(N,n)
+set.seed(1016)
+mean_sim <- replicate(n_samples, mean(sample(x, size = n, replace = TRUE)))
+n_bins <- 10
+mean_width <- (max(mean_sim) - min(mean_sim)) / n_bins
+sim_df <- data.frame(mean = mean_sim)
+title_samples <- paste("Sample Means: N = ",N,", n = ", n,", Samples = ", n_samples)
+
+ggplot(sim_df, aes(x= mean)) + 
+    geom_histogram(aes(y = ..density..), fill = "blue", color = "white", binwidth = mean_width) +   ggtitle(title_samples)
+```
+
+```{r, echo = FALSE}
+ans <- data_moments(x)
+ans <- round(ans, 4)
+title_raw <- "Billing data: 10 observations"
+knitr::kable(ans, caption = title_raw)
+ans <- data_moments(mean_sim)
+ans <- round(ans, 4)
+knitr::kable(ans, caption = title_samples)
+
+```
+
+- Observations?
+
+  1. Approximately symmetric
+  2. Defined on + to - infinity
+  3. Almost mesokurtic
+  4. Mean of sample means is equal to the population mean
+  5. Standard deviation of sample means is about half of the population standard deviation
+
+- Recommendations?
+
+# What about the sample standard deviation?
+
+We supposed we had a experimental population of 10 billings. 
+
+- We just pulled several samples of sample size 4 from this population.
+
+- We just found out that the mean of the sample means is the same as the population mean. This the same as saying that the point estimate of the mean of the sample means is unbiased.
+
+- The samples are all pulled from a population with population mean $\mu = 138$ and  has a population standard deviation of $\sigma = 35.33$.
+
+- All of this means that each and every draw of each of the 4 sampled billings comes from a population distributed with a $\mu = 138$ and a population standard deviation of $\sigma = 35.33$.
+
+# Explore a bit further
+
+Each and every draw of each of the 4 sampled billings comes from a population distributed with a $\mu = 138$ and a population standard deviation of $\sigma = 35.33$.
+
+- Each sample is a draw of 4 billings $X = \{X_1, X_2, X_3, X_4\}$, where 1, 2, 3 and 4 are simply any four draws from the population. Each of the drawn Xs came from the experimental population of 10 billings.
+
+- The mean of the samples is then
+\[
+\bar X = \frac{1}{4}(X_1+X_2+X_3+X_4)
+\]
+- The variance (square of the standard deviation) of the sample mean is then
+\[
+\sigma_{\bar X}^2 = \left( \frac{1}{4} \right)^2 (\sigma_{X_1}^2 + \sigma_{X_2}^2 + \sigma_{X_3}^2 + \sigma_{X_4}^2)
+\]
+- The variance (square of the standard deviation) of the independently drawn (no intersection!) _sum_ of the samples themselves is
+\[
+\sigma_{(X_1+X_2+X_3+X_4)}^2 = \sigma_{X_1}^2 + \sigma_{X_2}^2 + \sigma_{X_3}^2 + \sigma_{X_4}^2
+\]
+
+- But $\sigma_{X_1}^2 + \sigma_{X_2}^2 + \sigma_{X_3}^2 + \sigma_{X_4}^2 = 4\sigma^2$, four times the square of the population standard deviation. So that,
+\[
+\sigma_{\bar X}^2 = \left( \frac{1}{4} \right)^2 4\sigma^2 = \frac{\sigma^2}{4}
+\]
+and for any sample size $n$, we have the standard deviation of the sampled means as
+\[
+\sigma_{\bar X} = \frac{\sigma}{\sqrt{n}}
+\]
+- For our experiment all of this indicates that the distribution of the sample means is
+
+` 1. Approximately normally distributed with 
+  2. Mean = population mean $\mu = 138$, and
+  3. Standard deviation $\sigma_{\bar X} = \frac{35.33}{\sqrt{4}} = 17.70$

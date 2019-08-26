@@ -1,0 +1,344 @@
+---
+title: "Probability Distributions: Normal"
+author: "Copyright 2018. William G. Foote. All rights reserved."
+output:
+  html_document:
+    theme: cerulean
+    highlight: textmate
+    fontsize: 8pt
+    toc: true
+    number_sections: true
+    code_download: true
+    source_code: embed
+    toc_float:
+      collapsed: false
+---
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
+knitr::opts_chunk$set(size = "small")
+knitr::opts_hooks$set(fig.width = function(options) {
+  if (options$fig.width < options$fig.height) {
+    options$fig.width = options$fig.height
+  }
+  options
+})
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+
+gnorm <-  function(mu, sigma,a=NA,b=NA,calcProb=!all(is.na(c(a,b))),quantile=NA,calcQuant=!is.na(quantile))
+{
+  values <-  seq(-1,1,.005) * 4 * sigma + mu
+  probs <-  dnorm(values, mu, sigma)
+  plot(values, probs, axes = F, type = "n", xlab = "Values", 
+    ylab = "Probability Density",
+    main = substitute(paste("Normal Distribution with ",mu == m,", ",sigma == s),list(m=mu,s=sigma)))
+  axis(1, pos = 0)
+  abline(0,0,col=1)
+  lines(values, probs, col = 2)
+  lo <-  mu - 4 * sigma
+  hi <-  mu + 4 * sigma
+  h <-  dnorm(mu,mu,sigma)
+  cex <- 0.8
+  if(calcProb==T)
+  {
+    if(!is.na(a) && !is.na(b) && a > b){
+      d = a; a = b; b = d
+    }
+    if(is.na(a) || a <= lo){ ulo = lo }
+    else if(a <= hi){ ulo = a }
+    else { ulo = hi }
+    if(is.na(b) || b >= hi){ uhi = hi }
+    else if(b >= lo){ uhi = b }
+    else { uhi = lo }
+    u <-  seq(ulo,uhi,length=601)
+    lines(u,dnorm(u,mu,sigma),type="h",col=2)
+    if(!is.na(a) && !is.na(b)){
+      text(mu - 3.9 * sigma, 0.8 * h,
+        paste("P( ",a," < X < ",b," ) = ",
+  	round(pnorm(b,mu,sigma)-pnorm(a,mu,sigma),digits=4),sep=""),
+        adj=0,col=4,cex=cex)
+      text(mu - 3.9 * sigma, 0.6 * h,
+        paste("P( X < ",a," ) = ",
+          round(pnorm(a,mu,sigma),digits=4),sep=""),adj=0,col=4,cex=cex)
+      text(mu + 3.9 * sigma, 0.5 * h,
+        paste("P( X > ",b," ) = ",
+       	round(1-pnorm(b,mu,sigma),digits=4),sep=""),adj=1,col=4,cex=cex)
+    }
+    else if(!is.na(a) && is.na(b)){
+      text(mu - 3.9 * sigma, 0.6 * h,
+        paste("P( X < ",a," ) = ",
+          round(pnorm(a,mu,sigma),digits=4),sep=""),adj=0,col=4,cex=cex)
+      text(mu + 3.9 * sigma, 0.5 * h,
+        paste("P( X > ",a," ) = ",
+       	round(1-pnorm(a,mu,sigma),digits=4),sep=""),adj=1,col=4,cex=cex)
+    }
+    else if(is.na(a) && !is.na(b)){
+      text(mu - 3.9 * sigma, 0.6 * h,
+        paste("P( X < ",b," ) = ",
+          round(pnorm(b,mu,sigma),digits=4),sep=""),adj=0,col=4,cex=cex)
+      text(mu + 3.9 * sigma, 0.5 * h,
+        paste("P( X > ",b," ) = ",
+       	round(1-pnorm(b,mu,sigma),digits=4),sep=""),adj=1,col=4,cex=cex)
+    }
+  }
+  else if(calcQuant==T)
+  {
+    zoffset = -0.02
+    if( quantile <= 0 || quantile >= 1) quantile = 0.5
+    x = qnorm(quantile,mu,sigma)
+    if( x > lo && x < hi)
+    {
+      u = seq(lo,x,length=601)
+      lines(u,dnorm(u,mu,sigma),type="h",col=2)
+      text(x, zoffset * h,
+  	paste("z = ",round(qnorm(quantile),2),sep=""),adj=0.5,col=4,cex=cex)
+    }
+    else if(x >= hi)
+    {
+      u = seq(lo,hi,length=601)
+      lines(u,dnorm(u,mu,sigma),type="h",col=2)
+      text(hi, zoffset * h,
+  	paste("z = ",round(qnorm(quantile),2),sep=""),adj=0.5,col=4,cex=cex)
+    }
+    else if( x <= lo)
+    {
+      text(lo, zoffset * h,
+  	paste("z = ",round(qnorm(quantile),2),sep=""),adj=0.5,col=4,cex=cex)
+    }
+    text(mu - 3.9 * sigma, 0.5 * h,
+      paste("P( X < ",signif(x,4)," ) = ",
+  	round(quantile,digits=4),sep=""),adj=0,col=4,cex=cex)
+  }
+  return(invisible())
+}
+
+clt_sim <- function(n, source=NULL, param1=NULL, param2=NULL) {
+  r <- 10000  # Number of replications/samples - DO NOT ADJUST
+  # This produces a matrix of observations with  
+  # n columns and r rows. Each row is one sample:
+  my.samples <- switch(source,
+                       "E" = matrix(rexp(n*r,param1),r),
+                       "N" = matrix(rnorm(n*r,param1,param2),r),
+                       "U" = matrix(runif(n*r,param1,param2),r),
+                       "P" = matrix(rpois(n*r,param1),r),
+                       "C" = matrix(rcauchy(n*r,param1,param2),r),
+                       "B" = matrix(rbinom(n*r,param1,param2),r),
+                       "G" = matrix(rgamma(n*r,param1,param2),r),
+                       "X" = matrix(rchisq(n*r,param1),r),
+                       "T" = matrix(rt(n*r,param1),r))
+  all.sample.sums <- apply(my.samples,1,sum)
+  all.sample.means <- apply(my.samples,1,mean)   
+  all.sample.vars <- apply(my.samples,1,var) 
+  par(mfrow=c(2,2))
+  hist(my.samples[1,],col="gray",main="Distribution of One Sample")
+  hist(all.sample.sums,col="gray",main="Sampling Distribution \n of
+       the Sum")
+  hist(all.sample.means,col="gray",main="Sampling Distribution \n of the Mean")
+  hist(all.sample.vars,col="gray",main="Sampling Distribution \n of
+       the Variance")
+}
+#clt_sim(100,source="P",param1=1.89)
+
+gnorm(0,1, a = -2, b = 2, calcProb = TRUE)
+```
+
+# What is normal?
+
+Let's draw $X_i$ from $1$ to $n$ successes independently from a population where $\mu$ and $\sigma$ are known, then we would discover that the standardized average
+
+\[
+\frac{\bar{x} - \mu}{\sigma / \sqrt{n}}
+\]
+
+is asymptotically normal with mean 0 and variance 1 (often called normal(0,1)). 
+* This can be interpreted as when $n$ is large enough the
+average is approximately normal with mean $\mu$ and standard deviation $\sigma / \sqrt{n}$.
+
+* This result is also known as the _Central Limit Theorem_ (CLT), a cornerstone of classical statistics.
+
+* Normal means a symmetric distribution with _mesokurtic_ "tailedness", or kurtosis of 3. This implies there are not too many rare outcomes in the tails of the distribution.
+
+# How can we check this? 
+
+Simulation is an excellent way. Now to get your feet good and wet...
+
+Let's first do this for the binomial distribution, the CLT translates into saying that if $x_n$ are binomial distribution outcomes with parameters $n$ and $p$ then
+
+\[
+z = \frac{x_n - np}{\sqrt{np(1-p)}}
+\]
+
+then the standardized $x$, called $z$, is approximately `Normal(0,1)`.
+
+# Let's investigate
+
+* Create binomial random numbers in Excel using `BINOM.INV(n, p, RAND())`. 
+
+* `RAND()` is the randomly generated cumulative probability of a successful binomial outcome. 
+
+* Start with just a few trials: $n = 10$ and $p = 0.20$.
+
+* Then generate in 1000 separate cells 
+
+```{r, echo = FALSE}
+n <- 10;p <- .25; n.sim <- 1000
+x <-  rbinom(n.sim, n, p)
+z <- (x - n*p) / sqrt(n*p*(1-p))
+z.mean <- mean(z)
+z.sd <- sd(z)
+hist(z, prob = TRUE, main = paste("Binomial (n = ",n, ", p = ", p, ")"))
+```
+
+Almost bell-shaped. A little lop-sided too... Here are some statistics on our experimental runs.
+```{r, echo = FALSE, mysize=TRUE, size='\\footnotesize'}
+# r_moments function
+# INPUTS: r vector
+# OUTPUTS: list of scalars (mean, sd, median, skewness, kurtosis)
+data_moments <- function(data){
+  require(moments)
+  mean.r <- mean(data)
+  sd.r <- sd(data)
+  median.r <- median(data)
+  skewness.r <- skewness(data)
+  kurtosis.r <- kurtosis(data)
+  result <- data.frame(mean = mean.r, std_dev = sd.r, median = median.r, skewness = skewness.r, kurtosis = kurtosis.r)
+  #result <- data.frame(result, table = t(result))
+  return(result)
+}
+n <- 10;p <- .25; n.sim <- 1000
+x <-  rbinom(n.sim, n, p)
+z <- (x - n*p) / sqrt(n*p*(1-p))
+ans <- data_moments(z)
+ans <- round(ans, 4)
+require(knitr)
+knitr::kable(ans)
+```
+
+Almost a "normal" _mesokurtotic_ result of 3.0. A small skewness indicating a little asymmetry.
+
+Now try this
+
+* Use a lot more than a few trials: $n = 1000$ and $p = 0.20$.
+
+* Then generate in 1000 separate cells 
+
+```{r, echo = FALSE}
+n <- 1000;p <- .25; n.sim <- 1000
+x <-  rbinom(n.sim, n, p)
+z <- (x - n*p) / sqrt(n*p*(1-p))
+hist(z, prob = TRUE, main = paste("Binomial (n = ",n, ", p = ", p, ")"))
+ans <- data_moments(z)
+ans <- round(ans, 4)
+
+```
+
+Much more symmetric. Here are some summary statistics.
+
+```{r, echo = FALSE}
+knitr::kable(ans)
+```
+
+* Slightly negatively skewed tail we can eyeball, but very small.
+
+* Mean is near zero, and median not far from zero too.
+
+* Standard deviation is nearly 1.
+
+* Kurtosis is almost on that magic normal mesokurtic number of 3.0.
+
+## Let's look at this
+
+Here is a standard normal distribution, $\mu = 0$, and $\sigma = 1$. This is a distribution centered on 0. How is this like the calculated $z$-score?
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+We can center any distribution's outcomes $x$ around zero by simply calculating the deviation of the outcome from the mean of all outcomes. Then, we can standardize the deviations by dividing the deviations by the standard deviation of outcomes. The result is a mean of zero and a standard deviation of 1. 
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+In a spread sheet generate 10 outcomes sampled from the uniform distribution drawn from the unit interval $(0,1)$. You can do this by oopening up a fresh new workbook in Excel. 
+
+1. Put your cursor on cell B3 and type $=rand()$. Copy and paste this cell down another 9 rows. Label this column `x`. 
+2. Calculate the mean and standard deviation three columns to the right in cells D3 and D4. 
+3. In column C next to the random outcomes calculate the z score using a formula like $=(B3 - \$D\$3)/\$D\$4$. 
+4. Copy and paste this cell down next to the outcomes column. Label this new column `z`.
+5. Next calculate the mean and standard deviation of the 'z' random variable samples.
+6. Every time you change something on the spread sheet new random numbers are sampled. But what does not change?
+
+</div>
+
+Here is a graph of the z-score you generated above.
+
+```{r}
+gnorm(0,1, a = -2, b = 2, calcProb = TRUE)
+```
+
+What is the interpretation of the $-2$ and $+2$
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+
+These are z-scores which measure the number of standard deviations an outcome is from zero. 
+
+- Minus 2 means the outcome is 2 standard deviations below the mean. 
+
+- Plus 2 means the outcome is 2 standard deviations above the mean.
+
+</div>
+
+What is probability that an outcome is not 2 standard deviations from the mean?
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+
+From the graph, the probability that either $z > 2$ or $z < -2$ is the probability of the union of these two events.
+
+$$
+Pr[(z < -2) \cup (z > 2)] = Pr(z<-2) + Pr(z>2) = 0.0228 + 0.0228 = 0.0456
+$$
+</div>
+
+## Where do normal outcomes come from?
+
+Is anything normal? Normal distributions very naturally come from a very interesting source: sums and averages of random samples of any set of outcomes.
+
+Suppose we think that the number of students out of a random sample of 15 students from course sections (classes) that voted in last year's election is 1.2 students/year-class. Lets sample this intensity using the Poisson distribution with $\lambda = 1.2$ 10,000 times. When we do this, we calculate the sums, averages, and variances of each and every of the 10,000 samples. Then we plot. Here's the result.
+
+```{r}
+clt_sim(15,source="P",param1=1.89)
+```
+
+What do we notice?
+
+<button onclick="showText('myDIV4')">show / hide</button>
+<div id="myDIV4" style="display:none;">
+
+1. The original distribution of students is heavily skewed to the right. This is a poisson distribution, that if we interpret as a binomial means that the proportion of voting students is
+
+$$
+p = \frac{\lambda}{n} = \frac{1.2}{15} = `r 1.2/15`
+$$
+2. The sum and the means of each random sample seem to be symmetrical and with a nice, calm kurtosis (maybe a kurtosis = 3.0). In fact this distribution is the normal distribution.
+
+3. The distribution of the variance of outcomes is skewed to the right. This distribution is the chi-squared distribution.
+
+</div>

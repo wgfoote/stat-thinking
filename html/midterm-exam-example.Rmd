@@ -1,0 +1,51 @@
+---
+title: "Midterm Assessment -- BUAN 227"
+author: "Fall 2018"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, warning = FALSE, message = TRUE)
+options(digits = 5, scipen = 99999)
+library(knitr)
+library(magrittr)
+library(kableExtra)
+```
+
+Show all of your work. Draw pictures. Make a point; justify it; illustrate it with an example. 
+
+A utility company is concerned about the ability of its vehicle operators to drive safely in its service region. It decides to sample a population of accidents in the 10461 zip code. One particular intersection comes to light. Analysts estimate that 2 accidents ("vehicular contacts") per month occur at the intersection of Crosby and Westchester Avenues in the 10461 zip code in the Bronx. 
+
+Here are some preiminary calculations.
+
+```{r}
+data <- read.csv("data/ex-table.csv", stringsAsFactors = F)
+colnames(data) <- c("Index",	"Accidents",	"Probability",	"Deviations Squared",	"Deviations Cubed", "Quartic Deviations")
+data %>% 
+  kable() #%>%
+    #kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+Based on these calculations here are some metrics.
+
+```{r}
+data <- read.csv("data/ex-metrics.csv", stringsAsFactors = F)
+colnames(data) <- c("Metric",	"Level")
+data %>% 
+  kable() #%>%
+    #kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+
+
+1. Is there a random variable in this analysis? What kind of data do we have here?
+
+2. Calculate and interpret the expected value of accidents. Describe and interpret the standard deviation, skewness, and kurtosis. 
+
+3. What is the probability that there are either between 0 and 1 accidents (inclusive) or between 4 and 5 accidents? What is the probability that there are between 2 and 3 accidents (inclusive)? Explain.
+
+4. Calculate and interpret the z-score of 5 accidents. According to the Chebyshev rule what is the probability of finding accidents that many standard deviations from the expected value? Does this check out with the data?
+
+5. Discuss the pros and cons of 3 different scale (width, volatility, dispersion) metrics for a distribution of data.

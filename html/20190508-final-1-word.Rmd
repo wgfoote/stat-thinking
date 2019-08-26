@@ -1,0 +1,154 @@
+---
+title: "Yet Another FINAL -- BUAN 227 -- Spring 2019"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+options(digits = 4, scipen = 9999)
+library(visNetwork)
+library(tidyverse)
+library(kableExtra)
+library(ggplot2)
+library(ggthemes)
+#
+name_Y0 <- "ungarbled price (Rs./Kg)"
+name_Y <- "garbled price (Rs./Kg)"
+name_X <- "quantity supplied"
+description <- "Cochin peppercorns"
+n <- 6
+m_x <- 100
+s_x <- 25
+s_e <- 10
+set.seed(1016)
+X <- abs(rnorm(n, m_x, s_x))
+Y <- abs(367 - 0.08 * X + rnorm(n, sd = s_e))
+Y_0 <- abs(347 - 0.06 * X + rnorm(n, sd = s_e*1.10))
+XY_df <- data.frame(X = X, Y = Y)
+fit <- lm(Y ~ X, data = XY_df)
+XY_df$predicted <- predict(fit)
+XY_df$residuals <- residuals(fit)
+e <- residuals(fit)
+#
+sumX <- sum(X)
+sumY <- sum(Y)
+sumY0 <- sum(Y_0)
+sumXY <- sum(X*Y)
+sumX2 <- sum(X^2)
+Xbar <- mean(X)
+Ybar <- mean(Y)
+Y0bar <- mean(Y_0)
+Xsd <- sd(X)
+Ysd <- sd(Y)
+Y0sd <- sd(Y_0)
+diffbar <- Y0bar - Ybar
+n0 <- n
+diffsd <- sqrt(Y0bar^2/n0 + Ysd^2/n)
+n0 <- n
+N <- n
+k <- 2
+df <- N-k
+b1 <- (N*sumXY - sumX*sumY) / (N*sumX2 - sumX*sumX)
+b0 <- Ybar - b1*Xbar
+sumY0dev2 <- sum((Y_0-Y0bar)^2)
+sumYdev2 <- sum((Y-Ybar)^2)
+sumXdev2 <- sum((X-Xbar)^2)
+SST <- sum((Y-Ybar)^2)
+SSE <- sum(e^2)
+s_e <- sqrt(SSE / df)
+s_b0 <- sqrt(s_e^2*(1/N + Xbar^2/sumXdev2))
+s_b1 <- sqrt(s_e^2 / sumXdev2)
+Rsq <- 1 - SSE / SST
+t_b0 <- b0 / s_b0
+t_b1 <- b1 / s_b1
+alpha <- 0.05
+tstar <- abs(qt(alpha / 2, df))
+L_b0 <- b0 - tstar*s_b0
+L_b1 <- b1 - tstar*s_b1
+U_b0 <- b0 + tstar*s_b0
+U_b1 <- b1 + tstar*s_b1
+y_intercept_comment <- ifelse(b0 >= 0 , "positive", "negative")
+slope_comment <- ifelse(b1 > 0, "positive", "negative")
+hypo_b0 <- ifelse(-tstar < t_b0 , ifelse( t_b0 < tstar, "accept the null hypothesis", "reject the null hypothesis"), "reject the null hypothesis")
+hypo_b1 <- ifelse(-tstar < t_b1 , ifelse( t_b1 < tstar, "accept the null hypothesis", "reject the null hypothesis"), "reject the null hypothesis")
+t_diff <- (diffbar - 0) / diffsd
+tstar_diff <- abs(qt(alpha / 2, n0 + n -2))
+hypo_diff <- ifelse(-tstar_diff < t_diff , ifelse( t_diff < tstar_diff, "accept the null hypothesis", "reject the null hypothesis"), "reject the null hypothesis")
+p_cum <- pt(t_diff, n0+n-2)
+p_diff <- ifelse(t_diff > 0, 1 - p_cum, p_cum)
+```
+
+## A problem
+
+Here is data for the `r name_Y0`, `r name_Y` and `r name_X` of `r description`. 
+
+```{r}
+#
+header <- c(name_Y0, name_Y, name_X)
+margin <- 1:N
+col_0 <- Y_0
+col_1 <- Y
+col_2 <- X
+table <- cbind(col_0, col_1, col_2)
+colnames(table) <- header
+rownames(table) <- margin
+table %>% 
+  kable(digits = 2)
+```
+
+[Malabar pepper](https://en.wikipedia.org/wiki/Malabar_pepper) is classified under two grades known as garbled and un-garbled. The garbled variety (higher grade) is black in color with a wrinkled surface. The ungarbled variety has a wrinkled surface and the colour varies from dark brown to black.
+
+Here are calculations for the `r name_Y` and `r name_X` data:
+
+```{r}
+#
+header <- c("estimate", "standard deviation")
+margin <- c("intercept", "slope")
+row_1 <- c(b0, s_b0)
+row_2 <- c(b1, s_b1)
+table <- rbind(row_1, row_2)
+colnames(table) <- header
+rownames(table) <- margin
+table %>% 
+  kable(digits = 4) 
+#%>%
+#    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+$N= `r N`$, $\Sigma_{i=1}^N Y_i= `r sumY`$, $\Sigma_{i=1}^N X_i= `r sumX`$, $\Sigma_{i=1}^N X_iY_i= `r sumXY`$, $\Sigma_{i=1}^N X_i^2= `r sumX2`$, $\Sigma_{i=1}^N (Y_i - \bar Y)^2= `r SST`$, $\Sigma_{i=1}^N (Y_i - \bar Y)^2= `r sumYdev2`$, $\Sigma_{i=1}^N (X_i - \bar X)^2= `r sumXdev2`$, $\Sigma_{i=1}^N e_i^2= `r SSE`$, $s_e= `r s_e`$, $R^2=`r Rsq`$, $\alpha = `r alpha`$ with $|t| = `r tstar`$ for appropriate degrees of freedom. 
+
+For the `r name_Y0` data here are additional calculations where $Y =$ `r name_Y0`:
+
+$\Sigma_{i=1}^N Y_i= `r sumY0`$, $\Sigma_{i=1}^N (Y_i - \bar Y)^2= `r sumY0dev2`$
+
+For complete credit you must draw pictures, show formulas, show all calculations needed, interpret process and results.
+
+## Question 1: Should we use two prices?
+
+We are going to try to forecast prices. There are two prices at Cochin. Do they act as if one world price? 
+
+a. Formulate an hypothesis to test a claim that there is one world price. 
+
+b. Test the hypothesis and interpret the results.
+
+## Question 2: What is the model?
+
+Assume a linear relationship between the independent variable `r name_X` and dependent variable `r name_Y`. Include in this description the following with interpretations:
+
+a. A scatterplot that depicts the relationship between dependent and independent variables. A straight line through the data, consistent with the calculations, that depicts deviations of scatter points from the line.
+
+b. Validate the calculations of the sample mean and standard deviation of the intercept parameter as well as the percentage of variation in the dependent variable explained by the model.
+
+## Question 3: How confident are we about the estimates?
+
+Given a level of significance of `r alpha*100`\%, 
+
+a. Draw an appropriate probability distribution to construct an estimate of the confidence interval for $b_0$ and $b_1$. Be sure to include the upper and lower bounds on the distribution in terms of the number of standard deviations from the mean zero of this distribution.
+
+b. Calculate the upper and lower bounds for the confidence intervals of $b_0$ and $b_1$. Interpret the results.
+
+## Question 4: How meaningful are the estimates?
+
+a. Formulate testable hypotheses of the meaningfulness of the mean slope and Y-intercept of our model. Interpret.
+
+b. Test the hypotheses and interpret.

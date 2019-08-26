@@ -1,0 +1,389 @@
+---
+title: 'Inference II: Hypothesis Testing'
+author: "William G. Foote"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
+knitr::opts_chunk$set(size = "small")
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+knitr::opts_hooks$set(fig.width = function(options) {
+  if (options$fig.width < options$fig.height) {
+    options$fig.width = options$fig.height
+  }
+  options
+})
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+
+library(tidyverse)
+library(ggthemes)
+library(kableExtra)
+
+#f = system.file("W2-Rmore", "W2-Rmore.R")
+#knitr::purl(f, documentation = 1)
+# r_moments function
+# INPUTS: r vector
+# OUTPUTS: list of scalars (mean, sd, median, skewness, kurtosis)
+data_moments <- function(data){
+  require(moments)
+  mean.r <- mean(data)
+  sd.r <- sd(data)
+  median.r <- median(data)
+  skewness.r <- skewness(data)
+  kurtosis.r <- kurtosis(data)
+  result <- data.frame(mean = mean.r, std_dev = sd.r, median = median.r, skewness = skewness.r, kurtosis = kurtosis.r)
+  #result <- data.frame(result, table = t(result))
+  return(result)
+}
+```
+
+# Imagine this
+
+An online startup company carefully and thoroughly searches documents on behalf of clients from a variety of domains including science, engineering, healthcare, and finance. 
+
+1. The company has access to a huge _corpus_ of information for each domain.
+
+2. Researchers express their information needs through _queries_ in terms of topics, categories, and individual words, as well as by _reference_ through citations of work product.
+
+3. Queries are input to a _search engine_, the output of which matches _queries_ with information objects in the _corpus_.
+
+The company measures its performance in terms of 
+
+- Information retrieval _coverage_ as the fraction of objects the searcher discovers, and
+
+- The fraction of objects that are _relevant_ to the search.
+
+# Two errors are possible
+
+Retrieval faces off with relevance. Two errors are possible:
+
+```{r}
+header <- c("Retrieved", "Not Retrieved")
+margin <- c("Revelant", "Not Relevant")
+row_1 <- c("OK", "False Negative")
+row_2 <- c("False Positive", "OK")
+table <- rbind(row_1, row_2)
+colnames(table) <- header
+rownames(table) <- margin
+table %>% 
+  kable() %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+1. **Type I Error**: the False Negative means the researcher did not retrieve relevant information.
+
+2. **Type II Error**: the False Positive means that the research retrieved irrelevant information.
+
+How can the research company control for error? Be specific: How can the company ensure that the number of retrieved and relevant documents per day is as high as possible?
+
+# Control is probability
+
+Here is what the company does:
+
+1. Management makes an assumption and forms a hypothesis about the average rate of documents found in searches. This is a precise statement about a specific metric. Here the metric is the average number of retrieved and relevant documents per day, $\mu$, Suppose this target level is 1000 documents per day.
+
+- The _null hypothesis_ ($H_0$) is that the population metric equals a target value $\mu_0$ or $H_0: \mu = \mu_0$. Suppose that $H_0: \mu = 1000$. 
+
+- The _alternative hypothesis_ ($H_1$) is that the population metric does not equal (or is just greater or less than) the target value. Thus we would have $H_1: \mu \neq 1000$.
+
+2. Corporate policy sets a degree of confidence in accepting as true the assumption or hypothesis about the metric. The company determines that 95\% of the time $\mu = 1000$. This means there is an $\alpha =$ 5\% significance that the company would be willing to be wrong about rejecting that $H_0: \mu = 1000$ is true.
+
+- Under the null hypothesis it is probable that above or below a mean value of 1000 there is an error of $\alpha = 0.05$ in total, or $\alpha / 2 = 0.025$ above and $\alpha / 2 = 0.025$ below the mean.
+
+- Because management expresses the alternative hypothesis, $H_1: \mu \neq 1000$, as "not equal" then this translates into a two-tailed test of the null hypothesis.
+
+**What if management expressed the alternative hypothesis as $H_1 > 1000$?**
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+</br>
+
+If $H_1: \mu > 1000$, then management in effect specifies a **one-tailed** test. 
+
+This means that management believes that under the null hypotheses $H_0:\, \mu = 0$, that the distribution of documents per day for which the null hypothesis is probably true extends from the lowest number of documents all the way up to the 95\%tile of occurrences of the number of documents per day. 
+
+The region of the distribution beyond the 95\%tile is 5\% of the time and represents the highest range of documents per day.
+
+Similarly for the $H_1:\,\mu<1000$ case.
+
+</div>
+
+
+# On to the unknown
+
+Let's now suppose we _do not know_ the population standard deviation. Now the sample standard deviation is also a random variable, like the sample mean. In practice this is nearly always the case. What do we do now?
+
+- Use the Student's t distribution to correct for confidences that are, well, not so confident.
+
+- Here's a plot of the Student's t overlaid with the normal distribution.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+n.sample <- 3
+k.est <- 1
+df.sample <- n.sample - k.est
+x.title <- "z and t scores"
+y.title <- "Probability"
+line.size <- 1.5
+main.title <- "Normal and t Distribution Comparison"
+ggplot(data.frame(x = c(-4,4)),aes(x = x)) + stat_function(fun=dt, args = list(df = df.sample ), aes(colour = "Student's t"), size = line.size) + stat_function(fun = dnorm, args = list(0,1), aes(colour = "Normal"), size = line.size) + scale_x_continuous(name = x.title)  + scale_y_continuous(name = y.title) + scale_colour_manual("Groups", values = c("#4271AE", "#1F3552")) + theme_economist() + theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9))  + ggtitle(main.title)
+```
+
+What do we notice?
+
+- Normal is more pinched in than t (kurtosis? right!)
+
+- t has thicker tails than normal
+
+- Let's check that: in Excel use `=T.INV(2.5%,3)` which returns `-3.18`, and where the degrees of freedom $df$ of our 4 sample billings from our work in confidence intervals is $df = n - k = 4 - 1 = 3$. Here $n$ is the sample size of 4 rnadomly sampled billings and $k$ is the number of estimators we are building, just one in this case $\mu$.
+
+- Thus for the t distribution it takes 3.18 standard deviations below the mean to hit the 2.5\% level of cumulative probability. It only took 1.96 standard deviations on the normal distribution.
+
+- There are $k=3$ degrees of freedom because it only takes 3 out of the 4 sampled billings to get the third sampled billing (we do this by using 1 estimator, the mean we calculated).
+
+- That it took fewer standard deviations for the normal than for the t distribution to hit the 2.5\% level of cumulative probability means that the t distribution is thicker tailed than the normal.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+n.sample <- 4
+k.est <- 1
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- 0.05
+a <- alpha
+main.title <- substitute(paste("Sample Means: ", alpha == a), list(a = alpha))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < qt(alpha/2,df.sample) | x > -qt(alpha/2,df.sample)] <- NA
+  return(y)
+}
+ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)  + 
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552")) +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) + 
+  ggtitle(main.title)
+```
+
+## By the way, who is Student?
+
+- "Guiness is Good for You"
+
+- W. S. Gosset (1876-1937) was a modest, well-liked Englishman who was
+a brewer and agricultural statistician for the famous Guinness brewing
+company in Dublin. 
+
+- Guiness insisted that its employees keep their work secret,
+so he published  the distribution under the pseudonym "Student" in 1908.
+
+- This was one of the first results in modern small-sample statistics.
+
+# On with our story...
+
+When management does not know the population standard deviation, the analyst must use the Student's t distribution to correct for small sample sizes. As this is almost always the case for hypothesis testing, management has decreed that the Student-t distribution will be used for hypothesis testing. 
+
+2. CONTINUED --- management decides on regions of the distribution for acceptance that the null hypothesis is probably true and for rejection of the null hypothesis as well. This picture tells those and about 900+ more words.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+n.sample <- 100
+k.est <- 1
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- 0.05
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+ann.line<-data.frame(xmid1=min.a,xmid2=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(-5.5,0,5.5),y=c(.15,.15,.15),label=c("Reject\nH0","Accept\nH0","Reject\nH0"))
+main.title <- substitute(paste("Sample Means: ", alpha == a, ", df = 99", ", |t| = 1.98"), list(a = alpha, df.sample = df, max.a = t))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x < min.a | x > max.a] <- NA
+  return(y)
+}
+
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9)) 
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid2,xend=xmid2,y=y0,yend=y2),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid1,xend=xmid1,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main.title)
+p1
+```
+
+
+3. Management takes a random sample of $n = 100$ searches. An analyst then computes the sample average $\bar X = 980$ of retrieved and relevant searches with a standard deviation of $s = 80$, meant to represent the very unknown population $\sigma$. 
+
+4. They then compute the $t$ score, just like the z-score for the normal distribution:
+
+$$
+t = \frac{\bar X - \mu_0}{s / \sqrt{n}} = \frac{980 - 1000}{80 / \sqrt{100}} = -2.5
+$$
+
+and compare this value with the the acceptance region of the null hypotheses $H_0$. So, what is this value?
+
+
+5. For a sample size of $n = 100$ and $k = 1$ estimator ($\bar X$), the degrees of freedom $df = n - k = 100 - 1$. Under a Student's t distribution with 99 $df$, and using Excel's `=T.INV(0.025, 99)`, the region is bounded by t scores between $-1.98$ and $+1.98$.
+
+- The computed t score is -2.5 and falls in the rejection region of the null hypothesis.
+
+- The analyst can report that she is 95\% confident that management may reject the null hypothesis that reseachers retrieve 1,000 relevant documents each day. 
+
+- Another way of reporting this is that there is a 5\% probability that management would be wrong in concluding that researchers do not retrieve 1,000 relevant documents each day.
+
+# What about two shifts?
+
+Now management wants to know how two different shifts of researchers compare. Specifically, management has been assuming that the day shift (shift 1) retrieves more relevant documents than the night shift (shift 2).
+
+1. The analyst formulates the null hypothesis that the mean relevant retrieved documents in one day is the same for both shifts, and thus their difference is zero, or as
+$$
+H_0: \mu_1 - \mu_2 = 0
+$$
+and the alternative hypothesis as 
+$$
+H_1: \mu_1 - \mu_2 >0.
+$$
+
+2. This is a one-tailed test where the $\alpha = 0.05$ significance level region of the rejection of the null hypothesis $H_0$ is entirely in the upper tail of the Student's t distribution. 
+
+- The number of degrees of freedom now equal all of the observations from the night and the day shift minus the number of estimators, now equal to 2, or, $n_1 + n_2 - 2$. 
+
+- If the analyst samples $n_1 = 45$ searches from the day shift and $n_2 = 54$ searches from the night shift, then the number of degrees of freedom is $n_1+n_2-2 = 99 - 2 = 97$.
+
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+require(ggplot2)
+require(ggthemes)
+n.sample <- 99
+k.est <- 2
+df.sample <- n.sample - k.est
+x.title <- "t scores"
+y.title <- "Probability"
+line.size <- 1.0
+alpha <- 0.05
+a <- alpha
+min.a <- qt(alpha/2,df.sample)
+max.a <- -qt(alpha/2,df.sample)
+ann.line<-data.frame(xmid=max.a,xmin=-6,xmax=6,y0=0,y2=0.2,y=.09)
+ann.text <- data.frame(x=c(0,4.0),y=c(.15,.15),label=c("Accept\nH0","Reject\nH0"))
+main.title <- substitute(paste("Sample Means: ", alpha == a, ", df = 97", ", |t| = 1.66"), list(a = alpha, df.sample = df, max.a = t))
+limitRange <- function(fun, min, max) {
+  function(x){
+    y <- fun(x)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
+dt_limit <- function(x){
+  y <- dt(x,df.sample)
+  y[x > max.a] <- NA
+  return(y)
+}
+p1 <- ggplot(data.frame(x = c(-6,6)),aes(x = x)) + 
+  stat_function(fun=dt, args = list(df = df.sample), aes(colour = "Student's t"), size = line.size) + 
+  stat_function(fun = dt_limit, geom = "area", fill = "blue", alpha = 0.2) + scale_x_continuous(name = x.title)
+p1 <- p1 +
+  scale_y_continuous(name = y.title) + 
+  scale_colour_manual("Distributions", values = c("#4271AE", "#1F3552"))
+p1 <-  p1 +
+  theme_economist() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.size = unit(1, "cm"), axis.title = element_text(size = 12), legend.text = element_text(size = 9), legend.title=element_text(face = "bold", size = 9))
+p1 <- p1 + 
+  geom_segment(data=ann.line,aes(x=xmid,xend=xmin,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid,xend=xmax,y=y,yend=y),arrow=arrow(length=unit(0.2,"cm")),show_guide=F) +
+  geom_segment(data=ann.line,aes(x=xmid,xend=xmid,y=y0,yend=y2),show_guide=F) +
+  geom_text(data=ann.text,aes(x=x,y=y,label=label,size=2),show_guide=F)
+p1 <- p1 + ggtitle(main.title)
+p1
+```
+
+
+3. The analyst samples 45 searches in the day shift (shift 1) and 54 searches in the night shift (shift 2), and uses the same $\alpha = 0.05$ significance level for rejection of the null hypothesis. She estimates
+
+- $\bar X_1 = 600$ with $s_{\bar X_1}=60$ 
+
+- $\bar X_2 = 540$ with $s_{\bar X_2}=68$. 
+
+4. Her next job is to pool (also known as "aggregate") the standard deviations together since the risk associated with the null hypothesis relates to two pooled sample means $\bar X_1 - \bar X_2 = 600 - 540 = 60$. The analyst assumes that the two samples are not at all correlated with one another.
+$$
+s_{\bar X_1 - \bar X_2 } = \sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}
+$$
+$$
+= \sqrt{\frac{60^2}{45}+\frac{68^2}{54}} = 12.87
+$$
+and calculates the $t$ score as
+$$
+t = \frac{(\bar X_1 - \bar X_2) - (\mu_{0,1} - \mu_{0,2})}{s_{\bar X_1 - \bar X_2 }} = \frac{60 - 0}{12.87} = 4.66 
+$$
+
+5. A $t$ score of 4.66 means that the score, and the difference between the means, is in the region of rejection of the null hypothesis.
+
+- There is at most a 5\% chance that management is wrong in its assertion that the day shift out performs the night shift.
+
+- Another interpretation is possible. Using Excel the analyst can calculate `= 1 - T.DIST(4.66, 97)` = 0.0005\% which is the so-called `p-value` or cumulative probability  greater than $t=4.66$ that she was wrong about the rejection of the null hypothesis, very slim indeed.
+
+- The analyst compares the `p-value` with the significance level of 5\% and sees that there is an even slimmer chance of a Type I false negative error than indicated simply by looking at the rejection region.
+
+# Exercises
+
+1. An electric car manufacturer buys aluminum alloy sheets of 0.05 of an inch in thickness.  Thick sheets are too heavy and thin sheets imbalance the axle loads on icy and rainy road surfaces. The purchasing officer along with a manufacturing engineer samples 100 sheets of a shipment before accepting it and calculates an average of 0.048 inches in thickness with a standard deviation of 0.01 of an inch. 
+
+- At a 5\% level of significance, should the purchasing officer accept the shipment?
+
+- What is the probability that the purchasing officer is wrong about rejecting the null hypothesis?
+
+2. A real estate developer is comparing construction wages in two markets. In New York, using a random sample of 150 workers, the average daily wage is \$1,800 with a standard deviation of \$500 per day. In Los Angeles, for the same skills and experience, a random sample of 125 workers yields a daily wage average of \$1,700 per day with a standard deviation of \$450 per day.
+
+- Is there a significant difference in wage levels between the two cities at the 5\% level?
+
+- What is the probability of being wrong about rejecting the null hypothesis?
+

@@ -1,0 +1,340 @@
+---
+title: "Probability Distributions: Binomial"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
+knitr::opts_chunk$set(size = "small")
+knitr::opts_hooks$set(fig.width = function(options) {
+  if (options$fig.width < options$fig.height) {
+    options$fig.width = options$fig.height
+  }
+  options
+})
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+```
+
+## What is a probability distribution?
+
+For a given variable (e.g., house prices), the frequency of ranges of this variable (i.e., classes, groups, intervals).
+
+### Discrete or continuous?
+
+- Discrete: the number of distinct events (integers)
+
+- Continuous: always possible to find a number between any two events (real number)
+
+### Examples of distributions
+
+1. The **Bernoulli** distribution is used in situations where an uncertain parameter can take on one of only two possible values. 
+2. The **binomial** distribution is used for the number of outcomes on repeated trials when each trial is independently sampled (with replacement).
+3. The **hypergeometric** distribution is used for the number of outcomes on repeated trials when each trial is dependent on another trial (without replacement).
+4. The **poisson** distribution is used for the number of outcomes in a unit of time.
+5. The **uniform** distribution describes an outcome that is equally likely to fall anywhere between a minimum and a maximum value.
+6. The **triangular** distribution is a more flexible family of continuous distributions: these distributions are specified by three parameters: the minimum, maximum, and most likely values. 
+7. The **normal** distribution is a symmetric distribution, usually specified by its mean and standard deviation.
+8. The **exponential** distribution describes the frequency of times elapsed between random poisson occurrences.
+
+## Being binomial
+
+### Consumer goods 'r' us
+
+From a Consumer Food database. 
+
+1. What proportion of the database households are in the Metro area? Use this as the value of $p$ in a binomial distribution.
+2. If you were to randomly select 25 of these households, what is the probability that exactly 8 would be in the Metro area?
+3. If you were to randomly select 12 of these households, what is the probability that 3 or fewer would be households in the Metro area? 
+
+### What's a binomial?
+
+- Two possible event outcomes only in each run or scenario of a binomial process
+- E.g., default/not-default, reject/accept, comply/not-comply events
+- Let $x$ = comply, then $P(x)$ = probability of compliance and $1 - P(x)$ = probability of non-compliance.
+
+Three assumptions:
+
+1. Each replication of the process is a **combination** of events that results in one of two possible outcomes (usually referred to as "success"" or "failure" events).
+2. The probability of success is the same for each replication.
+3. The replications are independent, meaning here that a success in one replication does not influence the probability of success in another.
+
+## What's a combination?
+Start with a set of choices or categories. Combinations are the complete set of different ways you can arrange the various subsets of choices or categories. 
+
+### For a simple example 
+
+- Start with the set of $A= \{1,2\}$, where "1" is "comply" and "2" is "don't comply." 
+- You can form four subsets of this set: {}, {1}, {2}, and {1,2} (don't forget the _null_ or "do nothing" subset). These subsets are the **combinations** of set A.
+- Order does not matter so that $\{1,2\}$ is the same as $\{2,1\}$
+
+## We have to start with permutation first
+
+A permutation does care about the order of the elements in a subset, much like the order of letter in a word. We will find that combinations are found from permutations.
+
+### Start with $A = \{a,b,c,d,e\}$ letters in a text to your friend. 
+- With 5 letters to choose from we can select the first letter in 
+5 ways. 
+- We now have 4 letters left, so the second letter can be 
+chosen in 4 ways, 
+- Then the third letter in 3 ways
+- The fourth letter in 2 ways
+- The fifth letter in 1 way or
+\[
+5! = 5 \times 4 \times 3 \times 2 \times 1 = 120
+\]
+ways to build a word of text (granted some of these might be code).
+
+### Find the number of 3 letter words you can form from a list of 5 letters.
+
+Using the same logic as above this is 
+\[
+5 \times 4 \times 3 = 60
+\]
+There are 120 possible words you can form from 5 letters. There are 60 possible 3 letter sequences. This is called a **permutation**. In symbols we have 5 _permute_ 3 or $_{5}P_{3}$. We notice that $5! = 5 \times 4 \times 3 \times 2 \times 1 = 5 \times 4 \times 3 \times 2!$. So all we need to do to get the 60 permutations is take 5! and divide by 2! to get 
+
+\[
+_{5}P_{3} = \frac{5!}{2!} = 60
+\]
+
+Generally we have for $n$ elements permuted $x$ at a time:
+
+\[
+_{n}P_{x} = \frac{n!}{(n-x)!}
+\]
+
+### What about combinations?
+
+Now we don't care about the order of the letters. We seem to also know that 
+
+- **Permutations** track with the order of elements, here, letters: {a,d,c} $\neq$ {d,c,a}
+- **Combinations** don't worry about the order of elements: {a,d,c} = {d,c,a}
+- Thus out of the 60 permutations we just counted, we have to keep only one in $3 \times 2 \times 1 = 3! = 6$ (1/6th) of the 60 Permutations or 10 combinations. We then have 6 times more permutations than we need to account for combinations.
+
+## Combinations from permutations
+For our 5 letters taken 3 at a time without regard to the order of letters, we have
+\[
+_{5}C_{3} = {5 \choose 3} = \frac{5!}{3! \, (5 - 3)!}
+\]
+and then we compute
+\[
+= \frac{5x4x3x2x1}{(3x2x1)(2x1)} = 10
+\]
+More generally, we have
+\[
+_{n}C_{x} = {n \choose x} = \frac{n!}{x! \, (n - x)!}
+\]
+and
+\[
+_{n}P_{x} = _{n}C_{x}x! = {n \choose x}x! = \frac{n!}{(n - x)!}
+\]
+
+## Try these: combinations and permutations
+
+A risk management practice has 8 members. Teams of three are formed to work with client project teams and provide management, subject matter expertise and budget and scheduling control. The practice leader wants to know
+
+1. How many different project teams ("teams") can be formed from the practice?
+2. How many teams of 3 members can be formed from the practice if each team is to have a team manager, a project controller, and a subject matter expert?
+
+### Results: combinations and permutations
+
+1. How many different project teams ("teams") can be formed from the practice?
+
+We will find the number of _combinations_ of 8 members taken 3 at a time without regard for the order. Calculate
+\[
+_{8}C_{3} = {8 \choose 3} = \frac{8!}{3! \, (8 - 3)!}
+\]
+so that
+\[
+_{8}C_{3} = \frac{8x7x6x5x4x3x2x1}{(3x2x1)(5x4x3x2x1)} = \frac{336}{6} = 56
+\]
+potential combinations of practice members.
+
+2. How many teams of 3 members can be formed from the practice if each team is to have a team manager, a project controller, and a subject matter expert?
+
+The practice leader is now interested in finding the number of _permutations_ of 8 members taken 3 at a time, _when the order matters_. Calculate
+\[
+_{8}P_{3} = {8 \choose 3}3! = \frac{8!}{3! \, (8 - 3)!}3!
+\]
+so that
+\[
+= 56 \, (3x2x1) = 336
+\]
+potential permutations of practice members.
+
+## So how do we use the binomial process?
+
+Follow these steps:
+
+1. How many times did we repeat the process (number of observations)? $n$.
+2. How many successes (events we are tracking)? $x$
+3. How often does a success occur (event we are tracking)? $p(X = x)$
+4. How many $x$ successes (events) in $n$ replications (trials, observations)? The number of possible combinations of $x$ successes in $n$ replications is
+\[
+_{n}C_{x} = {n \choose x} = \frac{n!}{x! \, (n - x)!}
+\]
+The $x$ successes can occur anywhere among the $n$ trials (observations). There are $_{n}C_{x}$ different ways of distributing $x$ successes in a sequence of $n$ trials (observations).
+
+5. What is the probability of a single scenario (combination = 1) of $x$ successes? $p^x$
+
+6. What is the probability of a single scenario of $n-x$ failures? $(1-p)^{n-x}$
+
+7. What is the probability of all combinations of $x$ successes in $n$ trials (using the Excel formula)?
+\[
+P(X = x \mid n, p) = {n \choose x}p^x (1-p)^{n-x}
+\]
+We can also use the $BINOM.DIST(x,n,p,FALSE)$ formula in Excel, where `FALSE` indicates that we calculate the probability mass function value (the relative frequency) and `TRUE` indicates that we calculate cumulative probability value (the cumulative relative frequency).
+
+## Try this: binomial distribution
+A environmental control specialist picks a sample of 10 sensors from a large shipment of sensors. Experience has shown that 1 in 5 sensors fail to work when installed. The specialist is scheduling her time for the week and wants to know
+
+1. What is the probability that she will pick exactly 2 of the defective sensors?
+2. What is the probability that she will pick no more than 2 of the defective sensors?
+
+
+### Results: binomial distribution
+
+1. What is the probability that she will pick exactly 2 of the defective sensors?
+
+Follow these steps:
+
+1. How many times did we repeat the process (number of observations)? Here $10$ is the sample size.
+2. How many successes (we are tracking "defective" sensors)? No more than $2$ defective sensors.
+3. How often does a success ("defective" sensor) occur (event we are tracking)? $p = 1/5 = 0.20$.
+4. How many $x$ successes (events) in $n$ replications (trials, observations)? The number of possible combinations of $2$ successes ("defective" sensors) in $10$ replications (sample size) is
+\[
+_{10}C_{2} = {10 \choose 2} = \frac{10 !}{2! \, (10 - 2)!} =  45
+\]
+
+The $2$ defective sensors can occur anywhere among the $10$ sampled sensors. There are $_{10}C_{2}$ different ways of distributing $2$ defective sensors in a sequence of $10$ sampled sensors (observations).
+
+5. What is the probability of a single scenario (combination = 1) of $x$ successes? $(0.2)^2 = 0.04$.
+
+6. What is the probability of a single scenario of $n-x$ failures? $(1-0.2)^{10-2} = (0.8)^8 = 0.1678$
+
+7. What is the probability of all combinations of $2$ defective sensors in a sample of $10$ sensors?
+\[
+Binom(10,2,0.2) = {10 \choose 2}(0.2)^2 (1-0.2)^{10-2}
+\]
+or
+\[
+Binom(10,2,0.2) = (45)(0.04)(0.1678) = 0.3020
+\]
+and in Excel `BINOM.DIST(2,10,0.2,FALSE)`.
+
+2. What is the probability that she will pick no more than 2 of the defective sensors?
+
+Assuming no intersections and independent sampling of the 10 sensors,the probability is the union of three events, finding 0, 1, and 2 defective sensors. We have
+\[
+P(X \leq 2) = P(X = 0) + P(X = 1) + P(X = 2)
+\]
+We already have $P(X = 2) = 0.3020$. Now we calculate
+
+\[
+P(X = 0) = Binom(10,0,0.2) = {10 \choose 0}(0.2)^0 (1-0.2)^{10-0}
+\]
+or
+\[
+Binom(10,0,0.2) = 0.1074
+\]
+Similarly,$P(X = 1) = 0.2684$. We have then
+\[
+P(X \leq 2) = P(X = 0) + P(X = 1) + P(X = 2) = 0.6778
+\]
+
+## Try another
+
+Using the same sensor problem, what is the probability that she will pick 8 or more defective sensors? What if she picks more than 8 defective sensors?
+
+- Build a simple spreadsheet table to answer these questions.
+
+### Result
+Assuming no intersections and independent sampling of the 10 sensors,the probability is the union of three events, finding 8, 9, and 10 defective sensors. We have, if she finds 8 or more defective sensors,
+\[
+P(X \geq 8) = P(\{X=8\}\cup \{X=9\} \cup \{X=10\})
+\]
+and with mutually exclusive, independent (with replacement) events,
+\[
+P(\{X=8\}\cup \{X=9\} \cup \{X=10\}) 
+\]
+\[
+= P(X = 8) + P(X = 9) + P(X = 10) = 0.0078\%
+\]
+Finding more than 8 sensors
+\[
+P(X > 8) = P(\{X=9\} \cup \{X=10\})
+\]
+and with mutually exclusive, independent (with replacement) events,
+\[
+P(\{X=9\} \cup \{X=10\}) = P(X = 9) + P(X = 10) = 0.00042\%
+\]
+
+Here is a worksheet table that builds up these calculations.
+![Binomial Probability Calculations](binomial1.jpg)
+
+## What does a graph of the binomial look like?
+
+```{r, echo = FALSE}
+require(ggplot2)
+x <- 0:10
+n <- max(x)
+p <- c(0.2,0.5,0.8)
+x1 <- dbinom(x, n, p)
+plot(dbinom(0:10, 10, .2), xlab = "Occurrences", ylab = "Probability", main = "Binomial Densities", col = "green")
+points(dbinom(0:10, 10, .5), col = "red")
+points(dbinom(0:10, 10, .8), col = "blue")
+```
+
+## Binomial statistics
+
+- Mean of a binomial distribution
+\[
+\mu = n p
+\]
+- Standard deviation of a binomial distribution
+\[
+\sigma = (n p (1-p))^{1/2}
+\]
+
+## Try this
+What are the mean and standard deviation of the sensor problem above?
+
+### Result
+We calculate for $n = 10$ and $p = 0.20$
+
+Mean of the sensor binomial distribution
+\[
+\mu = n p = (10)(0.20) = 2
+\]
+defective sensors.
+
+Standard deviation of the sensor binomial distribution
+\[
+\sigma = (n p (1-p))^{1/2} = ((10)(0.20)(0.80))
+\]
+1.26, or rounding down, 1 defective sensor.
+
+## Short exercises
+
+1. Hospital records show that of patients suffering from a certain rare disease, 75\% die of it. What is the probability that of 6 randomly selected patients, 4 will recover?
+
+_Answer_: 3.3\%
+
+2. For the patients suffering from a certain disease, What is the probability that all 6 randomly selected patients will recover?
+
+_Answer_: very, very small
+
+3. You are trying reach your surveying team in the iron rich creases of the Mesabi mountain range. there was a probability of 80\% of success in any attempt to connect by cell phone. What is the probability of having 7 successes in 10 attempts?
+
+_Answer_: a little over 20\%
+
+4. A manufacturer of metal pistons finds that, on the average, 12\% of the pistons are rejected by customers because they are either oversize or undersize. What is the probability that a batch of 10 pistons will contain no more than 2 rejects?
+
+_Answer_: 89\%

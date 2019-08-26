@@ -1,5 +1,5 @@
 ---
-title: "How much does data deviate?"
+title: "Quick Quiz: how much does data deviate?"
 output: html_document
 ---
 ```{r setup, include=FALSE}
@@ -7,6 +7,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(stringr))
@@ -37,26 +38,23 @@ function showText(y) {
 
 Let's recall what a sample is.
 
-If $x$ is a sample (subset) from a population indexed by $i = 1 \dots N$ with $N$ elements sampled from the population, then (the same formula!)
-
-- **Sample arithmetic mean**
+If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
 
 $$
 \bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
 $$
 
-- **Standard Deviation**: the sample variance $s^2$ is
+and 
 
 $$
 s^2 = \frac{\Sigma_{i=1}^N (x_i - \bar{x})^2}{N-1}
 $$
-To get the sample standard deviation $s$ we simply take the positive square root of the variance to find 
+and then
 
 $$
 s = \sqrt{s^2}
 $$
 
-WHen there is sampling from a population we divide the sum of squared deviations of sampled elements from the mean by the $N-1$ **degrees of freedom** to eliminate sample bias. Sample bias means that we must use a sample mean estimate to get at the sample standard deviation (variance). We use up one of our data points when we do so. That reduces the number of ways the data can vary by one data point: thus the bias.
 
 - **Range**: the distance between the max and min
 
@@ -72,6 +70,16 @@ $$
 MAD = \frac{\Sigma_{i=1}^N |x_i - \mu|}{N}
 $$
 
+- **Standard Deviation**: first the square of the standard deviation is the variance
+
+$$
+\sigma^2 = \frac{\Sigma_{i=1}^N (x_i - \mu)^2}{N}
+$$
+next, the standard deviation is
+
+$$
+\sigma = \sqrt{\sigma^2}
+$$
 
 - **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
 
@@ -103,7 +111,7 @@ $$
 
 ## Problems
 
-Shown below are the top nine leading retailers in the United States in a recent year according to Statista.com. Compute range, IQR, MAD, standard deviation, CV, and invoke the empirical rule and Chebychev's Theorem, along with the z-score for each. Treat this as a sample (then what's the population?).
+20.	Shown below are the top nine leading retailers in the United States in a recent year according to Statista.com. Compute range, IQR, MAD, standard deviation, CV, and invoke the empirical rule and Chebychev's Theorem, along with the z-score for each. Treat this as a sample (then what's the population?).
 
 ```{r}
 data <- read.csv("data/qq-3-20.csv")

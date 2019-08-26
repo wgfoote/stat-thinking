@@ -1,0 +1,101 @@
+---
+title: "Quick Quiz: Descriptive Statistics"
+output: html_document
+---
+ 
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Quaestio Disputatae
+
+### How Can Persistently Weak Currencies Be Stabilized?
+
+POINT: 	The currencies of some Latin American countries depreciate against the U.S. dollar on a consistent basis. The governments of these countries need to attract more capital flows by raising interest rates and making their currencies more attractive. They also need to insure bank deposits so that foreign investors who invest in large bank deposits do not need to worry about default risk. In addition, they could impose capital restrictions on local investors to prevent capital outflows.   
+
+COUNTER-POINT: Some Latin American countries have had high inflation, which encourages local firms and consumers to purchase products from the U.S. instead. Thus, these countries could relieve the downward pressure on their local currencies by reducing inflation. To reduce inflation, a country may have to reduce economic growth temporarily. These countries should not raise their interest rates in order to attract foreign investment, because they will still not attract funds if investors fear that there will be large capital outflows upon the first threat of continued depreciation. 
+
+WHO IS CORRECT? 
+
+<button onclick="showText('myDIVCP')">show / hide</button>
+ 
+<div id="myDIVCP">
+
+**One answer could be**
+
+There is no perfect solution, but any solution would recognize the tradeoffs. 
+
+- The proposal to raise interest rates is not a good solution in the long run, because it will cause higher loan rates, and may slow down the economies in the long run. 
+
+- Effective anti-inflationary policies are needed to prevent further depreciation. 
+
+- However, the elimination of inflation that is caused by a wage-price spiral may cause some pain among the workers in the country, as some form of wage controls may be needed. 
+
+Any government has various means of reducing inflation, but all of them can have adverse effects on the economy in the short run.  
+
+</div>
+
+## Problems
+
+1.	Percentage Depreciation. Assume the spot rate of the British pound is $1.73. The expected spot rate 1 year from now is assumed to be $1.66. What percentage depreciation does this reflect? 
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1">
+**Answer**  
+
+($1.66 – $1.73)/$1.73 = –4.05%
+
+Expected depreciation of 4.05% percent
+
+</div>
+
+2.	Inflation Effects on Exchange Rates. Assume that the U.S. inflation rate becomes high relative to Canadian inflation. Other things being equal, how should this affect the (a) U.S. demand for Canadian dollars, (b) supply of Canadian dollars for sale, and (c) equilibrium value of the Canadian dollar? 
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2">
+**Answer**
+
+a. Demand for Canadian dollars should increase.
+
+b. Supply of Canadian dollars for sale should decrease.
+
+c. The Canadian dollar’s value should increase.
+
+</div>
+
+3. Interest Rate Effects on Exchange Rates. Assume U.S. interest rates fall relative to British interest rates. Other things being equal, how should this affect the (a) U.S. demand for British pounds, 
+
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3">
+**Answer**
+
+a, Demand for pounds should increase. 
+
+b. Supply of pounds for sale should decrease. 
+
+c. The pound’s value should increase.
+
+</div>
+
+4. Interest Rate Effects on Exchange Rates. Assume U.S. interest rates fall relative to British interest rates. Other things being equal, how should this affect the (a) U.S. demand for British pounds, 
+
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3">
+**Answer**
+
+a, Demand for pounds should increase. 
+
+b. Supply of pounds for sale should decrease. 
+
+c. The pound’s value should increase.
+
+</div>
