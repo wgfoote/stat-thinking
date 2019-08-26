@@ -1,0 +1,414 @@
+---
+title: "BUAN 227 Business Statistics"
+subtitle: "Spring 2018 - TWF"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+<style>                     
+.navbar {
+  background-color: green;
+  border-color: yellow;
+}
+.navbar-brand {
+color:yellow!important;
+}
+h3 {
+  color: blue;
+}
+h4 {
+  color: blue;
+}
+</style>
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+
+
+Welcome!
+===========================
+
+column {.sidebar}
+---------------------------
+
+### Getting started...
+
+1. [Check out Foote's Statistical Thinking notes](https://wgfoote.github.io/stat-thinking/index.html). Get the practice book at [Amazon: Salvatore and Reagle, Statistics and Econometrics, 2nd edition](https://www.amazon.com/Schaums-Outline-Statistics-Econometrics-Outlines/dp/0071755470) -- a [preview is available here](https://turing.manhattan.edu/~wfoote01/bsnstat/PDF/preview.pdf).
+
+2. Announcements will be made in Moodle where you will submit all of your assignments.
+
+3. View this video on [the use of business statistics](https://www.youtube.com/watch?v=svEG3kwmuRg) with just a little bit of advertising.
+
+### Need anything?
+
+Dr. William G. Foote (aka "Bill")
+
+- Email: `wfoote01@manhattan.edu`
+- Tel: (917) 767-7980, text or live
+- Class Hours: MWTh 11-1250 DLS 214 and MTh DLS 309
+- Office: DLS 423
+- Office Hours: MTh: 1:00-14:30 and by appointment
+
+Column {data-width=200} {.tabset}
+-----------------------------------------------------------------------
+
+### Thinking statistically
+
+>The first principle is that you must not fool yourself, and you are the easiest person to fool. 
+
+- Richard P. Feynman
+
+>To consult the statisticians after an experiment is finished is often merely to ask him to conduct a post mortem examination. He can perhaps say what the experiment died of. 
+
+- R.A. Fisher
+
+> Every great advance of science opens our eyes to facts which we had failed before to observe, and makes new demands on our powers of interpretation.
+
+- Karl Pearson
+ 
+> Facts are stubborn things, but statistics are pliable.
+
+- Mark Twain
+
+> The road to wisdom? --- Well, it's plain
+and simple to express:
+ Err
+ and err
+ and err again
+ but less
+ and less
+ and less.
+ 
+- Piet Hein
+
+### What's business statistics all about?
+
+#### A promise...
+
+When you successfully complete this course you will be able to:
+
+- Understand and discuss intelligently the use, and abuse, of data to assist managers make decisions in complex organizations including trends, deviations, distortions, progress and decline in their markets.
+
+- Identify and help eliminate bias in decisions arising the from the use, or lack of use, of data.
+
+- Design and implement ways to analyze data with decision-centric models, statistical techniques and reasoning.
+
+#### Is that it?
+
+Not a chance!
+
+The principal goal of this course is to improve and support decision making through the appropriate application of statistical principles and practices.  
+
+> In the case of allocating scarce funding resources to needy regions, the use of the right combinations of data and technique can help analysts support decision makers.
+
+With that in mind, we expect that upon completion of this course you will be able to:
+
+1.	Understand and use descriptive statistics, probability distributions, statistical inference, linear regression and correlation, and the analysis of variance
+2.	Apply statistical thinking and problem solving to support business decision making
+3.	Demonstrate the use of spreadsheets as it applies to statistical data analysis and the content of the course.
+4.	Acquire quantitative critical thinking skills through statistical problem solving.
+5.	Understand the role of the analyst and the analytics process in the decision making context of complex organizations and their environments.
+6.	Communicate analytical results to consumers of analytical products effectively.
+
+Learning outcomes from this course are strongly coupled with the programming goals of the School of Business:
+
+1.	Gain experience in analytical decision making
+2.	Develop an understanding of leadership
+3.	Demonstrate an understanding of ethical issues in business
+4.	Demonstrate an understanding of organizations and the competitive environment
+5.	Partake in experiential learning for career development
+
+This course will support the attainment of these goals through various classroom, group, and individual activities throughout our time together this semester. Assignments and other evidence of your work and performance in this course directly align with these goals.
+
+Imagine this
+===================================================
+column
+---------------------------------------------------
+
+### Imagine this...
+
+Suppose your organization helps to prioritize aid to various countries and regions. As part of support for managers to allocation scarce funding from individuals and governments, you examine the characteristics of recipient countries.
+
+- One criterion used by the World Bank is the relationship between life expectancy and gross domestic product per capita.
+
+- The analysis would identify trends, deviations from trend, and outliers in the data. The data are for each of several countries across several years.
+
+#### Watch and question
+
+> Are Africa and Oceania stagnating while other regions improve?
+
+> Is Europe always in the lead to better health and wealth?
+
+> How fast is India and China catching up with Europe?
+
+> How might the US (big Americas bubble) lead nearly all other regions?
+
+> Are the rest of the Americas being left in the dust?
+
+column
+---------------------------
+
+### Outliers?
+
+#### Are life expectancy and GDP per capita related? If so, what countries lags the others in health and wealth? 
+
+```{r echo = FALSE, fig.height = 3, fig.width = 5, fig.align = "center", message = FALSE, warning = FALSE, include = FALSE}
+#library(gapminder)
+#library(ggplot2)
+#library(magick)
+#img <- image_graph(600, 400, res = 96)
+#datalist <- split(gapminder, gapminder$year)
+#out <- lapply(datalist, function(data){
+ # p <- ggplot(data, aes(gdpPercap, lifeExp, size = pop, color = continent)) +
+  #  scale_size("population", limits = range(gapminder$pop)) + geom_point() + ylim(20, 90) +
+   # scale_x_log10(limits = range(gapminder$gdpPercap)) + ggtitle(data$year) + theme_classic()
+  #print(p)
+#})
+#while (!is.null(dev.list()))  dev.off()
+#img <- image_background(image_trim(img), 'white')
+#animation <- image_animate(img, fps = 2)
+#print(animation)
+#image_write(animation, "gapminder.gif")
+```
+
+![](gapminder.gif)
+
+[Source: gapminder.org 1952-2007](https://www.gapminder.org/data/).
+
+This animation is based on Hans Roslings' engaging discussion of [200 years, 200 countries](https://www.youtube.com/watch?v=jbkSRLYSojo).
+
+News
+=======================================================================
+
+column
+--------------------------------
+
+> Monday 2019-08-28
+
+Welcome to Business Statistics. We have much to accomplish together. Today we will go over the syllabus, form groups, walk through a team exercise. Be sure to get the Salvatore and Reagle book, locate the course on Moodle, and get ready for your data analytics journey.
+
+Activities
+=======================================================================
+
+column {.sidebar}
+-------------------------------------
+### For more information
+
+- Check this video out for more information about [the flipped classroom](https://www.youtube.com/watch?v=iQWvc6qhTds).
+
+- Team drama can and will occur! [Check this site](https://www.themuse.com/advice/team-not-playing-nicely-4-ways-to-deal-with-the-drama) out for more thoughts on how to deal with yourself and others
+
+- Visual meetings are a great tool. [Visit Grove consultants videos](http://www.grove.com/videoLibrary.php) for more ideas on using and running very productive meetings.
+
+- Here is an interesting thought piece on a new [trend in learning in complex organizations](https://www.panopto.com/blog/deputizing-departmental-training-the-next-big-challenge-in-learning-development/)
+
+column {.tabset}
+-------------------------------------
+
+### What happens in the course?
+
+![](flippedgraphic.png)
+
+### What happens in the classroom?
+
+> What is the best way to spend scarce classroom time?
+
+
+#### Before class 
+
+> Prepare by reading and notetaking in a hand-written notebook, explaining concepts to one another, shooting trouble, practicing exercises, viewing videos, and otherwise getting ready to present in class. Plan at least a couple of hours to prepare for each class session.
+
+#### In class
+
+> Perform: exercises, work-of-the-day, lightning rounds, interviews, debates with point / counterpoint, raise and resolve issues. We will start each meeting together with a very short **low-stakes quiz** to see where we are all at. we will continue to perform the meetings regular activities and finish up with a plan for the next meeting. My job is more coach, sherpa, guide, provocateur, subject matter specialist, assessor than lecturer.
+
+#### After class
+
+> You and your team will summarize the meeting and note successes, areas for improvement, and plan for next meeting preparation, including time and place for the team meeting.
+
+### Do I have to work in a team?
+
+> Yes! We use the tried and true method of **THINK - PAIR - SHARE** in and out of class. There will be **team dynamics** -- aka **drama**! Some ground-rules:
+
+#### 1. If you don't have anything nice to say, take 3 deep breaths...
+
+> Try a line like, "I understand your concerns and definitely want to talk this through with you. Why don't we both take some time to cool off a bit and come back to this in an hour?" This validates the other person's feelings and addresses the disagreement, but gives you both some space to simmer before you have an important conversation. 
+
+#### 2. Control your emotions
+
+> When people enter a conversation aggressively, they're usually coming from a place of fear or insecurity. Youcan respond with a line as in this situation: "You know, you're right, it's really too noisy in here to do any serious work, could you please look for another place while I check the online system?" You are humble, disarming, even-keeled, and others will model your way of doing things.
+
+#### 3. Take it outside
+
+> Change the venue! Use a line like "I really need a coffee! Come along, it's on me..." Go to lunch, happy hour, or even for a walk. A change in scenery can help de-escalate a hard conversation or even siphon off hard feelings and allow you to talk things through in a neutral environment. 
+
+When things are a little upsetting or get you fired up, put that passion to good use. Invest it in your team and in your courses. Find common ground with your team instead of wasting time and energy in arguments or debates. 
+
+### How are you assessed?
+
+#### 1. Participation (30\%): Show up! Course meetings are crucial to your success! I will take 5 random attendances. Evidence of your participation in teams, in class will be in a required hand-written notebook and the submission of problem sets into Moodle prior to class.
+
+> Failure to show up once, have your problem set handed into Moodle before class (on time) will result in losing one-third of this grade. Failure to show up twice will result in losing another third of this grade. If you cannot make it to class: weather, sickness, family and other emergencies, email me within 24 hours of the class. Alert your team mates. Plan your absence. You will be excused as appropriate.
+
+#### 2. Exams (50\%): The mid-term (20\%) is both formative and evaluative. You can retake it. The final (30\%) is purely evaluative and is comprehensive. 
+
+> Exams will be based on the questions we pose and answer throughout the course. They are taken with a single letter sized sheet of paper with whatever you want on it and with a financial calculator. Each answer requires a picture, graph, visual, assumptions, calculations, explanations. No picture = no credit.
+
+#### 3. Team project (20\%): You will build your own business analytics application. You will present your final rendering of your project to me at the end of the course.
+
+> There are 10 tasks for you to complete. Use Excel for all of them. This is a team effort. We will have several progress checks during the semester. Use class time to bring up issues and resolutions. The first five tasks will build out descriptive analytics tables and graphs. Other tasks will be assigned and completed during class.
+
+Day-by-day
+=====================================================
+
+column {.sidebar}
+-----------------------------------------------------
+
+### Key dates
+
+- Day One: Monday, August 26, 2019
+
+- Drop / Add: Friday, September 3, 2019
+
+- Midterm assessment: Thursday, October 10, 2019
+
+- Monday schedule; Tuesday, October 15, 2019
+
+- Midterm grades due: Tuesday, October 15, 2019
+
+- Last day to withdraw: Friday, November 15, 2019
+
+- Thanksgiving holiday: Wednesday, November 27 - Friday, November 29, 2019
+
+- Last day of class: Friday, December 6, 2019 
+
+- Final Exam: To be announced
+
+column
+-----------------------------------------------------------------------
+### The "daily"
+
+```{r}
+library(knitr)
+library(kableExtra)
+schedule <- read.csv("schedule-227-F2019.csv")
+schedule %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = T)
+```
+
+Resources
+=============================================
+
+column
+---------------------------------------------
+
+### Where can you get resources?
+
+#### Business Statistics
+
+- The course practice book at [Amazon: Salvatore and Reagle, Statistics and Econometrics, 2nd edition](https://www.amazon.com/Schaums-Outline-Statistics-Econometrics-Outlines/dp/0071755470) and 
+
+- Download this free textbook [Diez, Barr and Cetinkaya-Rundel, OpenIntro Statistics, 3rd edition](https://www.openintro.org/download.php?file=os3_tablet). OpenIntro has great video and other resources to enrich our statistical life.
+
+- Here are supplemental [powerpoint presentations for this course](https://turing.manhattan.edu/~wfoote01/bsnstat/PPTX/)
+
+#### Course Excel data workbooks
+
+- The data sets referenced in the book are in this [Excel workbook](https://turing.manhattan.edu/~wfoote01/bsnstat/XLSX/Databases_in_Excel_20160912.xlsx).
+- Other Excel [data and some analysis workbooks are located here](https://turing.manhattan.edu/~wfoote01/bsnstat/XLSX/). As we progress through the course, more will undoubtedly be added to this particular trove.
+
+#### Course videos
+
+You will see videos and accompanying worksheets appear in the day-to-day schedule. These will provide business practices and work flow for modeling data using Excel. They will form the techniques you will use in the team tasks and project.
+
+- Here are videos to show you how to use [Excel in business analytics. Access them here](https://turing.manhattan.edu/~wfoote01/bsnstat/VIDEO/).
+
+- Accompanying Excel [video worksheets are located here.](https://turing.manhattan.edu/~wfoote01/bsnstat/VIDEO/)
+
+#### Course class room workbooks
+
+Nearly every day together we will challenge one another with key questions. [These **workbooks** will be revised to match the class needs and are located at this site](https://turing.manhattan.edu/~wfoote01/bsnstat/QUIZ/).
+
+#### How NOT to do statistics
+
+- So many examples, so little time!
+- _Statistics Done Wrong: the woefully complete guide_, Alex Reinhart, no starch press, 2018
+- [Available here](https://www.amazon.com/Statistics-Done-Wrong-Woefully-Complete/dp/1593276206).
+
+#### FRED
+
+A trove of data is housed and maintained by the Federal Reserve Economic Data base called **FRED**
+
+- Access [FRED here](https://fred.stlouisfed.org/search?st=exchange+rates)
+- Download some exchange rate data and chart it in Excel
+- Drive your team and class discussions with data!
+
+#### World Bank and IMF
+
+The International Bank for Reconstruction and Development (IBRD) is the World Bank. 
+
+- Check out what the [World Bank does here](http://www.worldbank.org/en/about/what-we-do)
+- Access [World Bank data here](https://data.worldbank.org/indicator)
+- Find life expectancy and other country data, download it and chart it
+
+The International Monetary Fund (IMF) manages monetary cooperation, among other roles
+
+- Check out what the [IMF does here](https://www.imf.org/external/work.htm)
+- Access [IMF data here](https://www.imf.org/en/Data)
+- Download inflation data for a set of target countries, chart and discuss
+
+The United Nations Conference on Trade and Development promotes just that: trade and development
+
+- Check out what [UNCTAD does here](http://unctad.org/en/Pages/aboutus.aspx)
+- Access [UNCTAD data here](http://unctad.org/en/Pages/statistics.aspx)
+- Look for the Trade Matrix and pull some data to discuss
+
+#### NYC Open Data
+
+- Here is the [NYC Open Data home page](https://opendata.cityofnewyork.us/)
+
+#### openIntro Statistics
+
+There are 100 data sets from the [OpenIntro Statistics site here](https://turing.manhattan.edu/~wfoote01/bsnstats/DATA/os2_data.zip)
+
+Reflections/Dropbox
+=============================================
+
+column
+---------------------------------------------
+
+#### Instructions for BUAN 227 reflections
+
+As part of the so-called "flipped classroom" activities we and share record reflections on preparation and class work. 
+
+These reflections help to 
+
+- solidify knowledge, 
+- identify areas for improvement,
+- indicate plans for action,
+- help us prepare for the next class session, 
+- build a community of learners, and
+- demonstrate our growth in skills and capabilities as we proceed through the course.
+
+The process is this:
+
+1. I will initiate a **post** in Moodle after each class session with a title that indicates the topic we discussed in class. 
+2. Each team will submit a single reflection as a **comment to the post**. 
+3. Classmates and team members can add and respond to each other's comments.
+
+
+column
+----------------------------------------------
+
+#### Assignment Dropbox
+
+Submit team assignments into the appropriate Moodle section/topic.
+
+- One submission for each team
+- Excel file name: TASK-number-TEAM-name-MEMBERS-lastNames.xlsx
+- Accumulate tasks on worksheets in a single workbook: one task per worksheet
+- You may revise any prior task
