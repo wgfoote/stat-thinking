@@ -22,24 +22,29 @@ navbar:
       menu:
       - text: "Distribution"
       - text: "Tendency"
+        href: html/qq-central-tendency.html
       - text: "Deviation"
+        href: html/qq-deviants.html
     - text: "Anticipate"
       menu:
       - text: "Basics"
+        href: html/qq-prob101.html
       - text: "Binomial"
+        href: html/qq-binomial.html
       - text: "Poisson"
-      - text: "Normal"
-      - text: "Students-t"
+        href: html/qq-poisson.html
+      - text: "Normal / t"
+        href: html/qq-normal.html
     - text: "Infer"
       menu:
       - text: "Confidence"
+        href: html/qq-confidence-interval.html
       - text: "Hypothesis"
+        href: html/qq-hypo-test.html
     - text: "Relate"
       menu:
-      - text: "Regression"
-      - href: html/qq-regress.html
-      - text: "ANOVA"  
-    
+      - text: "Simple regression"
+        href: html/qq-regress.html
 output:
   html_document:
     theme: flatly
