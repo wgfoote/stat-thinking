@@ -139,11 +139,11 @@ visNetwork(main = list(text = "Data Classification",
 
 Let's classify the data in the the research example with this hierarchy.
 
-- Cases: or "observations" include measurements relative to 143,196 births between the years 1989 and 1993.
+- Cases: or "observations" include measurements relative to 143,196 births between the years 1989 and 1993 (Discrete - simply a convenient lexicographic index, not necessarily ordinal).
 
-- Variables: air quality station (nominal), year (nominal) length of gestation (continuous), levels of carbon monoxide were recorded in parts per million (continuous), nitrogen dioxide and ozone in parts per hundred million (continuous), and coarse particulate matter (PM10) in $\mu/m^3$ (continuous).
+- Variables: air quality station (discrete - nominal), year (discrete - nominal) length of gestation (continuous - ratio - has a 0 starting basis), levels of carbon monoxide were recorded in parts per million (continuous - ratio), nitrogen dioxide and ozone in parts per hundred million (continuous - ratio), and coarse particulate matter (PM10) in $\mu/m^3$ (continuous - ratio). All continuous variables are based from zero to some positive number. There appear to be no continuous - interval measures that would allow negative numbers (e.g., temperature in degrees centigrade).
 
-What further questions might be possibly related to these measures? Do these questions anticipate the collection of discrete or ordinal variables?
+What further questions might be possibly related to these measures? Do these questions anticipate the collection of discrete- ordinal variables? For example, are there preferences for living in one region versus another (ordinal)? How satisfied are respondents with air quality?
 
 </div>
 </br>
