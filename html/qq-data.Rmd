@@ -1,7 +1,20 @@
 ---
-title: "What types of data are there?"
-output: html_document
+title: "The many faces of data"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
@@ -10,7 +23,6 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(kableExtra))
-suppressPackageStartupMessages(library(bsselectR))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(stringr))
@@ -36,11 +48,19 @@ function showText(y) {
 
 3. Identify a research question and justify the the use of different types of data
 
+## March on
+
+Here is a classic example of the many types of data we will confront.
+
+[Minard: Napoleon's march to and from Moskow](poster_OrigMinard.gif)
+
+How many data streams can you count in this graphic?
+
 ## Air pollution and birth outcomes
 
 Businesses will often attempt to measure the impact of their operations on the populations they serve or are located near. Energy companies manufacture electricity, refined oil products, downstream basic and derived chemicals, and create polluting substances in the process. A California-based energy company wanted to gauge the impact of air pollution on births. Visit this [EPA site for more information on the management of air quality](https://www.epa.gov/air-quality-management-process/managing-air-quality-human-health-environmental-and-economic).
 
-Researchers collected data to examine the relationship between air pollutants and preterm births in Southern California. During the study air pollution levels were measured by air quality monitoring stations. Specifically, levels of carbon monoxide were recorded in parts per million, nitrogen dioxide and ozone in parts per hundred million, and coarse particulate matter (PM10) in $\mu / m*3$. Length of gestation data were collected on 143,196 births between the years 1989 and 1993, and air pollution exposure during gestation was calculated for each birth. The analysis suggested that increased ambient PM10 and, to a lesser degree, CO concentrations may be associated with the occurrence of preterm births.
+Researchers collected data to examine the relationship between air pollutants and preterm births in Southern California. During the study air pollution levels were measured by air quality monitoring stations. Specifically, levels of carbon monoxide were recorded in parts per million, nitrogen dioxide and ozone in parts per hundred million, and coarse particulate matter (PM10) in $\mu/m^3$. Length of gestation data were collected on 143,196 births between the years 1989 and 1993, and air pollution exposure during gestation was calculated for each birth. The analysis suggested that increased ambient PM10 and, to a lesser degree, CO concentrations may be associated with the occurrence of preterm births.
 
 In this study, identify
 
@@ -121,7 +141,7 @@ Let's classify the data in the the research example with this hierarchy.
 
 - Cases: or "observations" include measurements relative to 143,196 births between the years 1989 and 1993.
 
-- Variables: air quality station (nominal), year (nominal) length of gestation (continuous), levels of carbon monoxide were recorded in parts per million (continuous), nitrogen dioxide and ozone in parts per hundred million (continuous), and coarse particulate matter (PM10) in $\mu / m^3$ (continuous).
+- Variables: air quality station (nominal), year (nominal) length of gestation (continuous), levels of carbon monoxide were recorded in parts per million (continuous), nitrogen dioxide and ozone in parts per hundred million (continuous), and coarse particulate matter (PM10) in $\mu/m^3$ (continuous).
 
 What further questions might be possibly related to these measures? Do these questions anticipate the collection of discrete or ordinal variables?
 
@@ -132,13 +152,13 @@ What further questions might be possibly related to these measures? Do these que
 
 The data classification hierarchy is a theory to be tested. A **canon** is a general law, rule, principle, or criterion by which something is judged. Let's test this hierarchy against these canons of empirical method, expressed as questions for consideration (see [and astrophysicist's view of these canons](https://adh-sj.info/canons.php), both based on [Bernard Lonergan's _Insight_, Longmans, London 1957, chapter III](https://www.amazon.com/Insight-Understanding-Collected-Bernard-Lonergan/dp/0802034551) :
 
-a. Relevance and Selection: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
+- **Relevance and Selection**: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
 
-b. sufficiency: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
+- **sufficiency**: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
 
-c. Parsimony: is the hierarchical description of data itself verifiable in the data?
+- **Parsimony**: is the hierarchical description of data itself verifiable in the data?
 
-d. Completeness: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+- **Completeness**: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
 </br>
 
 <button onclick="showText('myDIV3')">show / hide</button>
@@ -147,21 +167,21 @@ d. Completeness: does this hierarchy account for all of the aspects you observe 
 
 By canon:
 
-a. Relevance and Selection: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
+- **Relevance and Selection**: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
 
-Yes it does. Anticipated are variables that are non-integer (as well as integer) and simply unordered categorical data. Other types are possible, but not present.
+_Yes it does. Anticipated are variables that are non-integer (as well as integer) and simply unordered categorical data. Other types are possible, but not present._
 
-b. sufficiency: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
+- **Sufficiency**: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
 
-No it does not. It seems that the continuous and discontinuous numeric variables are sufficient for numeric variables if only because they are mutually exclusive. The same for nominal (unordered) and ordinal (ordered). If fact the hierarchy _overfits_ the data in this exercise by the inclusion of discrete and ordinal data types. Including these anticipate relevancy and selection in other studies. 
+_No it does not. It seems that the continuous and discontinuous numeric variables are sufficient for numeric variables if only because they are mutually exclusive. The same for nominal (unordered) and ordinal (ordered). If fact the hierarchy **overfits** the data in this exercise by the inclusion of discrete and ordinal data types. Including these anticipate relevancy and selection in other studies._ 
 
-c. Parsimony: is the hierarchical description of data itself verifiable in the data?
+- **Parsimony**: is the hierarchical description of data itself verifiable in the data?
 
-Yes it does. Again our data seems well matched to the lowest level of the hierarchy. Further levels might delineate attributes of the previous level. For example, add another component, say integer. But integer is just another way of saying discrete variable. so this doesn't add anything. Are there other categories of numeric or categorical data? There do not seem so.
+_Yes it is. Again our data seems well matched to the lowest level of the hierarchy. Further levels might delineate attributes of the previous level. For example, add another component, say integer. But integer is just another way of saying discrete variable. so this doesn't add anything. Are there other categories of numeric or categorical data? There do not seem so._
 
-d. Completeness: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+- **Completeness**: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
 
-Yes it does. The data in the example are continuous, discrete, nominal, and ordinal. There does not seem to be any other relevant data available within the field of this example.
+_Yes it does. The data in the example are continuous, discrete, nominal, and ordinal. There does not seem to be any other relevant data available within the field of this example._
 
 </div>
 </br>
@@ -179,3 +199,6 @@ Yes it does. The data in the example are continuous, discrete, nominal, and ordi
 - A provisional structure helps us to identify and correct bias
 
 
+## Try this
+
+Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures > socio-economic factors for your investimation. [You can navigate to this site for an interactive view.](https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data)
