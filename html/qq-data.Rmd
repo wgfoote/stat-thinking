@@ -48,6 +48,8 @@ function showText(y) {
 
 3. Identify a research question and justify the the use of different types of data
 
+Data is all around us. It is first an observation of an event like number of store visits, and later might be observations of the result of a conceptual framework like customer satisfaction. Where we make a store transaction would result in latitude and longitude data. There is also data that describes other data like kilo-watt-hours as a unit of measurement for electricity usage.
+
 ## March on
 
 Here is a classic example of the many types of data we will confront.
@@ -186,6 +188,57 @@ _Yes it does. The data in the example are continuous, discrete, nominal, and ord
 </div>
 </br>
 
+## Something a bit more complicated
+
+Electricity customers now have their choice of service providers. The service providers can offer fixed and flexible rates for electricity usage. Usage data can be collected using remote sensing technology. An example of usage data are the following text strings for a facility in New York City.
+
+```{r usage}
+usage <- data.frame(index = 1:6, usage = c(  "3 PM  Mon 24th-Mar-2014___0.384 kwhNA_R",  
+"5AM  15-Aug-2014___1.201  kwh5_C",
+"__8PM Thu 20-Mar-2014____1.523 kwh_4_C",  
+"  6PM  23rd-Apr-2014___0.424  kwh_5_R",
+"_1AM  Friday 19th-Dec-2014___0.209  kwh_3_R",  
+"_5AM  Tue 19th-Aug-2014___1.228  kwh_4_C"
+))
+usage %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+All of the raw data is in a text string. We can parse the text into time of day, date, usage level, units of measurement, a quality rating (1-5), and a customer type ( _R_ for residential and _C_ for commercial) . Elements such as blank spaces and underscores (i.e., "_") would be eliminated as delimiters.
+
+Does the data type hierarchy still apply?
+
+</br>
+<button onclick="showText('myDIV8')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+</br>
+Let's modify the hierarchy a bit to include the text string raw data.
+
+```{r}
+visNetwork(main = list(text = "Electricity Usage Data Classification",
+ style = "font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"),
+        dot = 'dinetwork{ node [shape=box];  
+           "String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R" -> "Numeric" ;
+           "String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R" -> "Categorical" ;
+           "Numeric" -> "Continuous" ;
+           "Continuous" -> "Ratio" ;
+           "Ratio" -> "Usage: 0.384";
+           "Numeric" -> "Discrete" ;
+           "Discrete" -> "Time/Date: 3 PM  Mon 24th-Mar-2014";
+           "Categorical" -> "Nominal" ;
+           "Nominal" -> "Customer Type: R";
+           "Nominal" -> "Units of Measurement: kwh";
+           "Categorical" -> "Ordinal" ;
+           "Ordinal" -> "Quality Rating: 3"
+           }'
+           ) %>%  visNodes(color = list(background = "white", border = "blue", 
+    highlight = "yellow")) %>% visHierarchicalLayout(nodeSpacing = 200, sortMethod = "directed")
+```
+Even though the time "3 PM"  be would be arsed into 15:00 hours (on a 24-hour clock), the "PM" string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.
+
+</div>
+
 ## What have we learned?
 
 **Why does any of this matter?** The general question is bias and manipulation are possible if we fail to select all relevant, verifiable data that sufficiently describes and explains our research, decisions, and raises questions for further inquiry.
@@ -201,4 +254,4 @@ _Yes it does. The data in the example are continuous, discrete, nominal, and ord
 
 ## Try this
 
-Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures > socio-economic factors for your investimation. [You can navigate to this site for an interactive view.](https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data)
+Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures > socio-economic factors for your investigation. [You can navigate to this site for an interactive view.](https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data)
