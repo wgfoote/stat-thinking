@@ -1,0 +1,218 @@
+---
+title: "A First Exploration"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+#
+library(learnr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+#
+bullet_graph <- function(bg_data){
+  
+  # compute max and half for the ticks and labels
+  max_bg <- max(bg_data$high)
+  mid_bg <- max_bg / 2
+
+  gg <- ggplot(bg_data) 
+  gg <- gg + geom_bar(aes(measure, high),  fill="red", stat="identity", width=0.5, alpha=0.6) 
+  gg <- gg + geom_bar(aes(measure, mean),  fill="yellow3", stat="identity", width=0.5, alpha=0.6) 
+  gg <- gg + geom_bar(aes(measure, low),   fill="green4", stat="identity", width=0.5, alpha=0.6) 
+  gg <- gg + geom_bar(aes(measure, value), fill="darkblue",  stat="identity", width=0.2) 
+  gg <- gg + geom_errorbar(aes(y=target, x=measure, ymin=target, ymax=target), color="black", width=0.45, size = 3.00) 
+  gg <- gg + geom_point(aes(measure, target), colour="red", size=2.5) 
+  gg <- gg + scale_y_continuous(breaks=seq(0,max_bg,mid_bg))
+  gg <- gg + coord_flip()
+  gg <- gg + theme(axis.text.x=element_text(size=5),
+                   axis.title.x=element_blank(),
+                   axis.line.y=element_blank(), 
+                   axis.text.y=element_text(hjust=1, color="black"), 
+                   axis.ticks.y=element_blank(),
+                   axis.title.y=element_blank(),
+                   legend.position="none",
+                   panel.background=element_blank(), 
+                   panel.border=element_blank(),
+                   panel.grid.major=element_blank(),
+                   panel.grid.minor=element_blank(),
+                   plot.background=element_blank())
+
+  return(gg)
+
+}
+
+# test it out!
+
+# 5/1 seems to be a good ratio for individual bullet graphs but you
+# can change it up to fit your dashboard needs
+
+incidents <- data.frame(
+  measure=c("Total Events (K)", "Security Events (K)"),
+  high=c(3200,2000),
+  mean=c(2170,1500),
+  low=c(1500,500), 
+  target=c(2500,1750),
+  value=c(2726,1600)
+)
+
+
+```
+
+
+## Learning objectives
+
+Welcome to the first step in exploring data. In this unit you will 
+
+- Translate a business context into data
+
+- Arrange the data to answer a business question
+
+- Pose next steps in the analysis of the business context
+
+## Business context
+
+There are several parts of any context. We can arrange the contextual components into the who (including with and by whom), what, when, where, why, how, how often, how much categories of answers.
+
+Our new CFO is reviewing revenues for a start-up division in the company. For the past three years there have been low revenues averaging at most USD100 million, a high revenue of USD 300 was attained in a very busy quarter. But typically revenues ranged from USD100 to USD250 million. She anticipates that this movement of revenue will continue into the next budget year. This  year's budget is set at USD260 million.
+
+She has three questions for her revenue team:
+
+1. Are revenues on target?
+
+2. Is the target and the YTD revenue pushing the market and our expectations?
+
+3. What can we do to manage our revenue?
+
+Her team builds a graphic to walk her through a discussion.
+
+## Bullets
+
+The first bullet component is a background heat map that depicts ranges of the metric, in this case USD revenues for a particular division.
+
+```{r bullet-graph-1}
+revenue <- data.frame(measure = "Revenue YTD 2019", high = 300, mean = 250, low = 100, target = 0, value = 0 )
+bullet_graph(revenue)
+```
+
+Let's add a target revenue on this heat map. Now we have layered a revenue expectation on top of, or overlaying, the ranges of anticipated revenues.
+
+```{r bullet-graph-2}
+revenue <- data.frame(measure = "Revenue YTD 2019", high = 300, mean = 250, low = 100, target = 260, value = 0 )
+bullet_graph(revenue)
+```
+
+Let's now track year to date (_YTD_) USD revenues by overlaying a bar.
+
+```{r bullet-graph-3}
+revenue <- data.frame(measure = "Revenue YTD 2019", high = 300, mean = 250, low = 100, target = 260, value = 240 )
+bullet_graph(revenue)
+```
+
+
+### What did we do?
+
+
+```{r quiz}
+quiz(caption = "Anticipated revenue",
+  question("Which bullet graph component depicts expectations of future revenue?",
+    answer("Blue status bar"),
+    answer("Black target"),
+    answer("Three-color heat map", correct = TRUE),
+    answer("No component provides this information."),
+    allow_retry = TRUE, random_answer_order = TRUE
+  )
+)
+#
+quiz(caption = "Budgeting",
+  question("Which bullet graph component depicts bedget requirements?",
+    answer("Blue status bar"),
+    answer("Black target", correct = TRUE),
+    answer("Three-color heat map"),
+    answer("No component provides this information."),
+    allow_retry = TRUE, random_answer_order = TRUE
+  )
+)
+#
+quiz(caption = "Monitoring",
+  question("Which bullet graph component tracks current levels of the metric?",
+    answer("Blue status bar", correct = TRUE),
+    answer("Black target"),
+    answer("Three-color heat map"),
+    answer("No component provides this information."),
+    allow_retry = TRUE, random_answer_order = TRUE
+  )
+)
+```
+
+
+### What can we say?
+
+How will the bullet graph help answer the CFO's questions?
+
+1. Revenues are not on target.
+
+2. Revenues are within the "middling" level of revenues anticipated.
+
+3. There is obviously more work to do to raise the revenue level, alter anticipations, modify targets.
+
+
+## Incidents and accidents
+
+The security officer of a construction contractor tracks unauthorized access into physical and cyber systems. Here is some summary data from a recent day. All the So wants to know is if incidents are at high enough levels to enable countermeasures.
+
+```{r breach}
+incidents_pct <- data.frame(
+  measure=c("Total Events (%)", "Security Events (%)", "Filtered (%)", "Tickets (%)"),
+  high=c(100,100,100,100),
+  mean=c(45,40,50,30),
+  low=c(25,20,10,5), 
+  target=c(55,40,45,35),
+  value=c(50,45,60,25)
+)
+incidents_pct %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+All data has been normalized into percentages. This helps the SO compare categories of measures. Total Events include all reports of potential unauthorized access. Security Events are a subset of the total that qualify as critical physical or cyber system issues defined in the organization's security policy. Filtered events are those that are flagged as highly risky. Tickets are the events that warrant immediate resolution. The SO prepares a bullet graph to summarize this table.
+
+```{r bullet-multiple}
+bullet_graph(incidents_pct)
+```
+
+**What can we observe?**
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+<br>
+
+In the end, ticketed events are still in a relatively safe zone. However, filtered events far exceed targets, perhaps reflecting the high levels of security events according to the security policy. The organization does appear to be under attack.
+
+</div>
+
+## Where do we go from here?
+
+The CFO can make some judgments that revenue has not eaven reached the high revenue region yet, let alone the target. Next steps might include asking questions about drivers of revenue, the associations those drivers have with underlying causes, and inferences about how close the division can get to a target in the time alotted to the budget. These considerations will raise the important issue of how often revenues are low, medium, and high. That discussion needs another graphic: the **frequency distribution.**
+
+## Resources
+
+[Stephen Few's original post that explains the rationale and use of bullet graphs](https://www.perceptualedge.com/blog/?p=217)
+
+[Here is an Excel version of the bullet graphs](https://turing.manhattan.edu/~wfoote01/bsnstat/XLSX/bullet-graph.xlsx) above with directions to build your own graphs.
+
+[This blog uses a very similar approach to the Excel spread sheet above](https://www.exceldashboardtemplates.com/how-to-make-an-excel-bullet-chart/)
+
+[Tableau, a popular analytics platform, has this quick start guide to making a bullet chart.](https://help.tableau.com/current/pro/desktop/en-us/qs_bullet_graphs.htm) You can download a [public (free) version of Tableau here.](https://public.tableau.com/en-us/s/download)

@@ -42,6 +42,8 @@ function showText(y) {
 
 ## Learning outomes
 
+In this unit we will:
+
 1. Identify the different types of data
 
 2. Describe the use of different types of data to explore answers to business questions
@@ -57,6 +59,26 @@ Here is a classic example of the many types of data we will confront.
 [Minard: Napoleon's march to and from Moskow](poster_OrigMinard.gif)
 
 How many data streams can you count in this graphic?
+<br>
+<button onclick="showText('myDIV10')">show / hide</button>
+<div id="myDIV10" style="display:none;">
+</br>
+Several are present. But five are important:
+
+1. Latitude and longitude of the march to and from Moskow
+
+2. A scatter plot of the locations of cities en route
+
+3. Troup strength from and to Moskow
+
+4. Temperature differentials from and to Moskow
+
+5. Intervals of troup strength from and to Moskow
+
+We can observe several faces of data in this highly informative plot. This last item elucidates, that is, adds to, item three. We include it because it is a great example of the extensibility of lower orders of data (troup strength) into higher orders of analysis of data (changes in troup strength across latitude and longitude).
+
+<br>
+</div>
 
 ## Air pollution and birth outcomes
 
@@ -132,6 +154,52 @@ visNetwork(main = list(text = "Data Classification",
 ```
 
 
+Let's lead with this summary:
+
+```{r data-type-summary}
+column_names <- c("nominal", "ordinal", "interval", "ratio")
+row_names <- c("categories: counts", 
+               "order known", 
+               "differences between values", 
+               "add / substract values", 
+               "fractions and multiples of values",
+               "frame of reference / zero value",
+               "differentiation / clustering",
+               "hierarchy / relational",
+               "system"
+               )
+n_rows <- length(row_names)
+table_data <- matrix(c("x", "", "", "",
+                 "x", "x", "", "",
+                 "", "", "x", "x",
+                 "", "", "x", "x",
+                 "", "", "", "x",
+                 "", "", "", "x",
+                 "x", "x", "", "",
+                 "x", "x", "", "",
+                 "x", "x", "", ""
+                 ), nrow = n_rows)
+colnames(table_data) <- column_names
+rownames(table_data) <- row_names
+table_data %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "red", border_right = TRUE) 
+```
+
+At the bottom of the hierarchy are four typical, and quite inclusive, classes of data:
+
+- **Nominal** (from the Latin _nomen_, name) label variables, without any reference to their quantitative content.  This is first step in analysis: break down data into useful categories, assign labels, aggregate data according to the categories. Examples include any classification scheme, just like the data herarchy itself: gender, class section, resident county.
+
+- Building on nominal categories we have ***ordinal** scales (from the Latin _ordo, ordinis_, order) that rank levels of a variable from lowest to highest. There is no significance to the distance between ordinal scale levels, only the order is important. We might order customer satisfaction from a low level to a high level on a scale of 1 to 5. We might rank our prefewrences for beverages in which we might prefer milk (an ordinal value of 5) to beer (an ordinal value of 4), and so on. One level is simply better than another. As with nominal categories, ordinal scales do not contain any information about how much more we might prefer milk to beer.
+
+- **Interval** (from Latin _intervallum_, space between two walls) scales build both the order and the exact differences between the values.  The classic example of an interval scale is earnings per share because the difference between each value is the same.  For example, the difference between -1.20 and -1.19 EPS is a measurable 0.01 EPS in currency units per share of adjusted common stock, as is the difference between 0.01 and 0.02. Using interval scales we can measure entral tendency with mode, median, or mean; standard deviation can also be calculated. However, consider this: 1.12 EPS plus 1.12 EPS is 2.14 EPS.  But the result does not necessarily mean that 2.14 EPS is simply twice as high as 1.12 since EPS can take on negative values. There is no such thing as no EPS. A zero EPS is not no EPS, it is just a measure of positive earnings less negative earnings. There is no baseline or frame of reference to compare EPS.
+
+- **Ratio** scales (from Latin _ratio_, explanation) use a base case, zero, to compute comparable levels of a variable. The maximium of a ratio scale can be any positive value. The minimum is zero. This allows us to compare as a fraction or multiple one value against another, thus providing a componennt of an explanation of the relative value of a variable. Using the example of a range of EPS from -1.10 to 1.20, we see that this is clearly an interval variable range. It is not yet a ratio scale. We would have to transform the series to a new scale where -1.10 is zero. We can do this by subtracting 1.10 from all values of EPS ranging from -1.10 to 1.20. This yields a new scale from 0 to 1.10. Only in this way can we faithly compare one EPSA to another. Thus an EPS of -1.05 is only 0.05 higher than -1.10 or 0.05/1.10 = `r round((0.05/1.10)*100, 2)`\% higher than -1.10. 
+
+
+
+
 2. Map the data in the research example to the hierarchy.
 
 </br>
@@ -161,6 +229,7 @@ The data classification hierarchy is a theory to be tested. A **canon** is a gen
 - **Parsimony**: is the hierarchical description of data itself verifiable in the data?
 
 - **Completeness**: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+
 </br>
 
 <button onclick="showText('myDIV3')">show / hide</button>
@@ -211,11 +280,11 @@ Does the data type hierarchy still apply?
 
 </br>
 <button onclick="showText('myDIV8')">show / hide</button>
-<div id="myDIV1" style="display:none;">
+<div id="myDIV8" style="display:none;">
 </br>
-Let's modify the hierarchy a bit to include the text string raw data.
+Let's modify the hierarchy a bit to include the text string raw data. Hover over any arrow line, then click on the line to move the entire network into position for better viewing.
 
-```{r}
+```{r elec-usage}
 visNetwork(main = list(text = "Electricity Usage Data Classification",
  style = "font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"),
         dot = 'dinetwork{ node [shape=box];  
@@ -232,12 +301,29 @@ visNetwork(main = list(text = "Electricity Usage Data Classification",
            "Categorical" -> "Ordinal" ;
            "Ordinal" -> "Quality Rating: 3"
            }'
-           ) %>%  visNodes(color = list(background = "white", border = "blue", 
-    highlight = "yellow")) %>% visHierarchicalLayout(nodeSpacing = 200, sortMethod = "directed")
+           ) %>%  
+  visNodes(color = list(background = "white", border = "blue", highlight = "yellow")) %>%
+  visHierarchicalLayout(nodeSpacing = 200, sortMethod = "directed")
 ```
 Even though the time "3 PM"  be would be arsed into 15:00 hours (on a 24-hour clock), the "PM" string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.
 
 </div>
+
+We have a mixture of categorical and numeric data in this data set. The data could be ordered by the time / data stamp when the observations of electrical usage were collected from meters. In this case we culd classify the data as a time series. One of the implications of this classification is that we might want to compare one time versus another. For example we could ask these questions:
+
+- Is morning usage different from nightly usage?
+
+- Are summar months's usage different from winter months?
+
+- Is there a trend year to year?
+
+On the other hand we could view this data as a cross-section of usage sampled at verious times and classified by the type of electricity user or even by the ordinal quality of service series.  In a cross-sectional context, we would view the data irrespective of time. However we can group the data into time buckets such as norming and night to aggregate customer usage. We can ask these questions of the data so arranged:
+
+- Are there different levels of usage among the types of customers?
+
+- Are qaulity of service levels different among the types of customers?
+
+
 
 ## What have we learned?
 
@@ -255,3 +341,9 @@ Even though the time "3 PM"  be would be arsed into 15:00 hours (on a 24-hour cl
 ## Try this
 
 Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures > socio-economic factors for your investigation. [You can navigate to this site for an interactive view.](https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data)
+
+1. [Download this report](https://www.countyhealthrankings.org/sites/default/files/state/downloads/CHR2019_NY.pdf)
+
+2. identify at least two examples each of nominal, ordinal, interval, and ratio variables.
+
+3. Upon reading this report, are appropriate data types reach valid conclusions? For example, if a conclusion reached indicates that one segment of the sampled population is twice as large as the sampled population of another segment, are ratio measurement scales used?

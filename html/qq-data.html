@@ -6647,6 +6647,7 @@ function showText(y) {
 </script>
 <div id="learning-outomes" class="section level2">
 <h2>Learning outomes</h2>
+<p>In this unit we will:</p>
 <ol style="list-style-type: decimal">
 <li><p>Identify the different types of data</p></li>
 <li><p>Describe the use of different types of data to explore answers to business questions</p></li>
@@ -6658,7 +6659,19 @@ function showText(y) {
 <h2>March on</h2>
 <p>Here is a classic example of the many types of data we will confront.</p>
 <p><a href="poster_OrigMinard.gif">Minard: Napoleon’s march to and from Moskow</a></p>
-<p>How many data streams can you count in this graphic?</p>
+How many data streams can you count in this graphic? <br> <button onclick="showText(&#39;myDIV10&#39;)">show / hide</button>
+<div id="myDIV10" style="display:none;">
+<p></br> Several are present. But five are important:</p>
+<ol style="list-style-type: decimal">
+<li><p>Latitude and longitude of the march to and from Moskow</p></li>
+<li><p>A scatter plot of the locations of cities en route</p></li>
+<li><p>Troup strength from and to Moskow</p></li>
+<li><p>Temperature differentials from and to Moskow</p></li>
+<li><p>Intervals of troup strength from and to Moskow</p></li>
+</ol>
+<p>We can observe several faces of data in this highly informative plot. This last item elucidates, that is, adds to, item three. We include it because it is a great example of the extensibility of lower orders of data (troup strength) into higher orders of analysis of data (changes in troup strength across latitude and longitude).</p>
+<p><br></p>
+</div>
 </div>
 <div id="air-pollution-and-birth-outcomes" class="section level2">
 <h2>Air pollution and birth outcomes</h2>
@@ -6673,8 +6686,8 @@ function showText(y) {
 <div id="classifying-data-types" class="section level3">
 <h3>Classifying data types</h3>
 <p>A familiar example of a hierarchy is the organizational chart. This chart visualizes the reporting structure of an organization.</p>
-<div id="htmlwidget-c285e1b8b6406b5e06ab" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c285e1b8b6406b5e06ab">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"VP Student Life\" -> \"Residence Director\" ; \n           \"VP Student Life\" -> \"Program Director\" ; \n           \"Residence Director\" -> \"Residence Advisor-Alpha\" ;\n           \"Residence Director\" -> \"Residence Advisor-Beta\" ;\n           \"Residence Director\" -> \"Residence Advisor-Gamma\" ;     \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Hierarchy Example: Student Life","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-2790910a4107ba88d76d" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2790910a4107ba88d76d">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"VP Student Life\" -> \"Residence Director\" ; \n           \"VP Student Life\" -> \"Program Director\" ; \n           \"Residence Director\" -> \"Residence Advisor-Alpha\" ;\n           \"Residence Director\" -> \"Residence Advisor-Beta\" ;\n           \"Residence Director\" -> \"Residence Advisor-Gamma\" ;     \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Hierarchy Example: Student Life","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
 <p>You can access this <a href="https://en.wikipedia.org/wiki/Hierarchy">article about hierarchy</a> for more information.</p>
 <ol style="list-style-type: decimal">
 <li>What is a hierarchy?</li>
@@ -6692,8 +6705,170 @@ function showText(y) {
 <p></br></p>
 <p>In each department of science there are hierarchies and networks of metadata. Metadata are data about data. Statistics mirror life, and in life we find ourselves classifying the world around us to make some systematic sense of it.</p>
 <p>Here is a potential data classification hierarchy we might use with this research example.</p>
-<div id="htmlwidget-c2fea341ff542a94b26e" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c2fea341ff542a94b26e">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"Data\" -> \"Numeric\" ;\n           \"Data\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Numeric\" -> \"Discrete\" ;\n           \"Categorical\" -> \"Nominal\" ; \n           \"Categorical\" -> \"Ordinal\" ; \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3d6015820218c32d4eb7" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3d6015820218c32d4eb7">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"Data\" -> \"Numeric\" ;\n           \"Data\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Numeric\" -> \"Discrete\" ;\n           \"Categorical\" -> \"Nominal\" ; \n           \"Categorical\" -> \"Ordinal\" ; \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
+<p>Let’s lead with this summary:</p>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+nominal
+</th>
+<th style="text-align:center;">
+ordinal
+</th>
+<th style="text-align:center;">
+interval
+</th>
+<th style="text-align:center;">
+ratio
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+categories: counts
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+order known
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+differences between values
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+x
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+add / substract values
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+fractions and multiples of values
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+frame of reference / zero value
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+differentiation / clustering
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+x
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+hierarchy / relational
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+x
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: red !important;border-right:1px solid;">
+system
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+</tbody>
+</table>
+<p>At the bottom of the hierarchy are four typical, and quite inclusive, classes of data:</p>
+<ul>
+<li><p><strong>Nominal</strong> (from the Latin <em>nomen</em>, name) label variables, without any reference to their quantitative content. This is first step in analysis: break down data into useful categories, assign labels, aggregate data according to the categories. Examples include any classification scheme, just like the data herarchy itself: gender, class section, resident county.</p></li>
+<li><p>Building on nominal categories we have *<strong>ordinal</strong> scales (from the Latin <em>ordo, ordinis</em>, order) that rank levels of a variable from lowest to highest. There is no significance to the distance between ordinal scale levels, only the order is important. We might order customer satisfaction from a low level to a high level on a scale of 1 to 5. We might rank our prefewrences for beverages in which we might prefer milk (an ordinal value of 5) to beer (an ordinal value of 4), and so on. One level is simply better than another. As with nominal categories, ordinal scales do not contain any information about how much more we might prefer milk to beer.</p></li>
+<li><p><strong>Interval</strong> (from Latin <em>intervallum</em>, space between two walls) scales build both the order and the exact differences between the values. The classic example of an interval scale is earnings per share because the difference between each value is the same. For example, the difference between -1.20 and -1.19 EPS is a measurable 0.01 EPS in currency units per share of adjusted common stock, as is the difference between 0.01 and 0.02. Using interval scales we can measure entral tendency with mode, median, or mean; standard deviation can also be calculated. However, consider this: 1.12 EPS plus 1.12 EPS is 2.14 EPS. But the result does not necessarily mean that 2.14 EPS is simply twice as high as 1.12 since EPS can take on negative values. There is no such thing as no EPS. A zero EPS is not no EPS, it is just a measure of positive earnings less negative earnings. There is no baseline or frame of reference to compare EPS.</p></li>
+<li><p><strong>Ratio</strong> scales (from Latin <em>ratio</em>, explanation) use a base case, zero, to compute comparable levels of a variable. The maximium of a ratio scale can be any positive value. The minimum is zero. This allows us to compare as a fraction or multiple one value against another, thus providing a componennt of an explanation of the relative value of a variable. Using the example of a range of EPS from -1.10 to 1.20, we see that this is clearly an interval variable range. It is not yet a ratio scale. We would have to transform the series to a new scale where -1.10 is zero. We can do this by subtracting 1.10 from all values of EPS ranging from -1.10 to 1.20. This yields a new scale from 0 to 1.10. Only in this way can we faithly compare one EPSA to another. Thus an EPS of -1.05 is only 0.05 higher than -1.10 or 0.05/1.10 = 4.55% higher than -1.10.</p></li>
+</ul>
 <ol start="2" style="list-style-type: decimal">
 <li>Map the data in the research example to the hierarchy.</li>
 </ol>
@@ -6716,8 +6891,9 @@ function showText(y) {
 <li><p><strong>Relevance and Selection</strong>: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.</p></li>
 <li><p><strong>sufficiency</strong>: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?</p></li>
 <li><p><strong>Parsimony</strong>: is the hierarchical description of data itself verifiable in the data?</p></li>
-<li><p><strong>Completeness</strong>: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example. </br></p></li>
+<li><p><strong>Completeness</strong>: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.</p></li>
 </ul>
+<p></br></p>
 <button onclick="showText(&#39;myDIV3&#39;)">
 show / hide
 </button>
@@ -6812,11 +6988,22 @@ _5AM Tue 19th-Aug-2014___1.228 kwh_4_C
 <p>All of the raw data is in a text string. We can parse the text into time of day, date, usage level, units of measurement, a quality rating (1-5), and a customer type ( <em>R</em> for residential and <em>C</em> for commercial) . Elements such as blank spaces and underscores (i.e., &quot;_&quot;) would be eliminated as delimiters.</p>
 <p>Does the data type hierarchy still apply?</p>
 </br> <button onclick="showText(&#39;myDIV8&#39;)">show / hide</button>
-<div id="myDIV1" style="display:none;">
-<p></br> Let’s modify the hierarchy a bit to include the text string raw data.</p>
-<p><div id="htmlwidget-d8df5cedfb8265a02ca8" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d8df5cedfb8265a02ca8">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Numeric\" ;\n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Continuous\" -> \"Ratio\" ;\n           \"Ratio\" -> \"Usage: 0.384\";\n           \"Numeric\" -> \"Discrete\" ;\n           \"Discrete\" -> \"Time/Date: 3 PM  Mon 24th-Mar-2014\";\n           \"Categorical\" -> \"Nominal\" ;\n           \"Nominal\" -> \"Customer Type: R\";\n           \"Nominal\" -> \"Units of Measurement: kwh\";\n           \"Categorical\" -> \"Ordinal\" ;\n           \"Ordinal\" -> \"Quality Rating: 3\"\n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Electricity Usage Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script> Even though the time “3 PM” be would be arsed into 15:00 hours (on a 24-hour clock), the “PM” string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.</p>
+<div id="myDIV8" style="display:none;">
+<p></br> Let’s modify the hierarchy a bit to include the text string raw data. Hover over any arrow line, then click on the line to move the entire network into position for better viewing.</p>
+<p><div id="htmlwidget-cb5c4ed95b61f6efd7a8" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cb5c4ed95b61f6efd7a8">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Numeric\" ;\n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Continuous\" -> \"Ratio\" ;\n           \"Ratio\" -> \"Usage: 0.384\";\n           \"Numeric\" -> \"Discrete\" ;\n           \"Discrete\" -> \"Time/Date: 3 PM  Mon 24th-Mar-2014\";\n           \"Categorical\" -> \"Nominal\" ;\n           \"Nominal\" -> \"Customer Type: R\";\n           \"Nominal\" -> \"Units of Measurement: kwh\";\n           \"Categorical\" -> \"Ordinal\" ;\n           \"Ordinal\" -> \"Quality Rating: 3\"\n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Electricity Usage Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script> Even though the time “3 PM” be would be arsed into 15:00 hours (on a 24-hour clock), the “PM” string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.</p>
 </div>
+<p>We have a mixture of categorical and numeric data in this data set. The data could be ordered by the time / data stamp when the observations of electrical usage were collected from meters. In this case we culd classify the data as a time series. One of the implications of this classification is that we might want to compare one time versus another. For example we could ask these questions:</p>
+<ul>
+<li><p>Is morning usage different from nightly usage?</p></li>
+<li><p>Are summar months’s usage different from winter months?</p></li>
+<li><p>Is there a trend year to year?</p></li>
+</ul>
+<p>On the other hand we could view this data as a cross-section of usage sampled at verious times and classified by the type of electricity user or even by the ordinal quality of service series. In a cross-sectional context, we would view the data irrespective of time. However we can group the data into time buckets such as norming and night to aggregate customer usage. We can ask these questions of the data so arranged:</p>
+<ul>
+<li><p>Are there different levels of usage among the types of customers?</p></li>
+<li><p>Are qaulity of service levels different among the types of customers?</p></li>
+</ul>
 </div>
 <div id="what-have-we-learned" class="section level2">
 <h2>What have we learned?</h2>
@@ -6831,6 +7018,11 @@ _5AM Tue 19th-Aug-2014___1.228 kwh_4_C
 <div id="try-this" class="section level2">
 <h2>Try this</h2>
 <p>Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures &gt; socio-economic factors for your investigation. <a href="https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data">You can navigate to this site for an interactive view.</a></p>
+<ol style="list-style-type: decimal">
+<li><p><a href="https://www.countyhealthrankings.org/sites/default/files/state/downloads/CHR2019_NY.pdf">Download this report</a></p></li>
+<li><p>identify at least two examples each of nominal, ordinal, interval, and ratio variables.</p></li>
+<li><p>Upon reading this report, are appropriate data types reach valid conclusions? For example, if a conclusion reached indicates that one segment of the sampled population is twice as large as the sampled population of another segment, are ratio measurement scales used?</p></li>
+</ol>
 </div>
 
 
