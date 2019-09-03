@@ -60,8 +60,8 @@ Here is a classic example of the many types of data we will confront.
 
 How many data streams can you count in this graphic?
 <br>
-<button onclick="showText('myDIV10')">show / hide</button>
-<div id="myDIV10" style="display:none;">
+<button onclick="showText('my10')">show / hide</button>
+< id="my10" style="display:none;">
 </br>
 Several are present. But five are important:
 
@@ -78,7 +78,7 @@ Several are present. But five are important:
 We can observe several faces of data in this highly informative plot. This last item elucidates, that is, adds to, item three. We include it because it is a great example of the extensibility of lower orders of data (troup strength) into higher orders of analysis of data (changes in troup strength across latitude and longitude).
 
 <br>
-</div>
+</>
 
 ## Air pollution and birth outcomes
 
@@ -119,8 +119,8 @@ You can access this [article about hierarchy](https://en.wikipedia.org/wiki/Hier
 1. What is a hierarchy?
 
 </br>
-<button onclick="showText('myDIV1')">show / hide</button>
-<div id="myDIV1" style="display:none;">
+<button onclick="showText('my1')">show / hide</button>
+< id="my1" style="display:none;">
 </br>
 
 A hierarchy is an analytical technique that takes a group of objects and asks two questions:
@@ -131,7 +131,7 @@ A hierarchy is an analytical technique that takes a group of objects and asks tw
 
 Notice that the departments and their children nodes are mutually exclusive of one another.
 
-</div>
+</>
 </br>
 
 In each department of science there are hierarchies and networks of metadata. Metadata are data about data. Statistics mirror life, and in life we find ourselves classifying the world around us to make some systematic sense of it.
@@ -169,8 +169,9 @@ row_names <- c("categories: counts",
                "system"
                )
 n_rows <- length(row_names)
-table_data <- matrix(c("x", "", "", "",
-                 "x", "x", "", "",
+n_col <- length(column_names)
+table_data <- matrix(c("x", " ", " ", " ",
+                 "x", "x", " ", " ",
                  "", "", "x", "x",
                  "", "", "x", "x",
                  "", "", "", "x",
@@ -178,7 +179,7 @@ table_data <- matrix(c("x", "", "", "",
                  "x", "x", "", "",
                  "x", "x", "", "",
                  "x", "x", "", ""
-                 ), nrow = n_rows)
+                 ), nrow = n_rows, ncol = n_col, byrow = TRUE)
 colnames(table_data) <- column_names
 rownames(table_data) <- row_names
 table_data %>% 
@@ -203,8 +204,8 @@ At the bottom of the hierarchy are four typical, and quite inclusive, classes of
 2. Map the data in the research example to the hierarchy.
 
 </br>
-<button onclick="showText('myDIV2')">show / hide</button>
-<div id="myDIV2" style="display:none;">
+<button onclick="showText('my2')">show / hide</button>
+< id="my2" style="display:none;">
 </br>
 
 Let's classify the data in the the research example with this hierarchy.
@@ -215,7 +216,7 @@ Let's classify the data in the the research example with this hierarchy.
 
 What further questions might be possibly related to these measures? Do these questions anticipate the collection of discrete- ordinal variables? For example, are there preferences for living in one region versus another (ordinal)? How satisfied are respondents with air quality?
 
-</div>
+</>
 </br>
 
 3. Describe the usefulness of the components of your data classification hierarchy to answer the main research question above.
@@ -232,8 +233,8 @@ The data classification hierarchy is a theory to be tested. A **canon** is a gen
 
 </br>
 
-<button onclick="showText('myDIV3')">show / hide</button>
-<div id="myDIV3" style="display:none;">
+<button onclick="showText('my3')">show / hide</button>
+< id="my3" style="display:none;">
 </br>
 
 By canon:
@@ -254,7 +255,7 @@ _Yes it is. Again our data seems well matched to the lowest level of the hierarc
 
 _Yes it does. The data in the example are continuous, discrete, nominal, and ordinal. There does not seem to be any other relevant data available within the field of this example._
 
-</div>
+</>
 </br>
 
 ## Something a bit more complicated
@@ -279,8 +280,8 @@ All of the raw data is in a text string. We can parse the text into time of day,
 Does the data type hierarchy still apply?
 
 </br>
-<button onclick="showText('myDIV8')">show / hide</button>
-<div id="myDIV8" style="display:none;">
+<button onclick="showText('my8')">show / hide</button>
+< id="my8" style="display:none;">
 </br>
 Let's modify the hierarchy a bit to include the text string raw data. Hover over any arrow line, then click on the line to move the entire network into position for better viewing.
 
@@ -307,7 +308,7 @@ visNetwork(main = list(text = "Electricity Usage Data Classification",
 ```
 Even though the time "3 PM"  be would be arsed into 15:00 hours (on a 24-hour clock), the "PM" string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.
 
-</div>
+</>
 
 We have a mixture of categorical and numeric data in this data set. The data could be ordered by the time / data stamp when the observations of electrical usage were collected from meters. In this case we culd classify the data as a time series. One of the implications of this classification is that we might want to compare one time versus another. For example we could ask these questions:
 
