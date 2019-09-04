@@ -6654,6 +6654,7 @@ function showText(y) {
 <li><p>Identify a research question and justify the the use of different types of data</p></li>
 </ol>
 <p>Data is all around us. It is first an observation of an event like number of store visits, and later might be observations of the result of a conceptual framework like customer satisfaction. Where we make a store transaction would result in latitude and longitude data. There is also data that describes other data like kilo-watt-hours as a unit of measurement for electricity usage.</p>
+<p>We will examine both <strong>univariate</strong> (from Latin <em>unus</em>, one, and <em>variare</em>, to change) or one-variable data series as well as <strong>multivariate</strong> (from Latin <em>multus</em>, many) or arrays of univariate series.</p>
 </div>
 <div id="march-on" class="section level2">
 <h2>March on</h2>
@@ -6688,8 +6689,8 @@ function showText(y) {
 <div id="classifying-data-types" class="section level3">
 <h3>Classifying data types</h3>
 <p>A familiar example of a hierarchy is the organizational chart. This chart visualizes the reporting structure of an organization.</p>
-<div id="htmlwidget-20c1a0d4fd45586c63b1" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-20c1a0d4fd45586c63b1">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"VP Student Life\" -> \"Residence Director\" ; \n           \"VP Student Life\" -> \"Program Director\" ; \n           \"Residence Director\" -> \"Residence Advisor-Alpha\" ;\n           \"Residence Director\" -> \"Residence Advisor-Beta\" ;\n           \"Residence Director\" -> \"Residence Advisor-Gamma\" ;     \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Hierarchy Example: Student Life","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0b68d21126eb176ee9ca" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0b68d21126eb176ee9ca">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"VP Student Life\" -> \"Residence Director\" ; \n           \"VP Student Life\" -> \"Program Director\" ; \n           \"Residence Director\" -> \"Residence Advisor-Alpha\" ;\n           \"Residence Director\" -> \"Residence Advisor-Beta\" ;\n           \"Residence Director\" -> \"Residence Advisor-Gamma\" ;     \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Hierarchy Example: Student Life","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
 <p>You can access this <a href="https://en.wikipedia.org/wiki/Hierarchy">article about hierarchy</a> for more information.</p>
 <ol style="list-style-type: decimal">
 <li>What is a hierarchy?</li>
@@ -6707,8 +6708,8 @@ function showText(y) {
 <p></br></p>
 <p>In each department of science there are hierarchies and networks of metadata. Metadata are data about data. Statistics mirror life, and in life we find ourselves classifying the world around us to make some systematic sense of it.</p>
 <p>Here is a potential data classification hierarchy we might use with this research example.</p>
-<div id="htmlwidget-deda50199c4a4d387fc8" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-deda50199c4a4d387fc8">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"Data\" -> \"Numeric\" ;\n           \"Data\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Numeric\" -> \"Discrete\" ;\n           \"Categorical\" -> \"Nominal\" ; \n           \"Categorical\" -> \"Ordinal\" ; \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-5ecfa1d269ed8fe68369" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5ecfa1d269ed8fe68369">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"Data\" -> \"Numeric\" ;\n           \"Data\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Numeric\" -> \"Discrete\" ;\n           \"Categorical\" -> \"Nominal\" ; \n           \"Categorical\" -> \"Ordinal\" ; \n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
 <p>Let’s lead with this summary:</p>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -6924,7 +6925,7 @@ show / hide
 </div>
 <div id="something-a-bit-more-complicated" class="section level2">
 <h2>Something a bit more complicated</h2>
-<p>Electricity customers now have their choice of service providers. The service providers can offer fixed and flexible rates for electricity usage. Usage data can be collected using remote sensing technology. An example of usage data are the following text strings for a facility in New York City.</p>
+Electricity customers now have their choice of service providers. The service providers can offer fixed and flexible rates for electricity usage. Usage data can be collected using remote sensing technology. An example of usage data are the following text strings for a facility in New York City.
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -6987,35 +6988,21 @@ _5AM Tue 19th-Aug-2014___1.228 kwh_4_C
 </tr>
 </tbody>
 </table>
-<p>All of the raw data is in a text string. We can parse the text into time of day, date, usage level, units of measurement, a quality rating (1-5), and a customer type ( <em>R</em> for residential and <em>C</em> for commercial) . Elements such as blank spaces and underscores (i.e., &quot;_&quot;) would be eliminated as delimiters.</p>
-<p>Does the data type hierarchy still apply?</p>
+<p>All of the raw data is in a text string. We can parse the text into time of day, date, usage level, units of measurement, a quality rating (1-5), and a customer type ( <em>R</em> for residential and <em>C</em> for commercial) . Elements such as blank spaces and underscores (i.e., &quot;_&quot;) would be eliminated as delimiters. Does the data type hierarchy still apply?</p>
 </br> <button onclick="showText(&#39;my8&#39;)">show / hide</button>
 <div id="my8" style="display:none;">
-<p></br> Let’s modify the hierarchy a bit to include the text string raw data. Hover over any arrow line, then click on the line to move the entire network into position for better viewing.</p>
-<p><div id="htmlwidget-1bb0579d273aac661648" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1bb0579d273aac661648">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Numeric\" ;\n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Continuous\" -> \"Ratio\" ;\n           \"Ratio\" -> \"Usage: 0.384\";\n           \"Numeric\" -> \"Discrete\" ;\n           \"Discrete\" -> \"Time/Date: 3 PM  Mon 24th-Mar-2014\";\n           \"Categorical\" -> \"Nominal\" ;\n           \"Nominal\" -> \"Customer Type: R\";\n           \"Nominal\" -> \"Units of Measurement: kwh\";\n           \"Categorical\" -> \"Ordinal\" ;\n           \"Ordinal\" -> \"Quality Rating: 3\"\n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Electricity Usage Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script> Even though the time “3 PM” be would be arsed into 15:00 hours (on a 24-hour clock), the “PM” string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.</p>
+<p></br></p>
+<p>Let’s modify the hierarchy a bit to include the text string raw data. Hover over any arrow line, then click on the line to move the entire network into position for better viewing.</p>
+<div id="htmlwidget-a39b7c2c22e8d1954e6c" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-a39b7c2c22e8d1954e6c">{"x":{"dot":"dinetwork{ node [shape=box];  \n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Numeric\" ;\n           \"String: 3 PM  Mon 24th-Mar-2014___0.384 kwh3_R\" -> \"Categorical\" ;\n           \"Numeric\" -> \"Continuous\" ;\n           \"Continuous\" -> \"Ratio\" ;\n           \"Ratio\" -> \"Usage: 0.384\";\n           \"Numeric\" -> \"Discrete\" ;\n           \"Discrete\" -> \"Time/Date: 3 PM  Mon 24th-Mar-2014\";\n           \"Categorical\" -> \"Nominal\" ;\n           \"Nominal\" -> \"Customer Type: R\";\n           \"Nominal\" -> \"Units of Measurement: kwh\";\n           \"Categorical\" -> \"Ordinal\" ;\n           \"Ordinal\" -> \"Quality Rating: 3\"\n           }","options":{"width":"100%","height":"100%","nodes":{"shape":"dot","color":{"background":"white","border":"blue","highlight":"yellow"}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"nodeSpacing":200,"sortMethod":"directed"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":{"text":"Electricity Usage Data Classification","style":"font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
+<p>Even though the time “3 PM” be would be parsed into 15:00 hours (on a 24-hour clock), the “PM” string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.</p>
 </div>
-<p>We have a mixture of categorical and numeric data in this data set. The data could be ordered by the time / data stamp when the observations of electrical usage were collected from meters. In this case we culd classify the data as a time series. One of the implications of this classification is that we might want to compare one time versus another. For example we could ask these questions:</p>
-<ul>
-<li><p>Is morning usage different from nightly usage?</p></li>
-<li><p>Are summar months’s usage different from winter months?</p></li>
-<li><p>Is there a trend year to year?</p></li>
-</ul>
-<p>On the other hand we could view this data as a cross-section of usage sampled at verious times and classified by the type of electricity user or even by the ordinal quality of service series. In a cross-sectional context, we would view the data irrespective of time. However we can group the data into time buckets such as norming and night to aggregate customer usage. We can ask these questions of the data so arranged:</p>
-<ul>
-<li><p>Are there different levels of usage among the types of customers?</p></li>
-<li><p>Are qaulity of service levels different among the types of customers?</p></li>
-</ul>
+<p><br></p>
+<p>We have a mixture of categorical and numeric data in this data set. The data could be ordered by the time / data stamp when the observations of electrical usage were collected from meters. In this case we culd classify the data as a time series. One of the implications of this classification is that we might want to compare one time versus another. For example we could ask these questions: - Is morning usage different from nightly usage? - Are summar months’s usage different from winter months? - Is there a trend year to year? On the other hand we could view this data as a cross-section of usage sampled at verious times and classified by the type of electricity user or even by the ordinal quality of service series. In a cross-sectional context, we would view the data irrespective of time. However we can group the data into time buckets such as norming and night to aggregate customer usage. We can ask these questions of the data so arranged: - Are there different levels of usage among the types of customers? - Are qaulity of service levels different among the types of customers?</p>
 </div>
 <div id="what-have-we-learned" class="section level2">
 <h2>What have we learned?</h2>
-<p><strong>Why does any of this matter?</strong> The general question is bias and manipulation are possible if we fail to select all relevant, verifiable data that sufficiently describes and explains our research, decisions, and raises questions for further inquiry.</p>
-<ul>
-<li><p>Systematic inquiry uses structures to name, associate, analyze, and conclude the properties of data</p></li>
-<li><p>A proposed classification hierarchy anticipates the data used to analyze a pratical research problem</p></li>
-<li><p>A test of the hierarchy using rules of empirical methodology confirms the validity of the classifications of the data and reaches into further questions for inquiry</p></li>
-<li><p>A provisional structure helps us to identify and correct bias</p></li>
-</ul>
+<p><strong>Why does any of this matter?</strong> The general question is bias and manipulation are possible if we fail to select all relevant, verifiable data that sufficiently describes and explains our research, decisions, and raises questions for further inquiry. - Systematic inquiry uses structures to name, associate, analyze, and conclude the properties of data - A proposed classification hierarchy anticipates the data used to analyze a pratical research problem - A test of the hierarchy using rules of empirical methodology confirms the validity of the classifications of the data and reaches into further questions for inquiry - A provisional structure helps us to identify and correct bias</p>
 </div>
 <div id="review-these-scenarios" class="section level2">
 <h2>Review these scenarios</h2>
@@ -7030,7 +7017,7 @@ _5AM Tue 19th-Aug-2014___1.228 kwh_4_C
 <ol start="2" style="list-style-type: decimal">
 <li>Why would the manager want to infer that the sample is representative of the whole output of batteries?</li>
 </ol>
-<br> <button onclick="showText(&#39;myDIV12&#39;)">show / hide</button>
+<p><br> <button onclick="showText(&#39;myDIV12&#39;)">show / hide</button></p>
 <div id="myDIV12" style="display:none;">
 <p>The manager can’t test the life of all of the batteries – that would destroy the output of the venture! Instead the manager might want to test the hypothesis that the average battery life is greater than, say, 1,000 hours, with a precision of 5% that the manager is wrong about this hypothesis.</p>
 </div>
@@ -7065,7 +7052,7 @@ _5AM Tue 19th-Aug-2014___1.228 kwh_4_C
 <ol start="3" style="list-style-type: lower-alpha">
 <li>What if the batteries were produced in various locations. What kind of data might the locations be?</li>
 </ol>
-<br> <button onclick="showText(&#39;myDIV16&#39;)">show / hide</button>
+<p><br> <button onclick="showText(&#39;myDIV16&#39;)">show / hide</button></p>
 <div id="myDIV16" style="display:none;">
 <p>Location is a classification and thus nominal.</p>
 </div>
@@ -7073,7 +7060,10 @@ _5AM Tue 19th-Aug-2014___1.228 kwh_4_C
 <ol start="4" style="list-style-type: lower-alpha">
 <li>The manager asks experts to rate the reliability of the batteries. What kind of data are the ratings?</li>
 </ol>
-<br> <button onclick="showText(&#39;myDIV17&#39;)">show / hide</button>
+<p><br></p>
+<button onclick="showText(&#39;myDIV17&#39;)">
+show / hide
+</button>
 <div id="myDIV17" style="display:none;">
 <p>Ratings rank in some order from bad to good, or unlikely to likely, or some other ordered range, and thus ordinal.</p>
 </div>

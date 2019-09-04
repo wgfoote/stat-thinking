@@ -50,6 +50,8 @@ In this unit we will:
 
 Data is all around us. It is first an observation of an event like number of store visits, and later might be observations of the result of a conceptual framework like customer satisfaction. Where we make a store transaction would result in latitude and longitude data. There is also data that describes other data like kilo-watt-hours as a unit of measurement for electricity usage.
 
+We will examine both **univariate** (from Latin _unus_, one, and _variare_, to change) or one-variable data series as well as **multivariate** (from Latin _multus_, many) or arrays of univariate series.
+
 ## March on
 
 Here is a classic example of the many types of data we will confront.
@@ -132,6 +134,7 @@ A hierarchy is an analytical technique that takes a group of objects and asks tw
 Notice that the departments and their children nodes are mutually exclusive of one another.
 
 </div>
+
 </br>
 
 In each department of science there are hierarchies and networks of metadata. Metadata are data about data. Statistics mirror life, and in life we find ourselves classifying the world around us to make some systematic sense of it.
@@ -193,38 +196,65 @@ At the bottom of the hierarchy are four typical, and quite inclusive, classes of
 - **Nominal** (from the Latin _nomen_, name) label variables, without any reference to their quantitative content.  This is first step in analysis: break down data into useful categories, assign labels, aggregate data according to the categories. Examples include any classification scheme, just like the data herarchy itself: gender, class section, resident county.
 
 - Building on nominal categories we have ***ordinal** scales (from the Latin _ordo, ordinis_, order) that rank levels of a variable from lowest to highest. There is no significance to the distance between ordinal scale levels, only the order is important. We might order customer satisfaction from a low level to a high level on a scale of 1 to 5. We might rank our prefewrences for beverages in which we might prefer milk (an ordinal value of 5) to beer (an ordinal value of 4), and so on. One level is simply better than another. As with nominal categories, ordinal scales do not contain any information about how much more we might prefer milk to beer.
+
 - **Interval** (from Latin _intervallum_, space between two walls) scales build both the order and the exact differences between the values.  The classic example of an interval scale is earnings per share because the difference between each value is the same.  For example, the difference between -1.20 and -1.19 EPS is a measurable 0.01 EPS in currency units per share of adjusted common stock, as is the difference between 0.01 and 0.02. Using interval scales we can measure entral tendency with mode, median, or mean; standard deviation can also be calculated. However, consider this: 1.12 EPS plus 1.12 EPS is 2.14 EPS.  But the result does not necessarily mean that 2.14 EPS is simply twice as high as 1.12 since EPS can take on negative values. There is no such thing as no EPS. A zero EPS is not no EPS, it is just a measure of positive earnings less negative earnings. There is no baseline or frame of reference to compare EPS.
+
 - **Ratio** scales (from Latin _ratio_, explanation) use a base case, zero, to compute comparable levels of a variable. The maximium of a ratio scale can be any positive value. The minimum is zero. This allows us to compare as a fraction or multiple one value against another, thus providing a componennt of an explanation of the relative value of a variable. Using the example of a range of EPS from -1.10 to 1.20, we see that this is clearly an interval variable range. It is not yet a ratio scale. We would have to transform the series to a new scale where -1.10 is zero. We can do this by subtracting 1.10 from all values of EPS ranging from -1.10 to 1.20. This yields a new scale from 0 to 1.10. Only in this way can we faithly compare one EPSA to another. Thus an EPS of -1.05 is only 0.05 higher than -1.10 or 0.05/1.10 = `r round((0.05/1.10)*100, 2)`\% higher than -1.10. 
+
 2. Map the data in the research example to the hierarchy.
+
 </br>
 <button onclick="showText('my2')">show / hide</button>
 <div id="my2" style="display:none;">
 </br>
+
 Let's classify the data in the the research example with this hierarchy.
+
 - Cases: or "observations" include measurements relative to 143,196 births between the years 1989 and 1993 (Discrete - simply a convenient lexicographic index, not necessarily ordinal).
+
 - Variables: air quality station (discrete - nominal), year (discrete - nominal) length of gestation (continuous - ratio - has a 0 starting basis), levels of carbon monoxide were recorded in parts per million (continuous - ratio), nitrogen dioxide and ozone in parts per hundred million (continuous - ratio), and coarse particulate matter (PM10) in $\mu/m^3$ (continuous - ratio). All continuous variables are based from zero to some positive number. There appear to be no continuous - interval measures that would allow negative numbers (e.g., temperature in degrees centigrade).
+
 What further questions might be possibly related to these measures? Do these questions anticipate the collection of discrete- ordinal variables? For example, are there preferences for living in one region versus another (ordinal)? How satisfied are respondents with air quality?
+
 </div>
 </br>
+
 3. Describe the usefulness of the components of your data classification hierarchy to answer the main research question above.
+
 The data classification hierarchy is a theory to be tested. A **canon** is a general law, rule, principle, or criterion by which something is judged. Let's test this hierarchy against these canons of empirical method, expressed as questions for consideration (see [and astrophysicist's view of these canons](https://adh-sj.info/canons.php), both based on [Bernard Lonergan's _Insight_, Longmans, London 1957, chapter III](https://www.amazon.com/Insight-Understanding-Collected-Bernard-Lonergan/dp/0802034551) :
+
 - **Relevance and Selection**: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
+
 - **sufficiency**: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
+
 - **Parsimony**: is the hierarchical description of data itself verifiable in the data?
+
 - **Completeness**: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+
 </br>
+
 <button onclick="showText('my3')">show / hide</button>
 <div id="my3" style="display:none;">
 </br>
+
 By canon:
+
 - **Relevance and Selection**: Does the hierarchy use terms and relationships that hint at attributes in the data in the example? Does the hierarchy anticipate, and possibly raise further questions about the data? Does the hierarchy select relevant data and de-select irrevelant data.
+
 _Yes it does. Anticipated are variables that are non-integer (as well as integer) and simply unordered categorical data. Other types are possible, but not present._
+
 - **Sufficiency**: If you use another node or relationship in the hierarchy, does that add anything new to the description that is relevant?
+
 _No it does not. It seems that the continuous and discontinuous numeric variables are sufficient for numeric variables if only because they are mutually exclusive. The same for nominal (unordered) and ordinal (ordered). If fact the hierarchy **overfits** the data in this exercise by the inclusion of discrete and ordinal data types. Including these anticipate relevancy and selection in other studies._ 
+
 - **Parsimony**: is the hierarchical description of data itself verifiable in the data?
+
 _Yes it is. Again our data seems well matched to the lowest level of the hierarchy. Further levels might delineate attributes of the previous level. For example, add another component, say integer. But integer is just another way of saying discrete variable. so this doesn't add anything. Are there other categories of numeric or categorical data? There do not seem so._
+
 - **Completeness**: does this hierarchy account for all of the aspects you observe about data in this example? In other words, does the hierarchy somehow employ all of the data available, relevant, sufficient, and verifiable in this example.
+
 _Yes it does. The data in the example are continuous, discrete, nominal, and ordinal. There does not seem to be any other relevant data available within the field of this example._
+
 </div>
 </br>
 
@@ -243,13 +273,17 @@ usage %>%
   kable("html", escape = F) %>% 
     kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
 ```
+
 All of the raw data is in a text string. We can parse the text into time of day, date, usage level, units of measurement, a quality rating (1-5), and a customer type ( _R_ for residential and _C_ for commercial) . Elements such as blank spaces and underscores (i.e., "_") would be eliminated as delimiters.
 Does the data type hierarchy still apply?
+
 </br>
 <button onclick="showText('my8')">show / hide</button>
 <div id="my8" style="display:none;">
 </br>
+
 Let's modify the hierarchy a bit to include the text string raw data. Hover over any arrow line, then click on the line to move the entire network into position for better viewing.
+
 ```{r elec-usage}
 visNetwork(main = list(text = "Electricity Usage Data Classification",
  style = "font-family:Comic Sans MS;color:#ff0000;font-size:15px;text-align:center;"),
@@ -271,8 +305,12 @@ visNetwork(main = list(text = "Electricity Usage Data Classification",
   visNodes(color = list(background = "white", border = "blue", highlight = "yellow")) %>%
   visHierarchicalLayout(nodeSpacing = 200, sortMethod = "directed")
 ```
-Even though the time "3 PM"  be would be arsed into 15:00 hours (on a 24-hour clock), the "PM" string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.
+
+Even though the time "3 PM"  be would be parsed into 15:00 hours (on a 24-hour clock), the "PM" string could be used as discrete data to mark the second 12 hours of a day. Both usage and time are ratio types since both would start at a zero point. We might argue that days from 1/1/1900 to the date in the data is discrete as might be hours ending 3PM.
+
 </div>
+<br>
+
 We have a mixture of categorical and numeric data in this data set. The data could be ordered by the time / data stamp when the observations of electrical usage were collected from meters. In this case we culd classify the data as a time series. One of the implications of this classification is that we might want to compare one time versus another. For example we could ask these questions:
 - Is morning usage different from nightly usage?
 - Are summar months's usage different from winter months?
@@ -292,58 +330,91 @@ On the other hand we could view this data as a cross-section of usage sampled at
 ## Review these scenarios
 
 1. How can a production manager in a start-up summarize and describe to the board of directors the results of testing the life of a sample of 100 revolutionary light-weight organic batteries?
+
 <br>
 <button onclick="showText('myDIV11')">show / hide</button>
 <div id="myDIV11" style="display:none;">
+
 There is too much raw data to show the board. The manager wants to summarize the results by displaying the average life and range of lives of the batteries. The manager might also divide the sample into low, medium, and high durations to illustrate the distribution of lives in the sample. Each of these is an example of descriptive statistics.
+
 </div>
 <br>
+
 2. Why would the manager want to infer that the sample is representative of the whole output of batteries?
+
 <br>
 <button onclick="showText('myDIV12')">show / hide</button>
+
 <div id="myDIV12" style="display:none;">
 The manager can't test the life of all of the batteries -- that would destroy the output of the venture! Instead the manager might want to test the hypothesis that the average battery life is greater than, say, 1,000 hours, with a precision of 5% that the manager is wrong about this hypothesis.
+
 </div>
 <br>
+
 3. Identify the population and sample in this situation.
+
 <br>
 <button onclick="showText('myDIV13')">show / hide</button>
 <div id="myDIV13" style="display:none;">
 The manager takes a sample of 100 batteries from a population that includes all of the venture's output. The manager would like to describe the sample in a way that is probably representative of the output of the venture.
+
 </div>
 <br>
+
 4. The manager is putting together a testing database.
+
 a. What kind of data is the average life of the batteries? 
+
 <br>
 <button onclick="showText('myDIV14')">show / hide</button>
 <div id="myDIV14" style="display:none;">
 Since life is greater than or equal to zero, life data would numeric. Because I can always find a life value between any two consecutive life values, the data is continuous.
+
 </div>
+
 <br>
+
 b. What about the number of batteries in each location?
+
 <br>
 <button onclick="showText('myDIV15')">show / hide</button>
 <div id="myDIV15" style="display:none;">
+
 All counts are integers and thus discrete.
+
 </div>
 <br>
+
 c. What if the batteries were produced in various locations. What kind of data might the locations be? 
+
 <br>
 <button onclick="showText('myDIV16')">show / hide</button>
+
 <div id="myDIV16" style="display:none;">
+
 Location is a classification and thus nominal.
+
 </div>
 <br>
+
 d. The manager asks experts to rate the reliability of the batteries. What kind of data are the ratings?
+
 <br>
+
 <button onclick="showText('myDIV17')">show / hide</button>
+
 <div id="myDIV17" style="display:none;">
+
 Ratings rank in some order from bad to good, or unlikely to likely, or some other ordered range, and thus ordinal.
+
 </div>
 
 ## Try this
 
 Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures > socio-economic factors for your investigation. [You can navigate to this site for an interactive view.](https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data)
+
 1. [Download this report](https://www.countyhealthrankings.org/sites/default/files/state/downloads/CHR2019_NY.pdf)
+
 2. Identify at least two examples each of nominal, ordinal, interval, and ratio variables.
+
 3. Upon reading this report, are appropriate data types reach valid conclusions? For example, if a conclusion reached indicates that one segment of the sampled population is twice as large as the sampled population of another segment, are ratio measurement scales used?
