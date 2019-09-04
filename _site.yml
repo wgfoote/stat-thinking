@@ -21,6 +21,7 @@ navbar:
     - text: "Explore"
       menu:
       - text: "Distribution"
+        href: html/qq-distribution.html
       - text: "Tendency"
         href: html/qq-central-tendency.html
       - text: "Deviation"
