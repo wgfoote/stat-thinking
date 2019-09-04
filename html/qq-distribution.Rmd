@@ -1,0 +1,276 @@
+---
+title: "The shape of data"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(visNetwork))
+```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Learning outcomes
+
+In this unit we will learn to:
+
+1. Arrange numeric data into groups (also known as bins, classes, intervals)
+
+2. Count the number of data points in each group: the frequency
+
+3. Transform the absolute frequency (count) into a relative frequency and cumulative relative frequency
+
+4. Plot on the vertical axis the relative and cumulative relative frequencies of the horizontal axis midpoints of each bin
+
+5. Use the plots to describe the shape of the data and the implications of shape for decisions
+
+For the plots we will use a special bar graph called a histogram. We could also connect the midpoints with a line to produce a polygon graph. These graphs will help us answer two questions:
+
+1. What is the range of impact of the variable?
+
+2. How often do values and ranges of values of the variable occur?
+
+
+## How well did we do?
+
+Imagine we run a distribution center for a major appliance manufacturer. Key indicators of our operational performance include the number of on-time in-full orders delivered, time from receipt of order to delivery, returns, and overall service level. Time, cost, and quality are the hallmarks of a well run supply chain. 
+
+Here is a sample of 20 separate on-time in-full orders for the past month. Each observation is the number of items in the order.
+
+```{r orders}
+set.seed(1012)
+orders <- sample(x = 76:100, size=20, replace=TRUE, prob=c(rep(0.10, 5), rep(0.30, 8), rep(0.40, 7), rep(0.15, 4), rep(0.20, 1)))
+orders_tbl <- orders[order(orders)]
+column_names <- c(1:length(orders))
+row_names <- "orders"
+table_data <- matrix(orders, nrow = 1, ncol = length(orders), byrow = TRUE) 
+colnames(table_data) <- column_names
+rownames(table_data) <- row_names
+table_data %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "red", border_right = TRUE) 
+```
+
+The data is a mix of various values with an index in the top row.
+
+Our procedure straitforward:
+
+1. Arrange the data from lowest to highest values
+
+```{r sort}
+orders_sort <- orders[order(orders)]
+column_names <- c(1:length(orders))
+row_names <- "sorted \n orders"
+table_data <- matrix(orders_sort, nrow = 1, ncol = length(orders_sort), byrow = TRUE) 
+colnames(table_data) <- column_names
+rownames(table_data) <- row_names
+table_data %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "red", border_right = TRUE)
+min_orders <- min(orders_sort)
+max_orders <- max(orders_sort)
+n_bins <- 5
+bin_width <- (max_orders - min_orders) / n_bins
+library(dplyr)
+orders_df <- data_frame(orders = orders_sort)
+orders_bin <- orders_df %>% 
+  mutate(category=cut(orders, breaks=c(-Inf, min(orders) + 1:4*round((max(orders) - min(orders)),0) / 5, Inf), labels=c("very low","low","medium","high", "very high"))) %>% 
+  group_by(category) %>% 
+  add_tally() %>% 
+  group_by(category) %>% 
+  summarize ( frequency = mean(n) ) %>% 
+  mutate(begin = min(orders) + 0:4*(max(orders)-min(orders))/length(category), end = min(orders) + 1:5*(max(orders)-min(orders))/length(category)) %>% 
+  mutate(midpoint = (begin + end) / 2) %>% select(category, begin, end, midpoint, frequency)
+#orders_bin 
+```
+The data has also been re-indexed as shown in the top row of the table.
+
+2. Choose the number of bins (groups, intervals). Let's choose 5 bins. Usually bins are an odd, not an even, number. They typically range from 3 to 9 in practice.
+
+3. Calculate the bin width. We let $w$ be the width, $n$ the number of bins and $x$ the sorted orders in the formula below.
+
+$$
+w = \frac{max(x)-min(x)}{n} = \frac{`r max_orders` - `r min_orders`}{`r n_bins`} = `r bin_width`
+$$
+Already we are binning to describe our data. We have sorted it from lowest value $min(x)$ to the highest value $max(x)$. We are beginning to group the data into $n=`r n_bins`$.
+
+4. In a vertical table arrange the bins from lowest interval to highest. Initially use 5 columns as in the table below. The intervals will each have a beginning and ending value such that groups of orders will lie in non-overlapping intervals of bin-width.
+
+$$
+begin \leq orders < end
+$$
+We do not want to ever double count the number of orders in a bin, thus the $<$ relation for the end. The first $begin$ value is the minimum order $`r min_orders`$. The bin-width is $`r bin_width`$. The ending value of the first interval is then 
+
+$$
+end = begin + width = `r min_orders` + `r bin_width` = `r min_orders + bin_width` 
+$$
+
+Thus our first interval looks like this
+
+$$
+`r min_orders` \leq orders < `r min_orders + bin_width`
+$$
+
+The interval or class midpoint is the arithemetic average of the interval from beginning to end. So for the first group
+
+$$
+midpoint = \frac{begin+end}{2} = \frac{`r min_orders` + `r min_orders + bin_width`}{2} = `r (min_orders + min_orders + bin_width)/2`
+$$
+
+Because we have sorted our data, it is a simple exercise to count the number of orders in this first bin just by examining the sorted series.
+
+<br>
+
+How many are there?
+
+<br>
+
+<button onclick="showText('mydiv10')">show / hide</button>
+<div id="mydiv10" style="display:none;">
+<br>
+
+Just 2.
+
+</div>
+
+<br>
+
+The relationships in the last interval are very important to remember. From the very low to the high intervals the relationships are
+
+$$
+begin \leq orders < end
+$$
+
+But to obery the rubric that we must use all of our data (and also remember not to every double count), the last, the very high interval has these relationships.
+
+$$
+begin \leq orders \leq max(orders)
+$$
+
+We must always remember to use the $\leq$ relationship to include the $max(x)$ of our data series.
+
+Let's build out the table  with 5 columns: category, begin, end, midpoint, frequency. Try this on paper.
+
+<br>
+<button onclick="showText('mydiv11')">show / hide</button>
+<div id="mydiv11" style="display:none;">
+<br>
+
+```{r table-1}
+table_data <-  orders_bin
+table_data %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "red", border_right = TRUE)
+```
+
+<br>
+
+</div>
+
+<br>
+
+5. A few more steps and we will have a table of derived metrics to help answer our questions about the distribution center. In another column we calculate for each interval the **relative frequency** as the percentage of the bin's frequency count of the total count (20) of the sample. In the first interval are 2 very low observations. The relative frequency (%) is thus 2/20 or 10\% of the sample. We continue with the rest of the bins. Next we calculate the cumulative sum of contributions of the sample to all classes up to and including the latest class. If the relative frequency of the second class is 7/20 or 35\%, then the cumulative relative frequency across both the first (10\%) and the second (35\%) intervals is 45\%. This means that45\% of the sample contributes to very low and low levels of order sizes.
+
+Let's finish building the table with two more columns. After that we can plot our handiwork. 
+
+1. What do we notice about the cumulative relative frequency result in the last bin?
+
+2. How much of the data is high or very high in orders?
+
+<br>
+<button onclick="showText('mydiv12')">show / hide</button>
+<div id="mydiv12" style="display:none;">
+<br>
+
+```{r full-table}
+orders_bin <- orders_bin %>% mutate(relative = frequency * 100 / sum(frequency), cumulative = cumsum(frequency) *100 / sum(frequency))
+table_data <-  orders_bin
+table_data %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "red", border_right = TRUE)
+```
+
+1. By the last bin we have exhausted our data and we now have 100\% of the data accounted for.
+
+2. We can use the cumulative relative frequency column to answer this question. Very high is 100\% while medium is the next step below high. We can subtract medium from very high to get our answer: 100\% - 60\% = 40\% of the data is high or very high (an _either / or_ proposition).
+
+</div>
+
+</br>
+
+6. Let's plot our table. Draw a box, the left vertical side of which is the relative frequency in percentage (label this axis), the right vertical side of which is cumulative relative frequency (again label this secondary axis), with the bottom horizontal side the midpoints of the 5 bins (and again label using the midpoints and the categories for visual clarity). Plot relative frequency versus midpoints using a bar chart and cumulative relative frequency versus midpoint using a line plot.
+
+What do you get?
+
+<br>
+<button onclick="showText('mydiv13')">show / hide</button>
+<div id="mydiv13" style="display:none;">
+<br>
+
+Here is an example without a secondary axis.
+
+```{r histogram-cumsum}
+p <- orders_bin %>% 
+  ggplot(aes(x = midpoint, y = relative)) +
+    geom_col(color = "green", fill = "green", alpha = 0.80) +
+    geom_point(aes(y = cumulative), color = "red", size = 3) +
+    geom_line(aes(y = cumulative), color = "blue") +
+    scale_x_continuous("midpoint", labels = as.character(orders_bin$midpoint), breaks = orders_bin$midpoint) +
+    xlab("relative and cumulative relative frequncy (%)") +
+    ggtitle("On time-in full orders last month")
+p
+    
+```
+
+The histogram is the bar chart across all five midpoints. The line plot is called an **ogive* curve (from Latin _augere_, to increase).
+
+</div>
+
+## Review these scenarios
+
+TO BE CONTINUED!
+
+## Try this
+
+Apply the data hierarchy to the county health outcome rankings and data base for states in the US. Find the types of data and apply the canons of empirical method to your findings. Choose Other measures > socio-economic factors for your investigation. [You can navigate to this site for an interactive view.](https://www.countyhealthrankings.org/app/new-york/2019/measure/outcomes/1/data)
+
+1. [Download this report](https://www.countyhealthrankings.org/sites/default/files/state/downloads/CHR2019_NY.pdf)
+
+2. Identify at least two examples each of nominal, ordinal, interval, and ratio variables.
+
+3. Upon reading this report, are appropriate data types reach valid conclusions? For example, if a conclusion reached indicates that one segment of the sampled population is twice as large as the sampled population of another segment, are ratio measurement scales used?
