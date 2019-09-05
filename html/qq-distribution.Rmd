@@ -355,6 +355,10 @@ ggplotly(p)
 
 <br>
 
+## Two dimensions?
+
+[Here is an example of a two dimensional frequency distribution.](html/bx-crime.html)
+
 
 ## Try this
 
