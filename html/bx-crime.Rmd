@@ -1,6 +1,5 @@
 ---
 title: "Locating to the Bronx?"
-date: "August 16, 2018"
 output:
   html_document:
     toc: true
@@ -9,6 +8,14 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggmap)
+library(stringr)
+library(viridis)
+library(plotly)
+#
+api_key <- "AIzaSyA5XmoJgeHOcNNxqixIQojokXOB_7YwOMY"
+register_google(api_key, write = TRUE)
 ```
 
 # Situation, complications, and a question
@@ -24,6 +31,7 @@ library(tidyverse)
 library(ggmap)
 library(stringr)
 library(viridis)
+library(plotly)
 
 #Load data
 
@@ -38,7 +46,11 @@ ggplot() +
 
 # Get map
 
-we need a satellite map of the Bronx and will use `ggmap` to download and view the map.
+we need a satellite map of the Bronx and will use `ggmap` to download and view the map. But first you need to get a Google geocoding API key. As of mid-2018, the Google Maps Platform requires a registered API key. While this alleviates previous burdens (e.g. query limits), it creates some challenges as well. You will have to setup an account with Google, enable the relevant APIs, and then tell R about the user's setup.
+
+To obtain an API key and enable services, [go to this site.](https://cloud.google.com/maps-platform/). 
+
+To tell ggmap about your API key, use the register_google() function, e.g. register_google(key = "mQkzTpiaLYjPqXQBotesgif3EfGL2dbrNVOrogg", write = TRUE) (that's a fake key). This will set it permanently where it is stored in your .Renviron file, and that will be accessed by ggmap persistently across sessions.
 
 ```{r}
 map_bx <- get_map("Bronx", zoom = 12, maptype = 'satellite')
@@ -73,4 +85,4 @@ p
 
 # Decision?
 
-Not quite yet! There are neighborhoods to probably avoid and suggested by the clusters of high density incidents. Our next stop might be a visit to the Economic Development Corporation for data about economic and commercial zones in the Bronx.
+Not quite yet! There are neighborhoods to assess further. Here we have several neighborhoods suggested by the clusters of high and low density incidents to ponder. Our next stop might be a visit to the Economic Development Corporation for data about economic and commercial zones in the Bronx.
