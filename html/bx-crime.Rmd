@@ -1,0 +1,76 @@
+---
+title: "Locating to the Bronx?"
+date: "August 16, 2018"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Situation, complications, and a question
+
+Imagine that a business wants to locate its offices in the Bronx to take advantage of NYC incentives and relatively low rents. The operation is 24/7, so some workers will be coming to and going from work late at night. Are there any areas so unsafe that the business should avoid these neighborhoods?
+
+# Load and inspect data
+
+Open NYC Data has NYPD complaint data for the past few months at <https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-YTD/5uac-w243/data>, We will use `tidyverse` to read and inspect the data structurally and visually. A simple `lat` and `lon` (latitude and longitude) scatter plot will indicate light and dark areas for us to inspect the data.
+
+```{r}
+library(tidyverse)
+library(ggmap)
+library(stringr)
+library(viridis)
+
+#Load data
+
+bx_crime <- read_csv("bx-crime.csv")
+
+# Inspect data
+
+bx_crime %>% glimpse()
+ggplot() +
+  geom_point(data = bx_crime, aes(x = lon, y = lat), alpha = .05)
+```
+
+# Get map
+
+we need a satellite map of the Bronx and will use `ggmap` to download and view the map.
+
+```{r}
+map_bx <- get_map("Bronx", zoom = 12, maptype = 'satellite')
+ggmap(map_bx)
+```
+
+# Build heat map
+
+Again using `ggmap`, based on `ggplot2`, we use the `stat_density2d` function to view an overlay of the incidents scatterplot onto the Google satellite map. Titles, labels, density colors (courtesy of `viridis` and the `inferno` color option), along with theme formatting complete the picture.
+
+```{r}
+p <- ggmap(map_bx) +
+  stat_density2d(data = bx_crime, aes(x = lon, y = lat, 
+      fill = ..density..), geom = "tile", contour = F, alpha = .5) +
+  scale_fill_viridis(option = "inferno") +
+  labs(title = str_c("BX has largest concentration of crime\n"
+                     ,"near Fordham Rd., Morrisania, and the South Bronx"
+                     ),
+       subtitle = str_c("2017-18 source:", "\nhttps://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-YTD/5uac-w243/data"),
+       fill = str_c("Number of", "\ncrime incidents")
+       ) +
+  theme(text = element_text(color = "#444444"),
+        plot.title = element_text(size = 13, face = 'bold'),
+        plot.subtitle = element_text(size = 8),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank()
+        ) +
+  guides(fill = guide_legend(override.aes= list(alpha = 1)))
+p
+```
+
+# Decision?
+
+Not quite yet! There are neighborhoods to probably avoid and suggested by the clusters of high density incidents. Our next stop might be a visit to the Economic Development Corporation for data about economic and commercial zones in the Bronx.
