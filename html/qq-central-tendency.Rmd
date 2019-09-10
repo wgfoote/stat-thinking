@@ -14,6 +14,7 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(stringr))
 library(plotly)
+options(digits = 2, scipen = 9999999)
 ```
 
 <script>
@@ -86,7 +87,7 @@ $$
 Y_i = m + e_i
 $$
 
-We think (really we suppose or hypothesize) that each and every price, $Y_i$ is composed of a systematic constant price $m$ plus an unsystematic error or deviation from the average $e_i$. This might be because we do not know enough about auctions, used cars, whatever, to think there might be a systematic factor that might influence car price $Y_i$.
+We think (really we suppose or hypothesize) that each and every price, $Y_i$ is composed of a systematic constant price $m$ plus an unsystematic error or deviation from the average, called here $e_i$. This might be because we do not know enough about auctions, used cars, whatever, to think there might be a systematic factor that might influence car price $Y_i$.
 
 ```{r model-error-plot}
 price_tbl <- tibble(observation = 1:length(price), price = price)
@@ -108,7 +109,26 @@ There are three usual suspects for getting at a best average in this situation. 
 
 3. The sum of squared deviations or errors (SSE): $\Sigma_{i=1}^5(Y_i - m)^2$ 
 
-There are many criteria we could choose. We would typically choose mean absolute deviations of the data from the mean or the sum of squared deviations from the mean. The graph depicts the sum of squared deviations. Use of such a criterion allows us a clear and in this case unique calculation of the best linear estimator for the mean.
+There are many criteria we could choose. Which one might work best?
+
+<br>
+
+<button onclick="showText('myDIV24')">show / hide</button>
+<div id="myDIV24" style="display:none;">
+
+<br>
+
+Simply summing the errors and trying to find the best $m$ never seems to work because the sum of errors always must be zero when $m$ is the mean. Try it!
+
+To use mean absolute deviation we would need to employ the simplex method from linear programming. On top of that one of the best LP formulations is to use goal programming. A great idea, but for our purposes a bit beyond today's scope.
+
+The sum of squared deviations from the mean allows us to take a first derivative and use first order conditions for a minimum. These conditions, in this situation, reduce the problem to the solution of a first-order linear equation in one unknown, $m$. 
+
+</div>
+
+<br>
+
+The graph depicts the sum of squared deviations. Use of such a criterion allows us a clear and in this case unique calculation of the best linear estimator for the mean.
 
 ```{r optimize}
 m <- seq(min(price), max(price), length.out = 300)
@@ -129,7 +149,22 @@ p <- ggplot(opt_plot, aes(x = m, y = SSE)) +
 ggplotly(p)
 ```
 
-A bit of calculus confirms the brute force choice of mean that minimizes the sum of squared deivations about the mean. Hover over the graph and brush over the area around the red dot to zoom in.
+Hover over the graph and brush over the area around the red dot to zoom in. What do we see?
+
+<br>
+
+<button onclick="showText('myDIV25')">show / hide</button>
+<div id="myDIV25" style="display:none;">
+
+<br>
+
+Simply putting the cursor on the red dot indicates a solution: $m=$ `r round(m_min, 0)`.
+
+</div>
+
+<br>
+
+A bit of calculus confirms the brute force choice of mean that minimizes the sum of squared deivations about the mean.
 
 First, the sum of squared errors (deviations) of the $X_i$ data points about a mean of $m$ is
 
@@ -147,10 +182,10 @@ Here we used the chain and power rules of differentiation.
 Third, we solve for $m$ to find
 
 $$
-m = \frac{\Sigma_{i=1}^5 Y_i}{N}
+m = \frac{\Sigma_{i=1}^5 Y_i}{N}=`r mean(price)`
 $$
 
-This is none other than the arithmetic mean. We will perform a very similar procedure to get the sample means of the y-intercept $b_0$ and slope $b_1$ of the relationship
+Close enough for us? This is none other than the arithmetic mean. We will perform a very similar procedure to get the sample means of the y-intercept $b_0$ and slope $b_1$ of the relationship
 
 $$
 Y_i = b_0 + b_1 X_i + e_i
@@ -192,6 +227,8 @@ The arithmetic mean assumes that all the observations $Y_i$ are equally importan
 
 <button onclick="showText('myDIV21')">show / hide</button>
 <div id="myDIV21" style="display:none;">
+
+<br>
 
 Each observation is weighted by $1/N$ where $N$ is the number of observations. If $N=5$ as with the car auction prices, then each observation contributes $1/5=20$\% to the overall average.
 
