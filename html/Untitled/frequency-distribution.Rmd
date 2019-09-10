@@ -1,0 +1,86 @@
+---
+title: "What is the shape of data?"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Learning outcomes
+
+By the end of this unit you will be able to:
+
+- Visualize the frequency and impact of a single series of data
+
+- Calculate the relative and cumulative relative frequency of the data for equally spaced class intervals of observations
+
+- Graph the relative and cumulative relative frequency distributions
+
+- Interpret the graphs and underlying calculations
+
+## Visualize the data
+
+It is often useful to organize a data sample into a frequency distribution. **Frequency** is simply the number or count of observations. This arrangement breaks up the data into classes or groups and shows the number of observations in each class. 
+
+- The number of class intervals is usually an odd number between 5 and 15. Each interval is equally spaced. The intervals are not overlapping.
+
+- We derive a relative frequency distribution by dividing the number of observations in each class by the total number of observations. 
+
+- The sum of the frequencies must always equal the number of observations from the sample. The sum of the relative frequencies must always equal 1. 
+
+There are three graphs we can make using this procedure:
+
+1. A **histogram** is a bar graph of a frequency or relative frequency distribution, where classes are measured along the horizontal axis and frequencies or relative frequencies along the vertical axis. 
+
+2. A **frequency polygon** is a line plot of a frequency distribution which joins the frequency of each class plotted at the class midpoint. A **relative frequency** polygon uses the relative frequency (fraction of observations in each class).
+
+3. A **cumulative relative frequency distribution** shows, for each class, the total number of observations in
+all classes up to and including that class. When plotted, this gives a cumulative distribution curve, or **ogive**.
+
+## Build a histogram
+
+
+
+## Topic 2
+
+### Exercise with Hint
+
+*Here's an exercise where the chunk is pre-evaulated via the `exercise.eval` option (so the user can see the default output we'd like them to customize). We also add a "hint" to the correct solution via the chunk immediate below labeled `print-limit-hint`.*
+
+Modify the following code to limit the number of rows printed to 5:
+
+```{r print-limit, exercise=TRUE, exercise.eval=TRUE}
+mtcars
+```
+
+```{r print-limit-hint}
+head(mtcars)
+```
+
+### Quiz
+
+*You can include any number of single or multiple choice questions as a quiz. Use the `question` function to define a question and the `quiz` function for grouping multiple questions together.*
+
+Some questions to verify that you understand the purposes of various base and recommended R packages:
+
+```{r quiz}
+quiz(
+  question("Which package contains functions for installing other R packages?",
+    answer("base"),
+    answer("tools"),
+    answer("utils", correct = TRUE),
+    answer("codetools")
+  ),
+  question("Which of the R packages listed below are used to create plots?",
+    answer("lattice", correct = TRUE),
+    answer("tools"),
+    answer("stats"),
+    answer("grid", correct = TRUE)
+  )
+)
+```
+

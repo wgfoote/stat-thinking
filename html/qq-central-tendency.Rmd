@@ -1,16 +1,19 @@
 ---
-title: "Quick Quiz: what do data tend to?"
-output: html_document
+title: "What data tends to: building a position"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(kableExtra))
-suppressPackageStartupMessages(library(bsselectR))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(stringr))
+library(plotly)
 ```
 
 <script>
@@ -24,28 +27,206 @@ function showText(y) {
 }
 </script>
 
+## Learning outcomes
+
+In this unit you will learn to:
+
+1. Build a model for which you can derive a simple, but optimized, estimator of a measure of central tendency
+
+2. Using a frequency distribution approach calculate additional measures of aggregate position of data
+
+3. Compare, contrast various measures of tendency
+
+By tendency we mean how data elements might aggregate, accumulate, even congregate around or near a particular data point. Elementary examples of this measure are the arithmetic mean and the median. More sophisticated measures of position include quantiles, with quartiles as a special case, and the frequency-weighted average of grouped data.
+
+Position measures help us gain insight into trends, beliefs, and upper and lower limits of decision drivers. Bwecause they are aggregates, they necessarily abstract from the individual data points themselves. The measures do ehlp us understand teh systematic movement of a stream of data. But they also indicate how far they are away from any given piece of data. This distance is something we will exploit now and, and in the next installment even more so.
+
+## The best we have
+
+All statistics is born in two simple ideas:
+
+- There either is or is not a sytematic pattern, an aggregation, a trend in the data
+
+- Individual data do not sytematically deviate from this pattern or trend.
+
+Let's consider this sample of 5 observations of car prices at a recent auction in New Jersey:
+
+```{r auction}
+price <- c(12500,
+           13350,
+           14600,
+           15750,
+           17500
+)
+price_tbl <- tibble(price = price)
+
+price_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE) 
+```
+
+Suppose that as you cross the GW Bridge from the Bonx into New Jersey, you hear an advertisement on the radio proclaiming that, at the very auction you are going to, the average car price is $14,000.
+
+Let's let $X_i$ be the series of $i-1\dots5$ prices and $a=14000$ be the advertiser's estimate of the averaga, trend, or belief in what the car price is. Here is table of how prices deviate from the advertiser's announcement.
+
+```{r advert}
+a <- 14000
+price_tbl <- tibble(price = price, deviation = price - a)
+price_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(2, bold = T, color = "red", border_right = FALSE) 
+```  
+
+Of course there may be many such beliefs about the average price and thus many different possible deviations. Our job is to find the average that is best in a very particular sense. Here is our model.
+
+$$
+Y_i = m + e_i
+$$
+
+We think (really we suppose or hypothesize) that each and every price, $Y_i$ is composed of a systematic constant price $m$ plus an unsystematic error or deviation from the average $e_i$. This might be because we do not know enough about auctions, used cars, whatever, to think there might be a systematic factor that might influence car price $Y_i$.
+
+```{r model-error-plot}
+price_tbl <- tibble(observation = 1:length(price), price = price)
+p <- ggplot(data = price_tbl, aes(x = observation, y = price)) + 
+  geom_point() + 
+  geom_hline(yintercept = a, color = "red", size = 1.5) +
+  geom_segment(aes(x = observation, y = price, xend = observation, yend = a), alpha = 0.3)
+p
+```
+
+
+Each of the hanging error bars from the blue points to the red line represent deviations of price from a supposed average $a=$ $14,000. Is this the best average we can come up with? Let's systematically think through this.
+
+There are three usual suspects for getting at a best average in this situation. We can try to find the average $m$ that minimizes 
+
+1. The sum of deviations or errors: $\Sigma_{i=1}^5(Y_i-m)$
+
+2. The sum of absolute deviations: $|\Sigma_{i=1}^5(Y_i - m)|$
+
+3. The sum of squared deviations or errors (SSE): $\Sigma_{i=1}^5(Y_i - m)^2$ 
+
+There are many criteria we could choose. We would typically choose mean absolute deviations of the data from the mean or the sum of squared deviations from the mean. The graph depicts the sum of squared deviations. Use of such a criterion allows us a clear and in this case unique calculation of the best linear estimator for the mean.
+
+```{r optimize}
+m <- seq(min(price), max(price), length.out = 300)
+SSE <- m
+for (i in 1:length(m)) { 
+  SSE[i] <- t(price - m[i]) %*% (price - m[i])
+}
+opt_plot <- tibble(m = m, SSE = SSE)
+SSE_min_index <- SSE == min(SSE) 
+SSE_min <- SSE[SSE_min_index]
+m_min <- m[SSE_min_index]
+
+p <- ggplot(opt_plot, aes(x = m, y = SSE)) +
+  geom_line(color = "blue", size = 1.25) +
+  geom_point(x = m_min, y = SSE_min, color = "red", size = 4.0) +
+  geom_segment(x = 0, y = SSE_min+5, xend = m_min, yend = SSE_min, color = "red", linetype = "dashed") +
+  geom_segment(x = m_min++5, y = 0, xend = m_min, yend = SSE_min, color = "red", linetype = "dashed")
+ggplotly(p)
+```
+
+A bit of calculus confirms the brute force choice of mean that minimizes the sum of squared deivations about the mean. Hover over the graph and brush over the area around the red dot to zoom in.
+
+First, the sum of squared errors (deviations) of the $X_i$ data points about a mean of $m$ is
+
+$$
+SSE = \Sigma_{i=1}^5 (Y_i - m)^2
+$$
+
+Second, we derive the first derivative of $SSE$ with reapect to $m$, holding all else (e.g., sums of $X_i$) and set the derivative equal to zero for the first order condition for an optimum.
+
+$$
+\frac{d\,\,SSE}{dm} = -2\left(\Sigma_{i=1}^5 (Y_i - m)\right) = 0
+$$
+Here we used the chain and power rules of differentiation.
+
+Third, we solve for $m$ to find
+
+$$
+m = \frac{\Sigma_{i=1}^5 Y_i}{N}
+$$
+
+This is none other than the arithmetic mean. We will perform a very similar procedure to get the sample means of the y-intercept $b_0$ and slope $b_1$ of the relationship
+
+$$
+Y_i = b_0 + b_1 X_i + e_i
+$$
+
+where $x_i$ data points try tp explain movements in the $Y_i$ data points.
+
 ## Procedures
 
-- Mean: arithmetic mean
+Here are some basic procedures for calculating position and tendency (central or otherwise):
+
+- Mean: arithmetic mean and weighted mean (or average as some like to call it)
 
 - Median: another percentile?
 
 - Mode: good for nominal data
 
-- Percentile: or quantile
+- Quantile: percentile, and a special subset of quantile, the quartile
 
 ### Mean
 
-If $X$ is all of the data (population) indexed by $i = 1 \dots N$ with $N$ elements, then
+If $Y_i$ is all of the data possible in the universe (population) indexed by $i = 1 \dots N$ with $N$ elements, then the **arithmetic mean** is the well-known (and just derived through calculus):
 
 $$
-\mu = \frac{\Sigma_{i=1}^N X_i}{N}
+\mu = \frac{\Sigma_{i=1}^N Y_i}{N}
 $$
-If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
+
+If $Y_i$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
 
 $$
-\bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
+\bar{Y} = m = \frac{\Sigma_{i=1}^N Y_i}{N}
 $$
+
+We use the $\bar{}$ over the $Y$ to indicate a sample mean.
+
+The arithmetic mean assumes that all the observations $Y_i$ are equally important. Why?
+
+<br>
+
+<button onclick="showText('myDIV21')">show / hide</button>
+<div id="myDIV21" style="display:none;">
+
+Each observation is weighted by $1/N$ where $N$ is the number of observations. If $N=5$ as with the car auction prices, then each observation contributes $1/5=20$\% to the overall average.
+
+</div>
+
+<br>
+
+Let $f_i$ be the frequency (count) of each observation (could be grouped into bins as well). Then the weighted mean (or average) is
+
+$$
+m = \Sigma_{i=1}^N\left(\frac{f_i}{N}\right)Y_i
+$$
+
+Here $f_i/N$ is the relative frequency of observation $Y_i$. 
+
+Aren't the arithmetic mean and weighted mean really equivalent?
+
+<br>
+
+<br>
+
+<button onclick="showText('myDIV22')">show / hide</button>
+<div id="myDIV22" style="display:none;">
+
+They are equivalent only if each and every $f_i=1$ so that the mean is then
+
+$$
+m = \Sigma_{i=1}^N\left(\frac{1}{N}\right)Y_i = \bar{Y} = \frac{\Sigma_{i=1}^N Y_i}{N}
+$$
+
+Each observation is weighted by $1/N$ where $N$ is the number of observations.
+
+</div>
+
+<br>
 
 ### Median
 
@@ -59,9 +240,9 @@ The most frequently occurring value in the data.
 
 How to compute? 
 
-1.Organize the numbers into an ascending-order array.
+1. Organize the numbers into an ascending-order array.
 
-2.Calculate the percentile location $i$
+2. Calculate the percentile location $i$
 
 $$
 i = \frac{P}{100}N
@@ -74,7 +255,7 @@ $i$ = percentile location
 
 $N$ = number of elements in the data set
 
-3.Determine the location by either (a) or (b).
+3. Determine the location by either (a) or (b).
 
 a. If $i$ is a whole number, the $P$th percentile is the average of the value at the $i$th location and the value at the $(i + 1)$st location.
 
@@ -94,17 +275,22 @@ $$
 
 Because $i = 992$ is a whole number, follow the directions in step 3a. The 80th percentile is the average of the 992nd number and the 993rd number.
 
-## Problems
+## Always problems
 
-1.	Determine the median and the mode for the following numbers.
+1.	Determine the arithmetic mean, median, and the mode for the following numbers.
 
 2,4,8,4,6,2,7,8,4,3,8,9,4,3,5
  
+<br>
 <button onclick="showText('myDIV1')">show / hide</button>
-<div id="myDIV1">
+<div id="myDIV1" style="display:none;">
+<br>
+
 **Answer**  
 
-Both are 4
+The arithmetic mean is $66/15=4.4$.
+
+Both median and mode happen to be 4:
 
 1. Arrange in ascending order:
 	
@@ -112,45 +298,87 @@ Both are 4
 	
 	There are 15 terms.
 	
-2. Since there are an odd number of terms, the median is the middle number. Using the formula, the median is located at the $(N + 1)/2$ = 8th term
+2. Since there are an odd number of terms, the median is the middle number. Using the percentile formula, the median is located at the $(N + 1)/2$ = 8th term
 		
 The 8th term is	4
 
-For the mode
+3, For the mode
 	
 	2, 2, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8, 8, 8, 9
 
 The mode = 4, the most frequently occurring value
 
 </div>
+<br>
 
-8.	The following list shows the 15 largest banks in the world by assets according to relbanks.com. Compute the median and the mean assets from this group. Which of these two measures do you think is most appropriate for summarizing these data and why? What is the value of Q2 and Q3? Determine the 63rd percentile for the data. Determine the 29th percentile for the data. 
+2.	The following list shows the 15 largest banks in the world by assets according to [this 2018 survey.](https://www.relbanks.com/worlds-top-banks/assets) 
+
+- Compute the median and the mean assets from this group. 
+
+- Which of these two measures do you think is most appropriate for summarizing these data and why? 
+
+- What is the value of Q2 and Q3? 
+
+- Determine the 63rd percentile for the data. 
+
+- Determine the 29th percentile for the data.
+
+- Build an error bar graph around the 75th quantile (also the third quartile).
 
 ```{r}
-data <- read.csv("data/qq-3-8.csv")
-data %>%
+bank <- na.omit(read.csv("data/qq-3-8.csv"))
+bank %>% 
   kable("html", escape = F) %>% 
     kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
 ```
 
+<br>
+
 <button onclick="showText('myDIV2')">show / hide</button>
-<div id="myDIV2">
+<div id="myDIV2" style="display:none;">
+<br>
+
 **Answer**
+
 Mean :          
 
 $$
-\mu =  \frac{35412}{15} = 2360.8
+m =  \frac{35412}{15} = 2360.8
 $$
 
-The median is located at the 8th term, $Q_2 =  2337$
+The median is located at the 8th observation, $Q_2 =  2337$
 
 First, $Q_3 = P_{75}$ 
 
-For $Q_3$, 	$i=75/100 (15)=11.25$, then $Q_3$ is located at the $11 + 1 = 12$th term, $Q_3 = 2670$
+For $Q_3$, 	$i=75/100 (15)=11.25$, then $Q_3$ is located at the $11 + 1 = 12$th observation, $Q_3 = 2670$
 
-$P_{63}$ is located at the $9 + 1 = 10$th term, $P_{63} = 2584$
+$P_{63}$ is located at the $9 + 1 = 10$th observation $P_{63} = 2584$
 
-$P_{29}$ is located at the $4 + 1 = 5$th term, $P_{29} = 2105$
+$P_{29}$ is located at the $4 + 1 = 5$th observation, $P_{29} = 2105$
+
+```{r bank-error-bar}
+a <- quantile(bank[, 2], 0.75)
+bank_tbl <- tibble(observation = 1:length(bank[, 2]), assets = bank[, 2], a = rep(a, length(bank[, 2])))
+p <- ggplot(data = bank_tbl, aes(x = observation, y = assets)) + 
+  geom_point() + 
+  geom_hline(yintercept = a, color = "red", size = 1.5) +
+  geom_segment(aes(x = observation, y = assets, xend = observation, yend = a), alpha = 0.3)
+p
+
+```
+
+This graph seems to show a threshold that divides banks into two groups: a large group of smaller banks below the line and very few very large banks above the line. The largest bank is clearly head and shoulders larger than the next largest bank. Based on total assets 25\% of all the top banks are well above $2500 billion.
 
 </div>
+<br>
+
+## What have we gotten to so far?
+
+We seem to have hit all of the learning outcomes:
+
+1. We did build a (very naive) model of a variable, car auction price, and recognized a systematic pattern (average) and an unsystematic residue (error or deviation from the average) in the data with the model (average).
+
+2. We did use a frequency distribution approach throughout. Where? We interpreted the arithmetic average as a weighted average where the weights (frequencies or counts) are all equal. We also built out percentiles, which is just the **ogive** curve.
+
+3. Did we compare and contrast? A bit. But we need to do more. The error bar chart is in the right direction. It indicates thresholds for clustering data at the very least. That will jump out in the next installment: deviations.
 

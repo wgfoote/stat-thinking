@@ -1,0 +1,298 @@
+---
+title: "Quick Quiz: how much does data deviate?"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(bsselectR))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(stringr))
+```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Procedures
+
+- **Range**: the distance between the max and min
+
+$$
+Range = |max(x) - min(x)|
+$$
+
+- **IQR**: $Q_2$ net of $Q_1$ ($P_{75} - P_{25})
+
+- **Mean Absolute Deviation**: MAD is robust 
+
+$$
+MAD = \frac{\Sigma_{i=1}^N |x_i - \mu|}{N}
+$$
+
+- **Standard Deviation**: first the square of the standard deviation is the variance
+
+$$
+\sigma^2 = \frac{\Sigma_{i=1}^N (x_i - \mu)^2}{N}
+$$
+next, the standard deviation is
+
+$$
+\sigma = \sqrt{\sigma^2}
+$$
+
+- **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
+
+```{r}
+data <- read.csv("data/empirical-rule.csv")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+\begin{center}
+\begin{tabular}{c | c} \hline
+$\mu \pm 1 \sigma$ & 68\% \\ \hline
+$\mu \pm 2 \sigma$ & 95\% \\ \hline
+$\mu \pm 3 \sigma$ & 99.7\% \\ \hline
+\end{tabular}
+\end{center}
+
+- **Chebychev**: at least 75\% of all values are within ±2σ of the mean regardless of the shape of a distribution lie within $\pm 2 \sigma$ of the mean; for $\mu \pm k \sigma$, $k$ standard deviations and the proportion of observations is
+
+$$
+1 - \frac{1}{k^2}
+$$
+
+- **Coefficient of Variation**: the ratio of the standard deviation to the mean expressed in percentage and is denoted CV
+
+$$
+CV = \frac{\sigma}{\mu} \times 100
+$$
+
+- **z-score**: converts means into standard deviation units; the number of standard deviations a value from the distribution is above or below the mean of the distribution
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+- Sample versus population
+
+If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
+
+$$
+\bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
+$$
+
+and 
+
+$$
+s^2 = \frac{\Sigma_{i=1}^N (x_i - \bar{x})^2}{N-1}
+$$
+and then
+
+$$
+s = \sqrt{s^2}
+$$
+
+## Problems
+
+20.	Shown below are the top nine leading retailers in the United States in a recent year according to Statista.com. Compute range, IQR, MAD, standard deviation, CV, and invoke the empirical rule and Chebychev's Theorem, along with the z-score for each. Treat this as a sample (then what's the population?).
+
+```{r}
+data <- read.csv("data/qq-3-20.csv")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+**Answer**  
+
+- **Range**: the distance between the max and min
+
+$$
+Range = |max(x) - min(x)|
+$$
+
+- **IQR**: $Q_2$ net of $Q_1$ ($P_{75} - P_{25})
+
+- **Mean Absolute Deviation**: MAD is robust 
+
+$$
+MAD = \frac{\Sigma_{i=1}^N |x_i - \mu|}{N}
+$$
+
+- **Standard Deviation**: first the square of the standard deviation is the variance
+
+$$
+\sigma^2 = \frac{\Sigma_{i=1}^N (x_i - \mu)^2}{N}
+$$
+next, the standard deviation is
+
+$$
+\sigma = \sqrt{\sigma^2}
+$$
+
+- **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
+
+```{r}
+data <- read.csv("data/empirical-rule.csv")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+\begin{center}
+\begin{tabular}{c | c} \hline
+$\mu \pm 1 \sigma$ & 68\% \\ \hline
+$\mu \pm 2 \sigma$ & 95\% \\ \hline
+$\mu \pm 3 \sigma$ & 99.7\% \\ \hline
+\end{tabular}
+\end{center}
+
+- **Chebychev**: at least 75\% of all values are within ±2σ of the mean regardless of the shape of a distribution lie within $\pm 2 \sigma$ of the mean; for $\mu \pm k \sigma$, $k$ standard deviations and the proportion of observations is
+
+$$
+1 - \frac{1}{k^2}
+$$
+
+- **Coefficient of Variation**: the ratio of the standard deviation to the mean expressed in percentage and is denoted CV
+
+$$
+CV = \frac{\sigma}{\mu} \times 100
+$$
+
+- **z-score**: converts means into standard deviation units; the number of standard deviations a value from the distribution is above or below the mean of the distribution
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+- Sample versus population
+
+If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
+
+$$
+\bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
+$$
+
+and 
+
+$$
+s^2 = \frac{\Sigma_{i=1}^N (x_i - \bar{x})^2}{N-1}
+$$
+and then
+
+$$
+s = \sqrt{s^2}
+$$
+
+</div>
+
+26.	Shown below are the per diem business travel expenses in 11 international cities selected from a study conducted for Business Travel News' 2015 Corporate Travel Index, which is an annual study showing the daily cost of business travel in cities across the Globe. The per diem rates include hotel, car, and food expenses. Use this list to calculate the z scores for Lagos, Riyadh, and Bangkok. Treat the list as a sample.
+
+```{r}
+data <- read.csv("data/qq-3-36.csv")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+**Answer**
+- **Range**: the distance between the max and min
+
+$$
+Range = |max(x) - min(x)|
+$$
+
+- **IQR**: $Q_2$ net of $Q_1$ ($P_{75} - P_{25})
+
+- **Mean Absolute Deviation**: MAD is robust 
+
+$$
+MAD = \frac{\Sigma_{i=1}^N |x_i - \mu|}{N}
+$$
+
+- **Standard Deviation**: first the square of the standard deviation is the variance
+
+$$
+\sigma^2 = \frac{\Sigma_{i=1}^N (x_i - \mu)^2}{N}
+$$
+next, the standard deviation is
+
+$$
+\sigma = \sqrt{\sigma^2}
+$$
+
+- **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
+
+
+```{r}
+data <- read.csv("data/empirical-rule.csv")
+data %>%
+  kable("html", escape = F) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+\begin{center}
+\begin{tabular}{c | c} \hline
+$\mu \pm 1 \sigma$ & 68\% \\ \hline
+$\mu \pm 2 \sigma$ & 95\% \\ \hline
+$\mu \pm 3 \sigma$ & 99.7\% \\ \hline
+\end{tabular}
+\end{center}
+
+- **Chebychev**: at least 75\% of all values are within ±2σ of the mean regardless of the shape of a distribution lie within $\pm 2 \sigma$ of the mean; for $\mu \pm k \sigma$, $k$ standard deviations and the proportion of observations is
+
+$$
+1 - \frac{1}{k^2}
+$$
+
+- **Coefficient of Variation**: the ratio of the standard deviation to the mean expressed in percentage and is denoted CV
+
+$$
+CV = \frac{\sigma}{\mu} \times 100
+$$
+
+- **z-score**: converts means into standard deviation units; the number of standard deviations a value from the distribution is above or below the mean of the distribution
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+- Sample versus population
+
+If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
+
+$$
+\bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
+$$
+
+and 
+
+$$
+s^2 = \frac{\Sigma_{i=1}^N (x_i - \bar{x})^2}{N-1}
+$$
+and then
+
+$$
+s = \sqrt{s^2}
+$$
+
+
+</div>
+

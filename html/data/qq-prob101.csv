@@ -1,0 +1,5 @@
+phrase,meaning,math
+$x$ is at least $k$,the least $x$ is allowed to be is $k$,$x \geq k$
+$x$ is at most $k$,the most $x$ is allowed to be is $k$,$x \leq k$
+both $x$ and $y$,common elements of $x$ and $y$,$x \cap y$
+either $x$ or $y$,"one, or the other, or both $x$ and $y$",$x \cup y$

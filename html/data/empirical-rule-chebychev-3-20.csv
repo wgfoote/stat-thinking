@@ -1,0 +1,4 @@
+distance,proportion,k,distance,chebychev
+$\mu \pm 1 \sigma$,68,1,$101 \pm 1*92$, -   
+$\mu \pm 2 \sigma$,95,2,$101 \pm 2*92$, 0.75 
+$\mu \pm 3 \sigma$,99.7,3,$101 \pm 3*92$, 0.89 

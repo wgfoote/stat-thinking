@@ -1,0 +1,4 @@
+distance,proportion
+$\mu \pm 1 \sigma$,68
+$\mu \pm 2 \sigma$,95
+$\mu \pm 3 \sigma$,99.7

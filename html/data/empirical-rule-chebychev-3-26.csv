@@ -1,0 +1,4 @@
+distance,proportion,k,distance,chebychev
+$\mu \pm 1 \sigma$,0.68,1,$378 \pm 1*151$, -   
+$\mu \pm 2 \sigma$,0.95,2,$378 \pm 2*151$,0.75
+$\mu \pm 3 \sigma$,0.997,3,$378 \pm 3*151$,0.89
