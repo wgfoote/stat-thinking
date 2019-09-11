@@ -348,7 +348,7 @@ The mode = 4, the most frequently occurring value
 </div>
 <br>
 
-2.	The following list shows the 15 largest banks in the world by assets according to [this 2018 survey.](https://www.relbanks.com/worlds-top-banks/assets) 
+2.	The 2018 list of the 15 largest banks in the world by assets is in  [this survey.](https://www.relbanks.com/worlds-top-banks/assets) 
 
 - Compute the median and the mean assets from this group. 
 
@@ -400,13 +400,59 @@ p <- ggplot(data = bank_tbl, aes(x = observation, y = assets)) +
   geom_point() + 
   geom_hline(yintercept = a, color = "red", size = 1.5) +
   geom_segment(aes(x = observation, y = assets, xend = observation, yend = a), alpha = 0.3)
-p
+ggplotly(p)
 
 ```
 
 This graph seems to show a threshold that divides banks into two groups: a large group of smaller banks below the line and very few very large banks above the line. The largest bank is clearly head and shoulders larger than the next largest bank. Based on total assets 25\% of all the top banks are well above $2500 billion.
 
 </div>
+<br>
+
+
+## Visualizing with Tukey's box
+
+In 1977 John Tukey introduced the [box-and-whisker plot](https://en.wikipedia.org/wiki/Box_plot) or if you want to practice your French the [boite a moustacke](https://fr.wikipedia.org/wiki/Bo%C3%AEte_%C3%A0_moustaches). Like a bullet graph, the box plot visualizes several aspects of data using a box. Here we imagine a vertical rectangle:
+
+- The 75th percentile is on the top of the box
+
+- The 25th percentile is on the bottom of the box
+
+- The 505h percentile is in the middle of the box somewhere
+
+- Outliers, inclusing the maximum and minimun data points are on lines that extend from the top and bottom of box and are called whiskers (c'est a dire, moustache)
+
+Draw the box and whiskers plot for the bank asset data.
+
+<br>
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+<br>
+
+Your drawing should look something like this. hover over the plot to view the relevant statistics.
+
+```{r bank-box-plot}
+bank_tbl <- tibble(year = rep("2018", length(bank[,2])), assets = bank[, 2])
+p <- ggplot(bank_tbl, aes(x = year, y = assets )) +
+  geom_boxplot()
+ggplotly(p)
+```
+
+
+Or it can be arranged horizontally like this.
+
+```{r bank-box-plot-horizontal}
+bank_tbl <- tibble(year = rep("2018", length(bank[,2])), assets = bank[, 2])
+p <- ggplot(bank_tbl, aes(x = year, y = assets )) +
+  geom_boxplot() +
+  coord_flip()
+ggplotly(p)
+```
+
+
+</div>
+
 <br>
 
 ## What have we gotten to so far?
@@ -417,5 +463,5 @@ We seem to have hit all of the learning outcomes:
 
 2. We did use a frequency distribution approach throughout. Where? We interpreted the arithmetic average as a weighted average where the weights (frequencies or counts) are all equal. We also built out percentiles, which is just the **ogive** curve.
 
-3. Did we compare and contrast? A bit. But we need to do more. The error bar chart is in the right direction. It indicates thresholds for clustering data at the very least. That will jump out in the next installment: deviations.
+3. Did we compare and contrast? A bit. But we need to do more. The error bar chart is in the right direction. It indicates thresholds for clustering data at the very least. That will jump out in the next installment: deviations. The box plot is another devise to view the relative position statistics. It will pop up again the next installment as well.
 
