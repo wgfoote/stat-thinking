@@ -252,7 +252,7 @@ $$
 \bar{X} = \frac{\Sigma_{i=1}^N X_i}{N}
 $$
 
-Our model of deviations from the mean produced error terms $e_i=X_i\bar{X}$, which we assigned to the miles univariate data series. If we were to add up these deviations like this
+Our model of deviations from the mean produced error terms $e_i=X_i-\bar{X}$, which we assigned to the miles univariate data series. If we were to add up these deviations like this
 
 $$
 \Sigma_{i=1}^{5}(X_i-\bar{X})
