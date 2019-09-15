@@ -1,0 +1,175 @@
+---
+title: "Logistic Risk: running the regression"
+author: "Bill Foote"
+date: "September 11, 2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(plotly)
+library(GGally)
+library(knitr)
+library(kableExtra)
+```
+
+## Logistic Risk Analysis
+
+In many applications we want to predict the odds of an outcome, e.g., default, product acceptance, machine failure, fraud, etc. In risk management we can use the prediction of odds to quantify the likelihood of a risk event occurring.
+
+This simulation illustrates the idea:
+
+* Create two indicators of the occurrence of a risk event, for example  vendor inability to deliver, borrower inability to pay, customer refusal to buy, etc.
+
+* Combine these indicators into a score
+
+```{r}
+n <- 1000
+set.seed(555)
+x1 <-  rnorm(1000)           # some continuous variables we can call risk factors 
+x2 <- rnorm(1000)
+z <- 1 + 2*x1 + 3*x2        # the "risk score" is a linear combination with a bias
+xz_df <- data_frame(x1 = x1, x2 = x2, z = z)
+p <- ggplot(xz_df, aes(x = 1:length(z), y = z)) +
+  geom_line(color = "blue", size = 1.00) +
+  geom_point(color = "red", size = 1.25)
+ggplotly(p)
+```
+
+The odds that an event might occur is defined as the ratio of the probability that the event occurs, $\pi$ to the probability that the event does not occur, $1 - \pi$, We observe several vendor, credit, or product acceptance accounts. When the account is not accepted as a vendor, or if a customer defaults, or when a product is refused, we assign a 1, otherwise we will assign a zero. The odds ratio ends up being the sum of 1's divided by the sum of 0's we observe accross accounts. 
+
+Our next problem is to understand by an account is 1 or 0, defaulting / not accepted / refused. We hypothesize that several factors might help systematically explain the default / acceptance / refusal. Suppose all other reasons why a default / acceptance / refusal _might_ occur are contained in a factor we will call $z$. To examine the hypothesis that $z$ explains behavior we set the behaviorially observed _odds ratio_ equal to a predictor model:
+
+\[
+\frac{\pi}{1-\pi} = exp(z),
+\]
+
+and solve for $\pi$ to get
+
+\[
+\pi = \frac{1}{1+exp(-z)}.
+\]
+
+Let's translate this mathemetical expression directly into R. Then let's calculate "Bernoulli" coin toss trials. A Bernouli coin flip is an example of a 1 (_e.g._, "heads = default") occurring (indicated by a $1$) and not occurring (indicated by a $0$). We then plot the results.
+
+```{r}
+prob <- 1/(1+exp(-z))         # pass through an inverse-logit function
+                           # odds ratio: probability that 1 in 1+exp(-z) event occurs
+y <-  rbinom(1000,1,prob)      # bernoulli response variable
+y_df <- data_frame(y = y, z = z, prob = prob)
+p <- ggplot(y_df, aes(x = z, y = prob )) +
+  geom_line(color = "blue", size = 1.00) +
+  geom_point(color = "red", size = 1.25)
+ggplotly(p)                # plot logistic curve
+```
+
+The scatter shows a gathering of indicators at $1$ and $0$ with a cloud of potential probable occurrences in between. The plot of probability versus the $z$ scores marks out the logistic $S$ curve.
+
+```{r z-y-scatter}
+p <- ggplot(xz_df, aes(x = z, y = y )) +
+  geom_point(color = "blue", size = 1.25)
+ggplotly(p)
+```
+
+More insight can be gotten by looking at the cross scatter plot and histograms of the event indicator $y$ and predictor variables $x_1$ and $x_2$.
+
+```{r}
+# Load the psych library to view relationships and histograms
+# install.packages("psych") #if necessary
+yx1x2_df <- tibble(y = y, x1 = x1, x2 = x2) #make a column-wise matrix
+ggpairs(yx1x2_df)
+```
+Let's build the predictor model using ordinary least squares (OLS) and the general linear model (GLM). GLM assumes that the indicator variable is binomially distributed like a (loaded) coin toss. OLS assumes that the outcomes are normally distributed.
+
+```{r}
+fit_logistic <- glm( y~x1+x2,data = yx1x2_df, family = "binomial")
+summary(fit_logistic)
+#fit_ols <- lm( y~x1+x2,data = yx1x2_df)
+#summary(fit_ols)
+```
+
+Let's attempt an interpretation of the coefficients of the logistic regression. For that to happen we must discuss what the odds are.
+
+## The odds are ...
+
+Everything with odds starts with the concept of probability.  Let’s say that the probability of success of some event is .8.  Then the probability of failure is 1 – .8 = .2.  The odds of success are defined as the ratio of the probability of success over the probability of failure.
+
+In our example, the odds of success are .8/.2 = 4.  That is to say that the odds of success are 4 to 1.  If the probability of success is .5, i.e., 50-50 percent chance, then the odds of success is 1 to 1.
+
+The transformation from probability to odds is monotonic, that is, the odds increase as the probability increases and vice-versa.  Probability ranges from 0 and 1.  Odds range from 0 and positive infinity.  Below is a table of the transformation from probability to odds, where the odds in favor of an event are read x times favorable to 1 time unfavorable.
+
+```{r odds-example}
+probability <- seq(0.01, 0.99, length.out = 10)
+odds <- round(probability / (1 - probability), 2)
+odds_tbl <- tibble(probability = probability, odds = paste0(odds, " : 1"))
+kable(odds_tbl)
+```
+
+A plot shows better the transformaation.
+
+```{r odds-plot}
+probability <- seq(0.01, 0.99, length.out = 100)
+odds <- round(probability / (1 - probability), 2)
+odds_2_tbl <- tibble(probability = probability, odds)
+p <- ggplot(odds_2_tbl, aes(x = probability, y = odds)) +
+  geom_line(color = "blue", size = 1.25)
+ggplotly(p)
+```
+
+The odds ratio has a very sharply changing bend with probabilities greater than 0.75.
+
+Now for the coefficients of the logistic regression. We go back to the definition of the logistic curve that transfeorms a binomial sequence of 0's andd 1's into an odds ratio. Here again $\pi$ is the probability  of a favorable outcome. The odds ratio relates to the scoring model $z$ through $exp(z)$.
+
+\[
+\frac{\pi}{1-\pi} = exp(z),
+\]
+
+If wew take the natural logarithm of both sides we can isolate the coefficients in $z=\beta_0+\beta_1x_1+\beta_2x_2$.
+
+\[
+log\left(\frac{\pi}{1-\pi}\right) = z = \beta_0+\beta_1x_1+\beta_2x_2 ,
+\]
+
+Let's hold constant $x_2$ while $\beta_0$ certainly doesn't change and so that $\beta_2x_2$ is also a constant. We are left with the term in $x_1$ by itself, _ceteris paribus_, all else held equal. Then the change in the log odds for a unit change in $x_1$ is thus just $\beta_1$. 
+
+This means that the coefficients of the logistic regression are really expressed in terms of logarithms. To recover the odds inside the logarithms all we have to calculate the inverse of the log so that $exp(\beta_1)=exp(2.0469)=`r round(exp(2.04069),4)`$. We are not yet done: we must subtract a 1 from this expression since we were calculating the impact of a one unit change in the value of the $x_1$ variate. Thus a one unit change in $x_1$ changes the odds by `r (round(exp(2.04069),4)-1)*100`\%. The $x_1$ variate is quite an influential factor!
+
+## Predict now ...
+
+We begin a so-called prediction with some new data we think might occur for the values of $x_1$ and $x_2$. suppose we think a reasonable scenario is the 75th quantile of $x_1$ and the 25th quantile of $x_2$.
+
+```{r data-new}
+(data_scenario <- yx1x2_df %>% summarize(x1 = quantile(x1, 0.75), x2 = quantile(x2, 0.25)))
+```
+
+In specifying the data for the scenario we must use the same variable names that we used to estimate the logistic regression.
+
+```{r pred-x1}
+(data_scenario$x1_prob <- predict(fit_logistic, newdata = data_scenario, type = "response"))
+```
+
+This gives us a single forecast of `r round(data_scenario$x1_prob, 2)*100`\% probability that favorable event would occur.
+
+Let's visualize this by generating a grid of values for $x_1$ and plotting probabilities versus those values
+
+```{r prediction-plot}
+data_scenario_plot <- yx1x2_df %>% mutate(x1 = seq(from = quantile(x1, 0.50), to = max(x1), length.out = 1000), x2 = mean(x2))
+data_scenario_pred <- predict(fit_logistic, newdata = data_scenario_plot , type = "link", se = TRUE)
+data_scenario_pred <- cbind(data_scenario_plot, data_scenario_pred)
+data_scenario_CI <- within(data_scenario_pred, {
+    prob_pred <- plogis(fit)
+    LL <- plogis(fit - (1.96 * se.fit))
+    UL <- plogis(fit + (1.96 * se.fit))
+})
+p <- ggplot(data_scenario_CI, aes(x = x1, y = prob_pred)) +
+  geom_ribbon(aes(ymin = LL, ymax = UL), alpha = 0.6) +
+  geom_line(color = "blue", size = 1.25)
+ggplotly(p)
+```
+
+This procedurer produces our forecast: a confidence interval of forecasted probabilities of success conditional on levels of $x_1$.
+
