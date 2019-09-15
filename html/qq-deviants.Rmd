@@ -1,16 +1,67 @@
 ---
-title: "Quick Quiz: how much does data deviate?"
-output: html_document
+title: "How much does data vary?"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    source_code: embed
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(kableExtra))
-suppressPackageStartupMessages(library(bsselectR))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(stringr))
+library(plotly)
+library(grid)
+options(digits = 4, scipen = 999999)
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
 ```
 
 <script>
@@ -24,45 +75,315 @@ function showText(y) {
 }
 </script>
 
-## Learning outomes
+## Learning outcomes
 
-1. Using various measures of deviation from a central tendency, calculate average scales of data
+1. Using various measures of deviation from a tendency, calculate average scales of data
 
 2. Identify the applicability of each deviation measure to answer business questions.
 
 3. Formulate and explanation an interpretation of deviation measure results to answer business questions.
 
-## Procedures
+Deviation, distance, variation, scale, redisual, and even error are very similar concepts. They form the backbone of statistics because they measure how far away actual data is from our model, our supposition, our hypothesis, our belief of where we would like to  think the data is. And of course there are lot ways to compute distance and deviation.
 
-- Sample versus population
+We just computed several locations, trends, averages, percentiles, even quartiles with a box! Each of these are our peculiar mental image of where we think the data ought to be, at least most of the time. The rest of the time data is, where data happens to be when we stumble on it. Getting to an understanding of scale and distance and deviation we had to form a belief, calculate an average, build a trend. Now we move on to a more complete story of any particular data stream.
 
-Let's recall what a sample is.
 
-If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then (the same formula!)
+## Rev up the deuce
+
+This is where we will start, again. This time we are going to mix it up a bit. We are back at our car auction in New Jersey. We have heard enough about price and now we want to know why price might vary. One explanation from our far-reaching understanding of economic choice is that we might be buying car quality. One measure of quality is how many miles the previoius owner drove the car. We read odometers to get that data. We now have two sets (vectors) of data. Each observation is a pair of two observations for each car: price and miles.
+
+```{r auction}
+price <- c(12500,
+           13350,
+           14600,
+           15750,
+           17500
+)
+miles <- c(43521,
+           31002,
+           18868,
+           12339,
+           9997
+) 
+car_tbl <- tibble(i = 1:length(price), price = price, miles = miles)
+
+car_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(2, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(3, bold = T, color = "blue", border_right = FALSE)
+```
+
+We can set up three ways of thinking about our car data:
+
+1. Price ($Y_i$) variations on their own: $Y_i=\bar{Y}+e_i$
+
+2. Miles ($X_i$) variations on their own: $X_i=\bar{X}+e_i$
+
+3. Price dependency on miles: $Y_i=b_0+b_1X_i+e_i$
+
+To put all of these models together on one graph we can plot each of the 5 points on a scatter plot like so:
+
+```{r scatter-1}
+p <- car_tbl %>% ggplot(aes(x = miles, y = price)) +
+  geom_point(color = "blue", size = 3)
+ggplotly(p)
+```
+
+Let's look at the Y-axis, price first and draw a horizontal line to depict the arithmetic average of price ($Y_i$). Then draw error bars from each data point to this line all in the Y-direction.
+
+```{r scatter-1-1}
+Y_bar <- mean(car_tbl$price)
+p <- car_tbl %>% ggplot(aes(x = miles, y = price)) +
+  geom_point(color = "blue", size = 3) +
+  geom_hline(yintercept = Y_bar, color = "red", size = 1.5) +
+  geom_segment(aes(x = miles, y = price, xend = miles, yend = Y_bar), alpha = 0.3)
+ggplotly(p)
+```
+This so looks like the error bar plot we generated before where now miles seems to act like the observations index. Try to draw a similar plot of the X-axis error bars around the arithmetic mean of miles.
+
+<br>
+
+<button onclick="showText('myDIV24')">show / hide</button>
+<div id="myDIV24" style="display:none;">
+
+<br>
+
+```{r scatter-2}
+X_bar <- mean(car_tbl$miles)
+p <- car_tbl %>% ggplot(aes(x = miles, y = price)) +
+  geom_point(color = "blue", size = 3) +
+  geom_vline(xintercept = X_bar, color = "red", size = 1.5) +
+  geom_segment(aes(x = miles, y = price, xend = X_bar, yend = price), alpha = 0.3)
+ggplotly(p)
+```
+
+We just had to rotate  our thnking by 90 degrees clockwise, that's all. Hover over the virtical average lilne to see the mean of miles as `X_bar`.
+
+</div>
+
+<br>
+
+Now let's layer one graph on the other. This will get a little dense, but will not so badly illustrate the interaction of price and miles.
+
+```{r scatter-3}
+p <- car_tbl %>% ggplot(aes(x = miles, y = price)) +
+  geom_point(color = "blue", size = 3) +
+  geom_hline(yintercept = Y_bar, color = "red", size = 1.5) +
+  geom_segment(aes(x = miles, y = price, xend = miles, yend = Y_bar), alpha = 0.3) +
+  geom_vline(xintercept = X_bar, color = "red", size = 1.5) +
+  geom_segment(aes(x = miles, y = price, xend = X_bar, yend = price), alpha = 0.3)
+ggplotly(p)
+```
+
+We not have price and miles in the cross-hairs and begin to see not just the individual variations of price and miles about their respective means, but can begin to visualize the co-variation of price and miles.
+
+To illustrate model 3, price dependency on miles: $Y_i=b_0+b_1X_i+e_i$, let's draw the best line we can through the scatter, one that will minimize squared deviations of price about our odometer-inspired model of price. Let's leave that calculation till later. Willingly we will suspend any disbelief about that calculation. Let's instead believe the numbers to be true. Let's also keep the cross-hairs. Here we go.
+
+```{r scatter-4}
+car_fit <- lm(price ~ miles, data = car_tbl)
+b_0 <- 17782.4396
+b_1 <- - 0.1314
+X <- car_tbl$miles
+Y_predicted <- b_0 + b_1 * X
+p <- car_tbl %>% ggplot( aes(x = miles, y = price)) + 
+  geom_point(color = "blue", size = 3) +
+  geom_hline(yintercept = Y_bar, color = "red", size = 1.0) +
+  geom_segment(aes(x = miles, y = price, xend = miles, yend = Y_bar), alpha = 0.3, linetype = "dashed" ) +
+  geom_vline(xintercept = X_bar, color = "red", size = 1.5) +
+  geom_segment(aes(x = miles, y = price, xend = X_bar, yend = price), alpha = 0.3, linetype = "dashed") + 
+  geom_smooth(se = FALSE, method = "lm") + 
+  geom_segment(aes(xend = miles, yend = Y_predicted), color = "darkblue") + 
+  scale_color_continuous(low = "black", high = "red") + guides(color = FALSE) + theme_bw()
+ggplotly(p)
+```
+
+hover over the dark blue error bars that connect data pairs of miles and price to a new average, a downward-sloping straight (linear that is) line. If we were to be told that the average slope is `r b_1`, what would we think the average Y-intercept is?
+
+<br>
+
+<button onclick="showText('myDIV25')">show / hide</button>
+<div id="myDIV25" style="display:none;">
+
+<br>
+
+Our new average price, $\bar{Y}$, is an estimate of the average of $Y$ conditional on miles, $X$ and its average, still $\bar{X}$, is
 
 $$
-\bar{x} = \frac{\Sigma_{i=1}^N x_i}{N}
+\bar{Y} = b_0 + b_1 \bar{X}
+$$
+We know that $\bar{Y}=`r Y_bar`$, $\bar{X}=`r X_bar`$, and have just been informed that the slope parameter $b_1=`r b_1`$. So we plug (that is substitute) these numbers into the formula to get this. 
+
+$$
+`r Y_bar`=b_0`r b_1`(`r X_bar`)
+$$
+We now solve for the Y-intercept $b_0$ to find this result.
+
+$$
+b_0=`r Y_bar`+`r -b_1`\bar{X}=`r b_0`
+$$
+Phew!, but not so bad, just one equation in one unknown.
+
+</div>
+
+<br>
+
+We now have jumped into hyper-space (at least 2-space) to expand our consciousness from univariate to bivariate relationships.
+
+Our next stop is to use these and other versions of deviations to get a handle on the scale, range, variation, deviation, and yes, error in the data, at least with respect to our beliefs about the data.  We just expanded our beliefs from univariate to multivariate. When we get to multivariate we will look at how variations relate to one another, in our case bivariate variations in price relating to variations in miles and vice-versa.
+
+## Blinded by the light
+
+### What's a sample? (again)
+
+Let's recall what a sample is. It is a random draw from a larger group of data called a population. The word random derives from the Frankish (Germanic language from a while back) word _rant_ much like our word rant and eventually meaning (by about 1880) simply indiscriminate. 
+
+Our sample of auction prices is whatever we could get our hands on at the time of the sampling, thus a sort of random draw from the population of all auctioned cars. This begins to allow us to look at the error bars we generated as random deviations from the mean. 
+
+Let's also recall that this drawing of the random sample is the first analytical step after identifying a business question and a population from which to sample.
+
+So we have a sample of two univariate data series. We have also thought that is is reasonable to relate the two series together. Let's now find some measures of scale, deviation, and variation for each of the univariate series.
+
+### 1. Standard deviation
+
+If $x$ is a sample (subset) indexed by $i = 1 \dots N$ with $N$ elements from the population, then we already know that
+
+$$
+\bar{X} = \frac{\Sigma_{i=1}^N X_i}{N}
 $$
 
-and 
+Our model of deviations from the mean produced error terms $e_i=X_i\bar{X}$, which we assigned to the miles univariate data series. If we were to add up these deviations like this
+
+$$
+\Sigma_{i=1}^{5}(X_i-\bar{X})
+$$
+
+what would we get?
+
+<br>
+
+<button onclick="showText('myDIV26')">show / hide</button>
+<div id="myDIV26" style="display:none;">
+
+<br>
+
+ZERO.
+
+</div>
+
+<br>
+
+Right, this aggregation of deviations will always give us zero, by definition.
+
+Again, like we did to find the best average, let's calculate the sum of squared errors, the $SSE$. Because we sampled the data, the average $SSE$ will have to be divided by $N-1=5-1=4$, called, for the moment, the number of degrees of freedom. This will produce an unbiased measure, another topic for another time!
+
 
 $$
 s^2 = \frac{\Sigma_{i=1}^N (x_i - \bar{x})^2}{N-1}
 $$
-and then
+The squared measure $s^2$ is officially called the variance. It's square root
 
 $$
 s = \sqrt{s^2}
 $$
 
+is the standard deviation. THe notion of standard is that of an average. We already know what a deviation is.
+
+Let's build a table of four columns to calculate this measure of scale, deviation, error, and variation.
+
+<br>
+
+<button onclick="showText('myDIV27')">show / hide</button>
+<div id="myDIV27" style="display:none;">
+
+<br>
+
+```{r miles-table-1}
+miles_bar <- mean(miles)
+miles_tbl <- tibble(i = 1:length(miles), miles = miles, deviation = miles - miles_bar, `deviation squared` =  (miles - miles_bar)^2)
+N <- length(miles_tbl$miles)
+deviation_sum <- sum(miles_tbl$deviation)
+SSE <- sum(miles_tbl$`deviation squared`)
+variance <- SSE/(length(miles_tbl$miles))
+standard_deviation <- sqrt(variance)
+miles_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(2, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(3, bold = T, color = "red", border_right = FALSE) %>% 
+  column_spec(4, bold = T, color = "red", border_right = FALSE)
+```
+
+Some really big numbers emerge. That is typical and we often try to scale these down when performing computations, again a topic for later.
+
+Let's sum up the deviations again (just to prove they add up to zero) and the squared deviations ($SSE$)
+
+$$
+var(miles)=s^2=\frac{`r SSE`}{`r N` - 1}=`r variance`
+$$
+and then
+
+$$
+s=\sqrt{variance}=\sqrt{`r variance`}=`r standard_deviation`
+$$
+
+</div>
+
+<br>
+
+What about the standard deviation of price?
+
+<br>
+
+<button onclick="showText('myDIV28')">show / hide</button>
+<div id="myDIV28" style="display:none;">
+
+<br>
+
+We should have gotten `r sd(car_tbl$price)`
+
+</div>
+
+<br>
+
+### 2. Then there were two: covariance and correlation
+
+TBD! Stay tuned!
+
+
+### 3. Robust measures
 
 - **Range**: the distance between the max and min
 
 $$
-Range = |max(x) - min(x)|
+Range = max(x) - min(x)
 $$
 
-- **IQR**: $Q_2$ net of $Q_1$ ($P_{75} - P_{25})
+- **Interquartile Range, IQR**: $Q_3$ net of $Q_1$ ($P_{75} - P_{25}$) gives us a robust view like that in Tukey's (1977) box plot. What is the IQR of miles and price?
+
+<br>
+
+<button onclick="showText('myDIV29')">show / hide</button>
+<div id="myDIV29" style="display:none;">
+
+<br>
+
+We should have gotten 
+
+$$
+IQR_{miles}=`r quantile(miles, 0.75)`-`r quantile(miles, 0.25)`=`r quantile(miles, 0.75)-quantile(miles, 0.25)`
+$$
+and
+
+$$
+IQR_{price}=`r quantile(price, 0.75)`-`r quantile(price, 0.25)`=`r quantile(price, 0.75)-quantile(price, 0.25)`
+$$
+
+Wider, broader scale than the standard deviations? This measure is robust to highly skewed distributions with thick tails.
+
+</div>
+
+<br>
 
 - **Mean Absolute Deviation**: MAD is robust 
 
@@ -70,18 +391,11 @@ $$
 MAD = \frac{\Sigma_{i=1}^N |x_i - \mu|}{N}
 $$
 
-- **Standard Deviation**: first the square of the standard deviation is the variance
+## How can we use all of this?
 
-$$
-\sigma^2 = \frac{\Sigma_{i=1}^N (x_i - \mu)^2}{N}
-$$
-next, the standard deviation is
+At least four come to mind.
 
-$$
-\sigma = \sqrt{\sigma^2}
-$$
-
-- **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
+1. **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
 
 ```{r}
 data <- read.csv("data/empirical-rule.csv")
@@ -90,28 +404,32 @@ data %>%
     kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
 ```
 
-- **Chebychev**: at least 75\% of all values are within ±2σ of the mean regardless of the shape of a distribution lie within $\pm 2 \sigma$ of the mean; for $\mu \pm k \sigma$, $k$ standard deviations and the proportion of observations is
+2. **Chebychev**: at least 75\% of all values are within ±2σ of the mean regardless of the shape of a distribution lie within $\pm 2 \sigma$ of the mean; for $\mu \pm k \sigma$, $k$ standard deviations and the proportion of observations is
 
 $$
 1 - \frac{1}{k^2}
 $$
 
-- **Coefficient of Variation**: the ratio of the standard deviation to the mean expressed in percentage and is denoted CV
+3. Outlier analysis
+
+TBD
+
+3.  **Coefficient of Variation**: the ratio of the standard deviation to the mean expressed in percentage and is denoted CV
 
 $$
 CV = \frac{\sigma}{\mu} \times 100
 $$
 
-- **z-score**: converts means into standard deviation units; the number of standard deviations a value from the distribution is above or below the mean of the distribution
+4. **Comparisons using the z-score**: converts means into standard deviation units; the number of standard deviations a value from the distribution is above or below the mean of the distribution
 
 $$
 z = \frac{x - \mu}{\sigma}
 $$
 
 
-## Problems
+## Problems, always problems
 
-20.	Shown below are the top nine leading retailers in the United States in a recent year according to Statista.com. Compute range, IQR, MAD, standard deviation, CV, and invoke the empirical rule and Chebychev's Theorem, along with the z-score for each. Treat this as a sample (then what's the population?).
+1.	Shown below are the top nine leading retailers in the United States in a recent year according to Statista.com. Compute range, IQR, MAD, standard deviation, CV, and invoke the empirical rule and Chebychev's Theorem, along with the z-score for each. Treat this as a sample (then what's the population?).
 
 ```{r}
 data <- read.csv("data/qq-3-20.csv")
@@ -127,9 +445,9 @@ N = length(data)
 <button onclick="showText('myDIV1')">show / hide</button>
 <div id="myDIV1" style="display:none;">
 
-**Answer**  
+<br>
 
-
+**Answers (so many)**  
 
 - **Range**: the distance between the max and min
 
@@ -234,7 +552,9 @@ $$
 
 </div>
 
-Shown below are the per diem business travel expenses in 11 international cities selected from a study conducted for Business Travel News' 2015 Corporate Travel Index, which is an annual study showing the daily cost of business travel in cities across the Globe. The per diem rates include hotel, car, and food expenses. Use this list to calculate the z scores for Lagos, Riyadh, and Bangkok. Treat the list as a sample.
+<br>
+
+2. Shown below are the _per diem_ business travel expenses in 11 international cities selected from a study conducted for Business Travel News' 2015 Corporate Travel Index, which is an annual study showing the daily cost of business travel in cities across the Globe. The per diem rates include hotel, car, and food expenses. Use this list to calculate the z scores for Lagos, Riyadh, and Bangkok. Treat the list as a sample.
 
 ```{r}
 library(dplyr)
@@ -370,3 +690,8 @@ $$
 
 </div>
 
+<br>
+
+## What have we learned?
+
+So much! More to come -- stay tuned.
