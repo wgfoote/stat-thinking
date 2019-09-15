@@ -25,7 +25,7 @@ navbar:
       - text: "Tendency"
         href: html/qq-central-tendency.html
       - text: "Deviation"
-        href: html/qq-distribution.html
+        href: html/qq-deviants.html
     - text: "Anticipate"
       menu:
       - text: "Basics"
@@ -46,6 +46,8 @@ navbar:
       menu:
       - text: "Simple regression"
         href: html/qq-regress.html
+      - text: "Logistic regression"
+        href: html/logistic-regression.html
 output:
   html_document:
     theme: flatly
