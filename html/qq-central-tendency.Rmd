@@ -95,7 +95,7 @@ p <- ggplot(data = price_tbl, aes(x = observation, y = price)) +
   geom_point() + 
   geom_hline(yintercept = a, color = "red", size = 1.5) +
   geom_segment(aes(x = observation, y = price, xend = observation, yend = a), alpha = 0.3)
-p
+ggplotly(p)
 ```
 
 
@@ -105,11 +105,11 @@ There are three usual suspects for getting at a best average in this situation. 
 
 1. The sum of deviations or errors: $\Sigma_{i=1}^5(Y_i-m)$
 
-2. The sum of absolute deviations: $|\Sigma_{i=1}^5(Y_i - m)|$
+2. The sum of squared deviations or errors (SSE): $\Sigma_{i=1}^5(Y_i - m)^2$ 
 
-3. The sum of squared deviations or errors (SSE): $\Sigma_{i=1}^5(Y_i - m)^2$ 
+3. The sum of absolute deviations: $|\Sigma_{i=1}^5(Y_i - m)|$
 
-There are many criteria we could choose. Which one might work best?
+There are many criteria we could choose. Which one(s) might work best?
 
 <br>
 
@@ -120,15 +120,18 @@ There are many criteria we could choose. Which one might work best?
 
 Simply summing the errors and trying to find the best $m$ never seems to work because the sum of errors always must be zero when $m$ is the mean. Try it!
 
-To use mean absolute deviation we would need to employ the simplex method from linear programming. On top of that one of the best LP formulations is to use goal programming. A great idea, but for our purposes a bit beyond today's scope.
+The sum of squared deviations from the mean also allows us to take a first derivative and use first order conditions for a minimum. These conditions, in this situation, reduce the problem to the solution of a first-order linear equation in one unknown, $m$. 
 
-The sum of squared deviations from the mean allows us to take a first derivative and use first order conditions for a minimum. These conditions, in this situation, reduce the problem to the solution of a first-order linear equation in one unknown, $m$. 
+To use mean absolute deviation we would need to employ the simplex method from linear programming. On top of that one of the best LP formulations is to use goal programming. A simple exercise will stretch your calculus muscles by calculating first order conditions for a minimum. If you do not have such musculature available, just sit back and watch the show.
 
 </div>
 
 <br>
 
-The graph depicts the sum of squared deviations. Use of such a criterion allows us a clear and in this case unique calculation of the best linear estimator for the mean.
+
+### Square those errors
+
+This plot depicts the sum of squared deviations for a grid of potential values of what the data points deviate from, $m$. Use of such a criterion allows us a clear and in this case unique calculation of the best linear estimator for the mean.
 
 ```{r optimize}
 m <- seq(min(price), max(price), length.out = 300)
@@ -164,7 +167,7 @@ Simply putting the cursor on the red dot indicates a solution: $m=$ `r round(m_m
 
 <br>
 
-A bit of calculus confirms the brute force choice of mean that minimizes the sum of squared deivations about the mean.
+A bit of calculus confirms the brute force choice of the arithmetic mean that minimizes the sum of squared deivations about the mean.
 
 First, the sum of squared errors (deviations) of the $X_i$ data points about a mean of $m$ is
 
@@ -193,17 +196,284 @@ $$
 
 where $x_i$ data points try tp explain movements in the $Y_i$ data points.
 
+
+### Absolutely!
+
+Even more interesting is the idea we can find a middling measure that minimizes the sum of absolute deviations of data around this metric (too many $m$!).
+
+
+$$
+SAD = \Sigma_{i=1}^5 |Y_i - m|
+$$
+
+Yes, it is SAD, the sum of abssolute deviations. This is our foray into rank-oder statistics, quite a bit different in nature than the arithmetic mean of $SSE$ fame. We get to basic counting when we try to mind the $m$ that minimizes SAD. To illustrate this suppose our data is all positive (ratio data in fact). If $m=5$ then the function
+
+$$
+f(Y;m) = |Y-m|
+$$
+has this appearance, the so-called check function.
+
+```{r check-it-out}
+m <- 5
+X <- seq(0, 10, length.out = 100)
+Y <- abs(X-m)
+XY <- data_frame(X = X, Y = Y)
+p <- ggplot(XY, aes(x = X, y = Y)) +
+  geom_line(color = "blue", size = 2.0) +
+  geom_vline(xintercept = m, linetype = "dashed") +
+  geom_point(x = m, y = 0, color = "red",  size = 3) +
+  geom_hline(yintercept = 0.0) +
+  xlab("Y") + ylab("f(Y,m) = |Y-m|")
+ggplotly(p)
+```
+
+Intuitively, half the graph seems to be the left of $m=5$, the other have is to the right. Let's look at the first derivative of the check function with respect to changes in $m$, just like we did with each term in $SSE$. Notice that the (eyeballed) rise over run, i..e., slope, before $m=5$ is -1, and after it is +1. At $m=5$ there is no slope that's even meaningful.
+
+We have two cases to consider. First $Y$ can be less than  or equal to $m$ so that $Y-m \leq 0$. In this case
+
+$$
+\frac{d\,\,(Y-m)}{dY} = -1
+$$
+
+This corresponds exactly to negatively sloped line rolling into our supposed $m=5$ in the plot.
+
+Second, $Y$ can be greater than or equal to $m$ so that $Y-m \geq 0$. In this case
+
+$$
+\frac{d\,\,(Y-m)}{dY} = +1
+$$
+
+also correpsonding to the positively sloped portion of the graph.
+
+Another graph is in order to imagine this derivative.
+
+```{r check-function-derivative}
+m <- 5
+X <- seq(0, 10, length.out = 100)
+Y <- ifelse(X < m, -1, ifelse(X > m, 1, 0))
+XY <- data_frame(X = X, Y = Y)
+p <- ggplot(XY, aes(x = X, y = Y)) +
+  geom_line(color = "blue", size = 2)+
+  geom_vline(xintercept = m, linetype = "dashed") +
+  geom_point(x = m, y = 0, color = "red",  size = 3) +
+  geom_hline(yintercept = 0.0) +
+  geom_point(x = m, y = -1, color = "red", size = 3) +
+  geom_point(x = m, y = +1, color = "red", size = 3) +
+  geom_segment(aes(x = m, y = -1+.03, xend = m, yend = 1-.03 ), color = "white", size = 3, linetype = "dashed") +
+  geom_point(x = m, y = -1, color = "red", size = 3) +
+  geom_point(x = m, y = +1, color = "red", size = 3) +
+  xlab("Y") + ylab("f(Y,m) = |Y-m|") 
+ggplotly(p)
+```
+
+It's all or nothing for the derivative, a classic step function. We use this fact in the following (near) finale in our search for $m$. Back to $SAD$.
+
+We are looking for the $m$ that minimizes $SAD$:
+
+$$
+SAD = \Sigma_{i=1}^N |Y_i - m| = |Y_1-m| + \ldots + |Y_N-m|
+$$
+
+If we take the derivative of $SAD$ with respect to $Y$ data points, we get $N$ minus 1s and $N$ plus ones in our sum because each and every $|Y_i-m|$ could either be greater than or equal to $m$ or less than or equal to $m$, we just just don't know which, so we need to consider both cases at once. We also don't know off hand how many data points are to the left or the right of the value of $m$ that minimizes $SAD$!
+
+Let's play a little roulette and let $L$ be the number of (unknown) points to the left of $m$ and $R$ points to the right. Then $SAD$ looks like it is split into two terms, just like the two intervals leading up to and away from the red dot at the bottom of the check function.
+
+$$
+SAD = \Sigma_{i=1}^R |Y_i - m| + \Sigma_{i=1}^R |Y_i - m| = (|Y_1-m| + \ldots + |Y_L-m|) + (|Y_1-m| + \ldots + |Y_R-m|)
+$$
+
+
+$$
+\frac{d\,\,SAD}{dY} = \Sigma_{i=1}^L (-1) + \Sigma_{i=1}^R (+1) = (-1)L+ (+1)R
+$$
+
+When we set this result to zero for the first order condition for an optimum we get a possibly strange, but appropriate result. The tradeoff between left and right must offset one another exactly.
+
+$$
+(-1)L + (+1)R = 0
+$$
+$$
+L = R
+$$
+Whatever number of points are to the left must also be to the right of $m$. If $L$ points also include $m$, then $L/N\geq1/2$ as well as for the $R$ points if they include $m$ so that $R/N\geq1/2$. 
+
+We have arrived at what a median is.
+
+Now we come up with a precise statement of the middle of a data series, the notorious median. We let $P()$ be the proportion of data points at and above (if $Y \geq M$) or at and below ($Y \leq m$).
+
+THe median, $m$, is the first time a data point in a data series reaches _both_ 
+
+- $P(Y \leq m) \geq 1/2$ (from minimum data point) _and_  
+
+- $P(Y \geq m) \geq 1/2$ (from the maximum data point)
+
+That definition will work for us whether each data point is equally likely ($1/N$) or from grouped data with symmetric or skewed relative frequency distributions.
+
+Two cases arise:
+
+1. Even number of data points. So if $N=10$, the only way that can happen is if there are 5.5 points to the left of $m$ and 5.5 points to the right. Yes, the value $m$ is halfway between data point number 5 and data point number 6.
+
+2. Odd number of data points. If $N=9$ data points, the only way that can happen is if there are 5 points to the left of $m$, including $m$, and 5 points to the right, also including $m$. Yes, the value $m$ is data point number 5.
+
+Thus the complexities of order statistics obliterate calm composure.
+
+So what about our odd number of price data points?
+
+<br>
+
+<button onclick="showText('myDIV34')">show / hide</button>
+<div id="myDIV34" style="display:none;">
+
+<br>
+
+Each price data point represents an equal proportion of the total number of data points. The proportion is $1/5 = 0.2$ of the data. 
+```{r median-price-0}
+proportion <- rep(1 / length(price), length(price))
+proportion_cumsum_min <- cumsum(proportion)
+proportion_cumsum_max <- proportion_cumsum_min[order(-proportion_cumsum_min)]
+price_median_tbl <- tibble(i = 1:length(price), price = price, proportion = proportion, `min-to-max` = proportion_cumsum_min, `max-to-min` = proportion_cumsum_max)
+price_median_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(2, bold = T, color = "red", border_right = FALSE) %>% 
+  row_spec(3, bold = T, color = "white", background = "blue")
+```
+
+The first data point that accumulates a propportion of the data greater than or equal to 1/2, starting from the minimum, is data point 3, with price of 14600.
+
+The first data point that accumulates a proportion of the data greater than or equal to 1/2, starting from the maximum, is also data point 3, with price of 14600.
+
+</div>
+
+<br>
+
+The movement up from the minimum and down from the maximum price agreed on one data point. That will always happen for data sets with odd numbers of data points. What if there is an even number of data points? Add a price of d\$18000 and let's see.
+
+<button onclick="showText('myDIV35')">show / hide</button>
+<div id="myDIV35" style="display:none;">
+
+<br>
+
+Each price data point represents an equal proportion of the total number of data points. The proportion is now is $1/6 = `r 1/6`$ of the data. 
+
+```{r median-price-1}
+price_new <- c(price, 18000)
+proportion <- rep(1 / length(price_new), length(price_new))
+proportion_cumsum_min <- cumsum(proportion)
+proportion_cumsum_max <- proportion_cumsum_min[order(-proportion_cumsum_min)]
+price_median_tbl <- tibble(i = 1:length(price_new), price = price_new, proportion = proportion, `min-to-max` = proportion_cumsum_min, `max-to-min` = proportion_cumsum_max)
+price_median_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(2, bold = T, color = "red", border_right = FALSE) %>% 
+  row_spec(1:2, bold = T, color = "white", background = "blue")
+```
+
+
+
+</div>
+
+<br>
+
+
+
+### Quantiles anyone?
+
+We can use the same approach to finding those data points that correspond to the 25th quantile, otherwise known as the first quartile $Q1$.  Instead of 1/2 to the left or right of the median data point, we go 1/4 to the left (including the Q1 we search for), which means to the right there is $1-1/4=3/4$ of the data to the right (and including $Q$) of the quartile. 
+
+Does this work? (it better!)
+
+<br>
+
+<button onclick="showText('myDIV36')">show / hide</button>
+<div id="myDIV36" style="display:none;">
+
+<br>
+
+```{r median-price-5}
+#price <- c(price, 18000)
+proportion <- rep(1 / length(price_new), length(price_new))
+proportion_cumsum_min <- cumsum(proportion)
+proportion_cumsum_max <- proportion_cumsum_min[order(-proportion_cumsum_min)]
+price_median_tbl <- tibble(i = 1:length(price_new), price = price_new, proportion = proportion, `min-to-max` = proportion_cumsum_min, `max-to-min` = proportion_cumsum_max)
+price_median_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(2, bold = T, color = "red", border_right = FALSE) %>% 
+  row_spec(2, bold = T, color = "white", background = "blue")
+```
+
+It does! 
+
+The first data point that accumulates a propportion of the data greater than or equal to 1/4 (25\%), starting from the minimum, is data point 2, with price of 13350.
+
+The first data point that accumulates a proportion of the data greater than or equal to 3/4 (75\%), starting from the maximum, is also data point 2, with price of 13350.
+
+Thus 
+
+$$
+Q1 = 13350
+$$
+
+And cleanly at that. By symmetry then data point 5 must be $Q3$, the 75th quartile with price 17500.
+
+</div>
+
+<br>
+
+Now let's try something really daunting. Suppose that the 6 prices occur with relative frequencies (in ascending order) of 0.1, 0.4, 0.2, 0.1, 0.1, 0.1, What happens now? Will our approach still work? Let's this time find the 0.40 quantile so that 40\% of the data is at or below this point and 60\% of the data is at or above this point.
+
+<br>
+
+<button onclick="showText('myDIV37')">show / hide</button>
+<div id="myDIV37" style="display:none;">
+
+<br>
+
+We will only need the cumulative proportions from the minimum data point for this one.
+
+```{r median-price-4}
+#price_new <- c(price, 18000)
+proportion <- c(0.1, 0.4, 0.2, 0.1, 0.1, 0.1)
+proportion_cumsum_min <- cumsum(proportion)
+proportion_cumsum_max <- proportion_cumsum_min[order(-proportion_cumsum_min)]
+price_median_tbl <- tibble(i = 1:length(price_new), price = price_new, proportion = proportion, `min-to-max` = proportion_cumsum_min)
+price_median_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE) %>% 
+  column_spec(2, bold = T, color = "red", border_right = FALSE) %>% 
+  row_spec(1:2, bold = T, color = "white", background = "blue")
+```
+
+The first data point that accumulates a propportion of the data greater than or equal to 40\%, starting from the minimum, is data point 2, with price of 13350.
+
+We know that 40\% is just 10\% below the 50\% accumulation at data point 2. We can interpolate a value somewhere, closer to 13350 than to 12500, that is the 40\% mark. Moving from 10\% at data point 1 to 50\% at data point 2, we see that 40\% must be 3/4s (10\% + (10\% times 3) = 40\% of the way from data point 1, or just 1/4 of the way below data point 2 on its way to data point 1. 
+
+Let's try that second idea. there is a distance of `r price[2]-price[1]` from data points 1 to 2. A quarter of that is `r (price[2]-price[1])/4`. Let's subtrract this amount from data point 2 to get our interpolated (linearly!) 40\% quantile of  `r price[2] - (price[2]-price[1])/4`.
+
+All of this occurs at that mythical and fractional index value of 1.75, thre quanters of the way from index value 1 to index value 2. Yet another way of complicating our otherwise calm and cool composures.
+
+</div>
+
+<br>
+
+We have entered the world of {singular statistics}(http://watanabe-www.math.dis.titech.ac.jp/users/swatanab/e-manga.html), where we are otherwise sucked into a vortex. An exxample of that vortex is the check function we just used. It is a statistical singularity like the physical black holes in the cosmos. It ends up that a lot of the statistics practically done (right and well) uses the thinking and techniques behind our determination of the singular _median_.
+
 ## Procedures
 
-Here are some basic procedures for calculating position and tendency (central or otherwise):
+Let's summarize some basic procedures for calculating position and tendency (central or otherwise):
 
 - Mean: arithmetic mean and weighted mean (or average as some like to call it)
 
-- Median: another percentile?
+- Median: another quartile? (of course)
 
 - Mode: good for nominal data
 
-- Quantile: percentile, and a special subset of quantile, the quartile
+- Quantile: percentile, and a special subset of quantile, the quartile, and the median too
 
 ### Mean
 
@@ -273,7 +543,7 @@ The middle of the data. We can use the Percentile method below with $P = 50$.
 
 The most frequently occurring value in the data. 
 
-### Percentile
+### Percentile and quantile
 
 How to compute? 
 
@@ -315,6 +585,7 @@ Because $i = 992$ is a whole number, follow the directions in step 3a. The 80th 
 ## Always problems
 
 1.	Determine the arithmetic mean, median, and the mode for the following numbers.
+
 
 2,4,8,4,6,2,7,8,4,3,8,9,4,3,5
  
