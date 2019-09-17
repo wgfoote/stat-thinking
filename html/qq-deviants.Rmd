@@ -346,12 +346,7 @@ We should have gotten `r sd(car_tbl$price)`
 
 <br>
 
-### 2. Then there were two: covariance and correlation
-
-TBD! Stay tuned!
-
-
-### 3. Robust measures
+### 2. Robust measures
 
 - **Range**: the distance between the max and min
 
@@ -385,11 +380,146 @@ Wider, broader scale than the standard deviations? This measure is robust to hig
 
 <br>
 
-- **Mean Absolute Deviation**: MAD is robust 
+- **Mean Absolute Deviation**: MAD is robust to outliers.
 
 $$
-MAD = \frac{\Sigma_{i=1}^N |x_i - \mu|}{N}
+MAD = \frac{\Sigma_{i=1}^N |X_i - \mu|}{N}
 $$
+Let's compute this statistic for price and miles.
+
+<br>
+
+<button onclick="showText('myDIV30')">show / hide</button>
+<div id="myDIV30" style="display:none;">
+
+<br>
+
+This time we should have gotten for $X_i= miles_i$:
+
+$$
+MAD_{miles} = \frac{\Sigma_{i=1}^N |X_i - \mu|}{N} = \frac{`r sum(abs(miles - mean(miles)))`}{`r length(miles)`} = `r sum(abs(miles - mean(miles))) / length(miles)`
+$$
+
+</div>
+
+<br>
+
+### 3. Correlation
+
+Correlation measures the degree of relationship between two variables. The measure ranges from a low of -1 to a high of +1. The -1 is a perfectly correlated inverse relationship between two variables. The +1 correlation measure a perfectly possitive relationship between two variables. A 0 indicates no relationship seems to exist. This is not cause and effect, just two variables happening to bump together or not in the street one day in the Bronx. We otherwise call this an antecedent-consequent relationship.
+
+#### Three steps to a correlation.
+
+1. Calculate the covariance between two variables, $X_i$ and $Y_i$. 
+
+$$
+cov(X, Y) = s_{xy} = \frac{\Sigma_{i=1}^N(X_i-\bar{X})(Y_i-\bar{Y})}{N-1}
+$$
+The numerative sums up the pairwaise ups and downs of how $X$ varies with $Y$. This number may net out to positive, negative, or just very close to zero. We lose at least one degree of freedom because we have to use the arithmetic mean to calculate deviations, just like we did for the sample standard deviation.
+
+2. Calculate the standard deviations for each of the two variables, $X_i$ and $Y_i$. First, the variance, here illustrated for $X$, miles in our example.
+
+$$
+var(X) = s_{x}^2 = \frac{\Sigma_{i=1}^N(X_i-\bar{X})^2}{N-1} = \frac{`r sum((miles-mean(miles))^2)`}{`r length(miles)`} = `r var(miles)`
+$$
+$$
+s_X = \sqrt{var(X)} = `r sd(miles)` 
+$$
+and for $Y$ as price we have
+
+$$
+s_Y = `r sd(price)`
+$$
+
+3. Calculate the ratio of covariance to the product of the standard deviations. This step transform the unwieldly, and hard to interpret covariance from the $-\infty...+\infty$ to the $-1...+1$ range. For samples we call the correlation $r_{XY}$.
+
+$$
+r_{XY} = \frac{cov(X,Y)}{s_x s_y} = \frac{`r cov(miles, price)`}{(`r sd(miles)`)(`r sd(price)`) } = `r cor(miles, price)`
+$$
+
+Let's build a table and calculate away.
+
+<br>
+
+<button onclick="showText('myDIV31')">show / hide</button>
+<div id="myDIV31" style="display:none;">
+
+<br>
+
+First a table.
+
+```{r corr-table}
+corr_tbl <- tibble(i = 1:length(miles), `X=miles` = miles, `Y=price` = price, `(X-X_bar)` = miles - mean(miles), `(Y-Y_bar)` = price - mean(price), `(X-X_bar)(Y-Y_bar)` = (miles - mean(miles))*(price - mean(price)))
+corr_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE)
+```
+
+Summing up the cross deviation terms $(X_i-\bar{X})(Y_i-\bar{Y})$ we get
+
+$$
+\Sigma_{i=1}^5 (X_i-\bar{X})(Y_i-\bar{Y}) = `r sum(corr_tbl[,6])`
+$$
+Dividing by the degrees of freedom $N-1=5-1=4$ we then have the sample covariance
+
+$$
+cov(X, Y) = \frac{\Sigma_{i=1}^5 (X_i-\bar{X})(Y_i-\bar{Y})}{N-1} = `r sum(corr_tbl[,6])/4`
+$$
+
+We already have the standard deviations of miles, `r sd(miles)`, and price, `r sd(price)`, so now we can compute the sample correlation as
+
+$$
+r_{XY} = r_{XY} = \frac{cov(X,Y)}{s_x s_y} = `r cor(miles, price)`
+$$
+
+</div>
+
+<br>
+
+#### What about the slope?
+
+We will show later (yes, with calculus -- free of charge) that the slope parameter $b_1$ is just the ratio of the covariance of miles ($X$) and price ($Y$) to the variance of miles ($X$.
+
+Should we try it?
+
+<br>
+
+<button onclick="showText('myDIV32')">show / hide</button>
+<div id="myDIV32" style="display:none;">
+
+<br>
+
+$$
+b_1 = \frac{cov(X,Y)}{var(X)} = \frac{`r cov(miles, price)`}{`r var(miles)`} =   `r cov(miles, price)/var(miles)`
+$$
+
+Negatively sloped, reflecting the negative correlation: when variations in miles are positive, variations in prices are negative, on average in this sample.
+
+</div>
+
+<br>
+
+If we find a car at the auction with an odometer reading of 15010 miles. What price would we expect based on our model?
+
+<br>
+
+<button onclick="showText('myDIV33')">show / hide</button>
+<div id="myDIV33" style="display:none;">
+
+<br>
+
+Sure. We found that if we knew $b_1=`r b_1`$, then we could calculate at the cross-hairs of average $X$ and $Y$ that $b_0=`r b_0`$. We substitute this into our model to get
+
+$$
+price = b_0 + b_1\,\,miles = `r b_0` + (`r b_1`)(15010) = `r b_0+b_1*15010`
+$$
+
+Would we be willing to pay that amount? We might want to look at other factors such as the age and condition of the car, among many other features of our auction in New Jersey.
+
+</div>
+
+<br>
 
 ## How can we use all of this?
 
@@ -410,9 +540,12 @@ $$
 1 - \frac{1}{k^2}
 $$
 
-3. Outlier analysis
+3. **Outlier analysis**: using IQR as a quantile inspired deviation we can build **fences**: Tukey(1977) once recommended 
 
-TBD
+- We add 1.5 times IQR to Q3 and see if any data exceeded that **fence** _and_
+
+- We subtract 1.5 times IQR from Q1 and see if any data fell short of that **fence**
+
 
 3.  **Coefficient of Variation**: the ratio of the standard deviation to the mean expressed in percentage and is denoted CV
 
