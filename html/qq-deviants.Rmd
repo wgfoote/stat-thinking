@@ -304,7 +304,7 @@ miles_tbl <- tibble(i = 1:length(miles), miles = miles, deviation = miles - mile
 N <- length(miles_tbl$miles)
 deviation_sum <- sum(miles_tbl$deviation)
 SSE <- sum(miles_tbl$`deviation squared`)
-variance <- SSE/(length(miles_tbl$miles))
+variance <- SSE/(length(miles_tbl$miles) - 1)
 standard_deviation <- sqrt(variance)
 miles_tbl %>% 
   kable(align = "c") %>% 
@@ -520,6 +520,10 @@ Would we be willing to pay that amount? We might want to look at other factors s
 </div>
 
 <br>
+
+
+
+
 
 ## How can we use all of this?
 
