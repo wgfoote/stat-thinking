@@ -1,0 +1,101 @@
+---
+title: "DriveTime Used Cars"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = TRUE)
+library(tidyverse)
+library(plotly)
+library(GGally)
+library(knitr)
+library(kableExtra)
+#
+# function to specify scatterplot smoothers in GGally::ggpairs()
+#
+smooth_over <- function(data, mapping, method="loess", ...){
+  # function to specify scatterplot smoothers in GGally::ggpairs()
+  # try this with ggpairs(data, lower = list(continuous = smooth_over)) for loess
+  # try this with ggpairs(data, lower = list(continuous = wrap(smooth_over, method="lm"))) for lm
+      p <- ggplot(data = data, mapping = mapping) + 
+      geom_point() + 
+      geom_smooth(method=method, ...)
+      p
+    }
+```
+
+## Driving in my car
+
+The [DriveTime](https://www.drivetime.com/used-cars) has current market data for used cars across the United States. This table summarizes miles driven and prices paid for Hyundai Elantras in California.
+
+
+```{r cars-data}
+cars_data <- read_csv("drive_time_sedans.csv")
+cars_hyundai_elantra_CA_summary <- cars_data %>% select(total.cost, mileage, makex, make.model, state) %>% filter(state == "CA" & makex == "HYUNDAI" & make.model == "HYUNDAI.ELANTRA") %>% select(price = total.cost, miles = mileage) %>% gather(key = "key", value = "value") %>% group_by(key) %>% summarize(min = min(value), q1 = quantile(value, 0.25), median = quantile(value, 0.50), q3 = quantile(value, 0.75), max = max(value), mean = mean(value), sd = sd(value), mad = sum(abs(value - mean(value))/length(value))) %>% mutate(IQR = q3 - q1, cv = sd / mean)
+car_tbl <- cars_hyundai_elantra_CA_summary
+car_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE)
+```
+
+A Tukey (1977) box plot visualized the table.
+
+```{r cars_boxplot}
+cars_hyundai_elantra_CA <- cars_data %>% select(total.cost, mileage, makex, make.model, state) %>% filter(state == "CA" & makex == "HYUNDAI" & make.model == "HYUNDAI.ELANTRA") %>% select(miles = mileage, price = total.cost)
+p <- cars_hyundai_elantra_CA %>% 
+    ggplot(aes(y = price)) +
+     geom_boxplot()
+ggplotly(p)
+p <- cars_hyundai_elantra_CA %>% 
+    ggplot(aes(y = miles)) +
+     geom_boxplot()
+ggplotly(p)
+ggpairs(cars_hyundai_elantra_CA, lower = list(continuous = wrap(smooth_over, method="lm")))
+```
+
+There almost seem to be two clusters through the 60,000 mile mark. Let's check that out.
+
+## The down-low
+
+Let's divide the observations into two buckets: prices for miles < 60,000 and prices for miles $\geq$ 60000. We will summarize and view scatter matrices.
+
+Here's the lower mileage cluster.
+
+```{r cars-cluster-low}
+cars_low_miles <- cars_hyundai_elantra_CA %>% 
+  filter(miles < 60000)
+ggpairs(cars_low_miles, lower = list(continuous = wrap(smooth_over, method="lm")), title = "Cars with mileage < 60000")
+#
+cars_low_miles_summary <- cars_low_miles %>% gather(key = "key", value = "value") %>% group_by(key) %>% summarize(min = min(value), q1 = quantile(value, 0.25), median = quantile(value, 0.50), q3 = quantile(value, 0.75), max = max(value), mean = mean(value), sd = sd(value), mad = sum(abs(value - mean(value))/length(value))) %>% mutate(IQR = q3 - q1, cv = sd / mean)
+car_tbl <- cars_low_miles_summary
+car_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE)
+```
+
+Relative to the overall sample, this filtered sample has a slightly flatter correlation and definitely a different set of miles and price distributions as evidenced in the summary table.
+
+What about higher mileage cars?
+
+
+```{r cars-cluster-high}
+cars_high_miles <- cars_hyundai_elantra_CA %>% 
+  filter(miles >= 60000)
+ggpairs(cars_high_miles, lower = list(continuous = wrap(smooth_over, method="lm")), title = "Cars with mileage >= 60000")
+#
+cars_high_miles_summary <- cars_high_miles %>% gather(key = "key", value = "value") %>% group_by(key) %>% summarize(min = min(value), q1 = quantile(value, 0.25), median = quantile(value, 0.50), q3 = quantile(value, 0.75), max = max(value), mean = mean(value), sd = sd(value), mad = sum(abs(value - mean(value))/length(value)),) %>% mutate(IQR = q3 - q1, cv = sd / mean)
+car_tbl <- cars_high_miles_summary
+car_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE)
+```
+
+Again, these ranges are very different than the whole sample, and even less correlated than the low mileage cars.
+

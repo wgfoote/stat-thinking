@@ -16,7 +16,62 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(stringr))
 library(plotly)
 library(grid)
+#@
 options(digits = 4, scipen = 999999)
+library(psych)
+library(ggplot2)
+library(GGally)
+library(lubridate)
+library(quantreg)
+library(forecast)
+library(tidyquant)
+library(timetk)
+library(quantmod)
+library(matrixStats)
+library(plotly)
+library(quadprog)
+#
+# returns
+#
+#stocks_env <- new.env()
+symbols <- c("TAN", "USO") #c("ABBV", "AMZN", "AXP", "CVX", "EMR", "HEI", "NTRI", "OC", "ORCL", "SENS", "TMO" )  #c("FXG", "PBJ", "UGE") #c("ENE", "REP", "")
+price_tbl <- tq_get(symbols) %>% select(date, symbol, price = adjusted)
+# long format ("TIDY") price tibble for possible other work
+return_tbl <- na.omit(price_tbl) %>% group_by(symbol) %>% tq_transmute(mutate_fun = periodReturn, period = "daily", type = "log", col_rename = "daily_return") %>% mutate(abs_return = abs(daily_return))
+r_2 <- return_tbl %>% select(symbol, date, daily_return) %>% spread(symbol, daily_return)
+r_2 <- xts(r_2, r_2$date)[-1, ]
+storage.mode(r_2) <- "numeric"
+r_2 <- r_2[, -1]
+#
+# loss
+#
+price_spread <- price_tbl %>% spread(symbol, price)
+price_spread <- xts(price_spread, price_spread$date)
+storage.mode(price_spread) <- "numeric" #select(FXG, PBJ, UGE) # 3 risk factors (rf)
+price_spread <- price_spread[, -1]
+price_0 <- as.numeric(tail(price_spread, 1))
+shares <- c(100000, 0) #, 50000)
+#price_last <- price_etf[length(price_etf$FXG), 3:5] #(FXG, PBJ, UGE) %>% as.vector()
+w <- as.numeric(shares * price_0)
+return_hist <- r_2
+# Fan these across the length and breadth of the risk factor series
+weights_rf <- matrix(w, nrow=nrow(return_hist), ncol=ncol(return_hist), byrow=TRUE)
+## We need to compute exp(x) - 1 for very small x: expm1 accomplishes this
+loss_rf <- -rowSums(expm1(return_hist) * weights_rf)
+loss_rf <- loss_rf[loss_rf > 0]
+loss_df <- tibble(loss = loss_rf, distribution = rep("historical", each = length(loss_rf)))
+#
+ES_calc <- function(data, prob){
+  threshold <- quantile(data, prob)
+  result <- median(data[data > threshold])
+}
+#
+n_sim <- 1000
+n_sample <- 100
+prob <- 0.95
+ES_sim <- replicate(n_sim, ES_calc(sample(loss_rf, n_sample, replace = TRUE), prob))
+summary(ES_sim)
+#
 # Multiple plot function
 #
 # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
@@ -522,12 +577,139 @@ Would we be willing to pay that amount? We might want to look at other factors s
 <br>
 
 
+## The tails have it!
+
+To round out our discussion about the shape of data, we ask two more questions:
+
+1. What direction do the tails of distribution tend to go, to the right or the left?
+
+2. How thick are the tails?
+
+The first question gets at the asymmetry in lots of data. An example of this is this data on losses from trading common stock in solar ppwer companies. We gather several days of stock prices, then comppute returns as percentage changes in the daily prices. A loss is whenever the returns are negative. Suppose that the latest price per share is USD `r price_0[1]` and we have 100,000 shares.
+
+```{r skew-losses}
+p <- ggplot(loss_df, aes(x = loss_rf, fill = distribution)) +
+  geom_histogram()
+ggplotly(p)
+```
+
+Let's eyeball answers to the questions.
+
+<br>
+
+<button onclick="showText('myDIV52')">show / hide</button>
+<div id="myDIV52" style="display:none;">
+
+<br>
+
+1. What direction does the distribution tend to?
+
+This data looks like the skewness is to the right. There is a preponderance of observations in the body to the left of the 100000 mark.
+
+The distirbution therefore looks like it is right- or positively-skewed.
+
+2. How thick tailed is the distribution?
+
+The losses seem to be somewhat frequent in the tails. It looks like it might be tick tailed. In financial terms this means that the volatility (standard deviation, IQR) is itself volatile.
+
+</div>
+
+<br>
+
+The answer to these questions can also come from two more aggregations, both based on deviations and variation of data points from thwir means. Skewness needs a direction so a positive metric will mean deviations can be found in the positive tail on average, while a negative metric will indicate a net average long tail in the opposite diredtion. Here is a metric that does this:
+
+$$
+skew = \frac{\frac{\Sigma_{i=1}^N (X_i - m)^3}{N-1}}{s^3}
+$$
 
 
+Just like correlation is dimensionless by scaling the covariance with the product of standard deviations, so the skewness measure looks at the cubed deviations per cubed standard deviation.
+
+- What direction is the price data?
+
+<br>
+
+<button onclick="showText('myDIV53')">show / hide</button>
+<div id="myDIV53" style="display:none;">
+
+<br>
+
+Using the formula we construct a table like so.
+
+```{r skew-table}
+skew_tbl <- tibble(i = 1:length(price), `Y=price` = price, `(Y-Y_bar)` = price - mean(price), `(Y-Y_bar)^3` = (price - mean(price))^3)
+N <- length(price)
+SCD <- sum(skew_tbl[,4])
+numerator <- SCD / (N-1)
+skew_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE)
+```
+
+We see lots of negative cubed deviations. Let's add them up to get `r SCD`. Divide this by $N-1=$`r length(price)` and we get `r numerator`. Dividing by the cube of the standard deviation we see our result.
+
+$$
+skew = \frac{\frac{\Sigma_{i=1}^N (X_i - m)^3}{N-1}}{s^3} = \frac{`r numerator`}{`r sd(price)^3`} = `r numerator / sd(price)^3`
+$$
+
+We are sure to check out the units of measurement here. The skew is positive. Price variations on average are _above_ their mean. What about miles?
+
+By the by, the solar loss ditribution does indeed compute a positive skewness. But we could see that with our own eyes as well.
+
+</div>
+
+<br>
+
+So now how thick is the tail? Here we can use a variant of the skew just by squaring the variance term. Kurtosis describes the condition of the thickness of the tail. Just as skewness tells us whether the deviations are on average above or below the mean, so kurtosis tells us how volatile the standard deviation is.
+
+Try this formula out for kurtosis on the price variable.
+
+$$
+kurtosis = \frac{\frac{\Sigma_{i=1}^N (X_i - m)^4}{N-1}}{s^4}
+$$
+
+- How thick or thin are the tails?
+
+<br>
+
+<button onclick="showText('myDIV54')">show / hide</button>
+<div id="myDIV54" style="display:none;">
+
+<br>
+
+Using the formula we construct a table like so.
+
+```{r kurt-table}
+kurt_tbl <- tibble(i = 1:length(price), `Y=price` = price, `(Y-Y_bar)` = price - mean(price), `(Y-Y_bar)^4` = (price - mean(price))^4)
+N <- length(price)
+SQD <- sum(skew_tbl[,4])
+numerator <- SQD / (N-1)
+kurt_tbl %>% 
+  kable(align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) %>% 
+  column_spec(1, bold = T, color = "blue", border_right = FALSE)
+```
+
+We see lots of negative cubed deviations. Let's add them up to get `r SQD`. Divide this by $N-1=$`r length(price)` and we get `r numerator`. Dividing by the cube of the standard deviation we see our result.
+
+$$
+kurtosis = \frac{\frac{\Sigma_{i=1}^N (X_i - m)^4}{N-1}}{s^4} = \frac{`r numerator`}{`r sd(price)^4`} = `r numerator / sd(price)^4`
+$$
+
+THe kurtosis is very small, indeed a very thin tale. This indicates a very stable volatility in prices. We will see later with teh normal distribution that the normal kurtosis is 3.00. Compared to the normal distribution, the price distribution is a very thin tailed distribution. An implication might be that it is a rare occurrence to see a high price in this sample. We must remember thata there are only 5 data points in the first place!
+
+The solar loss distribution has a kurtosis that is only slightly greater than 3. 
+
+We are sure to check out the units of measurement here. The skew is positive. Price variations on average are _above_ their mean.  What about miles?
+
+</div>
+
+<br>
 
 ## How can we use all of this?
 
-At least four come to mind.
+At least five come to mind. All of these build on a foundation of where (location, tendency) a distribution tends to land.
 
 1. **Empirical Rule**: if we thnk the distribution is symmetrical ("normal") then the proportion of observations will be
 
@@ -562,6 +744,9 @@ $$
 $$
 z = \frac{x - \mu}{\sigma}
 $$
+
+
+5. **Higher moments.** The third and fourth moments are present in the skewnewss (cubed) and kurtosis (fourth power). Very nice math with a meaningful punch. Skewness will help us understand if deviations are above (positive skewness) or below (negative skewness) the average. Kurtosis will tell us if the standard deviation varies more or less than the normal distribution average of 3.00 (to be dug into later, of course).
 
 
 ## Problems, always problems
