@@ -26,6 +26,8 @@ navbar:
         href: html/qq-central-tendency.html
       - text: "Deviation"
         href: html/qq-deviants.html
+      - text: "Practice"
+        href: html/explore-practice.html
     - text: "Anticipate"
       menu:
       - text: "Basics"
@@ -36,18 +38,24 @@ navbar:
         href: html/qq-poisson.html
       - text: "Normal / t"
         href: html/qq-normal.html
+      - text: "Practice"
+        href: html/anticipate-practice.html
     - text: "Infer"
       menu:
       - text: "Confidence"
         href: html/qq-confidence-interval.html
       - text: "Hypothesis"
         href: html/qq-hypo-test.html
+      - text: "Practice"
+        href: html/infer-practice.html
     - text: "Relate"
       menu:
       - text: "Simple regression"
         href: html/qq-regress.html
       - text: "Logistic regression"
         href: html/logistic-regression.html
+      - text: "Practice"
+        href: html/relate-practice.html
 output:
   html_document:
     theme: flatly
