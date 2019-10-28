@@ -7,7 +7,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
 knitr::opts_chunk$set(tidy = TRUE)
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=36))
 knitr::opts_chunk$set(size = "small")
@@ -21,7 +21,26 @@ knitr::knit_hooks$set(mysize = function(before, options, envir) {
   if (before) 
     return(options$size)
 })
+
+library(tidyverse)
+library(tidyquant)
+library(visNetwork)
+library(DiagrammeR)
 ```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+
+
 
 ## What is a probability distribution?
 
@@ -44,6 +63,228 @@ For a given variable (e.g., house prices), the frequency of ranges of this varia
 7. The **normal** distribution is a symmetric distribution, usually specified by its mean and standard deviation.
 8. The **exponential** distribution describes the frequency of times elapsed between random poisson occurrences.
 
+
+# Imagine this
+
+You are considering to found an equity fund to track risky investments in privately owned organizations
+
+- You have a history of stock prices
+- You know that today's stock price is the present value of stockholders' free cashflow for the foreseeable and not-so-foreseeable future
+- You need a back of the envelope way to describe how stock prices and value evolve
+- You also want to use this evolution to understand how a claim contingent on stock prices also evolves
+- And the present value of such a claim
+
+What do you want to know?
+
+- Is there a distribution you can use to describe the evolution and also price a claim on the stock prices?
+
+Why?
+
+- So you can acquire or divest an asset, a project, or anything that generates cash flows over time and has the same risk profile as the stock price.
+
+#  What's a binomial?
+
+Suppose we know that the current stock price of Ross Stores (NASDQ: ROST) $S$ is \$109 per share. We might consider a simple forecast of the uncertain level of the asset's value in one day, or even several days into the future: it might go up or it might go down. That's a **binomial**.
+
+We picture the binomial view of an anticipated stock price $S$ as branches from a root of $S_0=\$109$ per share today at time $t=0$. How can we forecast asset value at the end of one day $S_1$? We can do so by supposing that the stock price might simply rise or fall. Both up $u$ and down $d$ stock price outcomes, $S_{1,u}$ and $S_{1,d}$, might occur in $t=1$ day.
+
+We might also want to represent our optimisim or pessimism about how often up moves and down moves might occur. Let's assume just for a minute that we are optimistic about the future so that the probability of any up move in this stock is $p = 0.60$. If the probability of an up move is 0.60, then the probability of a down move must be
+
+<br>
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;"><br>
+
+Probability of a down movement is 1 minue the probability of an up movement or $1-p=1-0.06=0.40$.
+
+</div>
+<br>
+
+We can hover over the diagram below and locate the initial stock price and the up and down possibilities as well as probabilities of an up or down movement.
+
+```{r branch1}
+nodes <- data.frame(
+  id = 1:3,
+  title = c("S(0)=109", "S(1,u)", "S(1,d)")
+)
+
+edges <- data.frame(
+  from = c(1),
+  to = c(2,3),
+  label = c("p=0.60", "1-p=1-0.60=0.40")
+)
+
+visNetwork(nodes, edges, width = "100%") %>% 
+  visEdges(arrows = "to") %>% 
+  visHierarchicalLayout(direction = "LR")
+```
+
+Now we can suppose that the stock price grows or declines by an amount. That amount can be learned from the sample standard deviation $\sigma$ of the rate of return of the stock price. Rates of return are just growth (or decline) rates. So that the one day ahead stock price will go up to
+
+$$
+S_{1,u} = S_0 + S_0 \sigma = S_0(1+\sigma) \approx S_0 e^{\sigma}
+$$
+Where we use the approximmation $(1+\sigma) \approx e^{\sigma}$. We must keep in mind that this is the one day standard deviation.
+
+Let's get this a little more down to earth. We find that over the past 251 trading days that the stock return daily standard deviation is 0.0165 or 1.65\% per day. If we multiply this by 251 days a \$1 invested today would grow into `r exp(0.0165 * 251)`. This means that after 251 up jumps from today we would get this amount. Intuitively we might feel this is not very likely! Anyway, after just one up jump (a stock price move for one day) and if today's stock price is \$109 per share, then
+
+$$
+S_{1,u} = S_0 + S_0 \sigma = S_0(1+\sigma) \approx S_0 e^{\sigma} = 109 e^{0.0165} = `r 109 * exp(0.0165)`
+$$
+
+What goes up might just as well go down. If stock returns have a positive $\sigma = 0.0165$, and since $\sigma = var^{1/2}$, then it is possible for a negative or down turn in the return. Now the factor is $e^{-0.0165}=`r exp(-0.0165)`, a discount to the current stock price of \$109 per share.
+
+$$
+S_{1,d} = S_0 - S_0 \sigma = S_0(1-\sigma) \approx S_0 e^{-\sigma} = 109 e^{-0.0165} = `r 109 * exp(-0.0165)`
+$$
+
+If the stock could jump up 251 times it might decline that many times too. In that scenario, the stock price would move from \$109 to what level?
+
+<br>
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;"><br>
+
+`r 109*exp(-0.0165*251)`
+
+What a decline!
+
+</div>
+<br>
+
+What would be the expected value of the stock price in one day? This question is just a weighted average of the probabilities of up and down with the stock price outcomes, a random variable in one day.
+
+<br>
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;"><br>
+
+$$
+E(S_1) = p S_{1,u} + (1-p) S_{1,d} = (0.60)(110.81)+(0.40)(107.2163)=109.37
+$$
+
+Just a tad above today's price.
+
+</div>
+<br>
+
+## Then there were two
+
+Yes, two draws of stock prices, one after the other, one conditional on the other. Let's look at this up and down tree.
+
+```{r branch2}
+# Create a node data frame
+ndf <-
+  create_node_df(
+    n = 6,
+    label = c("S(0)", "S(1,d)", "S(1,u)", "S(2,dd)", "S(2,ud=du)", "S(2,uu)"),
+    type  = "lower",
+    style = "filled",
+    color = "orange",
+    shape = c("circle", "circle", "circle", "circle", "circle", "circle"),
+    data = c(109, 107,112,103,109,115)
+  )
+edf <-
+  create_edge_df(
+    from = c(1, 1, 2, 2, 3, 3),
+    to   = c(2, 3, 4, 5, 5, 6),
+    rel  = "leading_to"
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf
+  ) %>%
+  add_global_graph_attrs(
+    attr = "fontsize",
+    value = 7,
+    attr_type = "node"
+  ) %>% 
+  set_node_attrs(
+    node_attr = "fontname",
+    values = "Helvetica"
+  ) %>%
+  set_edge_attrs(
+    edge_attr = "color",
+    values = "blue"
+  ) %>%
+  set_edge_attrs(
+    edge_attr = "arrowsize",
+    values = 1
+  )
+
+graph %>% render_graph(layout = "tree")
+```
+
+SOme description is in order. At the top is right now, day 0. The second row is day 1. The third row is day 2. If the stock goes up from day 0 to day 1, then the value is $S(1,u)$. Similarly if the stock goes down. If after the stock goes up at day 1, then the stock can either go up to $S(2,uu)$ (that is, jump up twice) to go down to $S(2,ud)$ (that is, after jumping up it then jumps down). The same thoughts will occur when the stock goes down to $S(1,d)$.
+
+How many paths are there to get to the third row where we have forecasted the 2nd day's stock price?
+
+<br>
+<button onclick="showText('myDIV4')">show / hide</button>
+<div id="myDIV4" style="display:none;"><br>
+
+For $S(2,uu)$ there is only one path, up and up.
+
+For $S(2,ud=du)$ there are two paths, up and down, and down and up. It does not matter, they both lead to the same node.
+
+For $S(2,dd)$ there is only one path, down and down.
+
+</div>
+<br>
+
+### How often?
+
+We can compute outcomes all day. But how often does a node occur? We remember that our task is to forecast stock prices in the future. To do that we realize that stock prices occur in a probable range. That means they are random variables, where the adjective **random** has the notion of an indiscriminate sampling of prices. But a random variable is not so colloquially indiscriminate as to not have a notion of a frequency of occurrence. The relative frequency, as we continue to see, is what we measure to be probability. Allowing probability into our lives also admits our beliefs into the analysis.
+
+So what is the probability of a stock price after one up and one down jump?
+
+<br>
+<button onclick="showText('myDIV5')">show / hide</button>
+<div id="myDIV5" style="display:none;"><br>
+
+This is an example of a both-and event. Both an up and a down jump must occur. The probability of an up jump, according to our analysis is 0.60. The probabiilty of a down jump is then just $1-0.60=0.40$. Intuitively, if stock prices were to rise, that would account for 60\% of our experiments. Then after an up jump, the stock falls, so out of 60 pf a humdred experiments with stock prices, 40\% of those might occur.
+
+Thus the probability of an up jump followed by a down jump is
+
+$$
+Prob(S(2, ud)) = p^1(1-p)^1 = (0.60)^1(0.40)^1 = 0.24
+$$
+
+THis is the probability of a single up and down combination.
+
+Hang on! In the stock price tree we just admitted that there are two paths to get to a stock price that experiences both an up and a down jump. Okay, that would then mean there are two mutually exclusive ways of getting to an outcome like that. EIther the stock price jumps up then jumps down, or the stock price jumps down then up. This is thus an either-or event. We must therefore add the independently occurring probabilities.
+
+$$
+Prob(s(2, ud) \cup S(2, du)) = Prob(S(2, ud)) + Prob(S(2, du)) = 0.24 + 0.24 = 2(0.24) = 0.48
+$$
+
+Thus the complete answer is that 48\% of the time we might experience a stock price.
+
+</div>
+<br>
+
+How would we calculate the $S(2,du=ud)$ outcome?
+
+<br>
+<button onclick="showText('myDIV6')">show / hide</button>
+<div id="myDIV6" style="display:none;"><br>
+
+Let's use the up and down sequence. We already know that
+
+$$
+S_{1,u} = S_0 + S_0 \sigma = S_0(1+\sigma) \approx S_0 e^{\sigma} = 109 e^{0.0165} = `r 109 * exp(0.0165)`
+$$
+
+Yes, the stock price rises. After the rise to `r 109 * exp(0.0165)`, the stock price now jumps down. We take our up estimate and condition it with a down movement like this
+
+$$
+S_{2,ud} = S_{1,u} - S_{1.u} \sigma = S_{1,u}(1-\sigma) \approx S_{1,u} e^{-\sigma} = `r 109 * exp(0.0165)` e^{-0.0165} = `r 109 * exp(0.0165)*exp(-0.0165)`
+$$
+Yes, right back where we started. Do we not observe a symmeterical outcome? Yes, indeed we do.
+
+</div>
+<br>
+
+The $S(2, du=ud)$ outcome occurs 48\% of the time given our optimism in this market.
+
 ## Being binomial
 
 ### Consumer goods 'r' us
@@ -54,19 +295,24 @@ From a Consumer Food database.
 2. If you were to randomly select 25 of these households, what is the probability that exactly 8 would be in the Metro area?
 3. If you were to randomly select 12 of these households, what is the probability that 3 or fewer would be households in the Metro area? 
 
+Just like the probability of an up swing in stock prices, the proportion of Metro area households is the probability of that up or success (yes we found Metro households!) brach of the binomial tree. We can go on to then answer qeustions 2 and 3. We will need to know how many paths it can take to get to an outcome, the probability of a single path as well. Armed with this knowledge we can answer questions just like these.
+
 ### What's a binomial?
+
+Let's get more precise.
 
 - Two possible event outcomes only in each run or scenario of a binomial process
 - E.g., default/not-default, reject/accept, comply/not-comply events
 - Let $x$ = comply, then $P(x)$ = probability of compliance and $1 - P(x)$ = probability of non-compliance.
 
-Three assumptions:
+We use three assumptions:
 
 1. Each replication of the process is a **combination** of events that results in one of two possible outcomes (usually referred to as "success"" or "failure" events).
 2. The probability of success is the same for each replication.
 3. The replications are independent, meaning here that a success in one replication does not influence the probability of success in another.
 
 ## What's a combination?
+
 Start with a set of choices or categories. Combinations are the complete set of different ways you can arrange the various subsets of choices or categories. 
 
 ### For a simple example 
@@ -75,7 +321,7 @@ Start with a set of choices or categories. Combinations are the complete set of 
 - You can form four subsets of this set: {}, {1}, {2}, and {1,2} (don't forget the _null_ or "do nothing" subset). These subsets are the **combinations** of set A.
 - Order does not matter so that $\{1,2\}$ is the same as $\{2,1\}$
 
-## We have to start with permutation first
+### We have to start with permutation first
 
 A permutation does care about the order of the elements in a subset, much like the order of letter in a word. We will find that combinations are found from permutations.
 
@@ -136,14 +382,18 @@ and
 _{n}P_{x} = _{n}C_{x}x! = {n \choose x}x! = \frac{n!}{(n - x)!}
 \]
 
-## Try these: combinations and permutations
+### Try these: combinations and permutations
 
 A risk management practice has 8 members. Teams of three are formed to work with client project teams and provide management, subject matter expertise and budget and scheduling control. The practice leader wants to know
 
 1. How many different project teams ("teams") can be formed from the practice?
 2. How many teams of 3 members can be formed from the practice if each team is to have a team manager, a project controller, and a subject matter expert?
 
-### Results: combinations and permutations
+<br>
+<button onclick="showText('myDIV7')">show / hide</button>
+<div id="myDIV7" style="display:none;"><br>
+
+Let's get to it.
 
 1. How many different project teams ("teams") can be formed from the practice?
 
@@ -169,6 +419,9 @@ so that
 \]
 potential permutations of practice members.
 
+</div>
+<br>
+
 ## So how do we use the binomial process?
 
 Follow these steps:
@@ -193,13 +446,17 @@ P(X = x \mid n, p) = {n \choose x}p^x (1-p)^{n-x}
 We can also use the $BINOM.DIST(x,n,p,FALSE)$ formula in Excel, where `FALSE` indicates that we calculate the probability mass function value (the relative frequency) and `TRUE` indicates that we calculate cumulative probability value (the cumulative relative frequency).
 
 ## Try this: binomial distribution
+
 A environmental control specialist picks a sample of 10 sensors from a large shipment of sensors. Experience has shown that 1 in 5 sensors fail to work when installed. The specialist is scheduling her time for the week and wants to know
 
 1. What is the probability that she will pick exactly 2 of the defective sensors?
 2. What is the probability that she will pick no more than 2 of the defective sensors?
 
+<br>
+<button onclick="showText('myDIV8')">show / hide</button>
+<div id="myDIV8" style="display:none;"><br>
 
-### Results: binomial distribution
+Using (a bit slavishly) our protocol:
 
 1. What is the probability that she will pick exactly 2 of the defective sensors?
 
@@ -209,6 +466,7 @@ Follow these steps:
 2. How many successes (we are tracking "defective" sensors)? No more than $2$ defective sensors.
 3. How often does a success ("defective" sensor) occur (event we are tracking)? $p = 1/5 = 0.20$.
 4. How many $x$ successes (events) in $n$ replications (trials, observations)? The number of possible combinations of $2$ successes ("defective" sensors) in $10$ replications (sample size) is
+
 \[
 _{10}C_{2} = {10 \choose 2} = \frac{10 !}{2! \, (10 - 2)!} =  45
 \]
@@ -249,13 +507,19 @@ Similarly,$P(X = 1) = 0.2684$. We have then
 P(X \leq 2) = P(X = 0) + P(X = 1) + P(X = 2) = 0.6778
 \]
 
-## Try another
+</div>
+<br>
+
+### Try another
 
 Using the same sensor problem, what is the probability that she will pick 8 or more defective sensors? What if she picks more than 8 defective sensors?
 
 - Build a simple spreadsheet table to answer these questions.
 
-### Result
+<br>
+<button onclick="showText('myDIV9')">show / hide</button>
+<div id="myDIV9" style="display:none;"><br>
+
 Assuming no intersections and independent sampling of the 10 sensors,the probability is the union of three events, finding 8, 9, and 10 defective sensors. We have, if she finds 8 or more defective sensors,
 \[
 P(X \geq 8) = P(\{X=8\}\cup \{X=9\} \cup \{X=10\})
@@ -279,20 +543,29 @@ P(\{X=9\} \cup \{X=10\}) = P(X = 9) + P(X = 10) = 0.00042\%
 Here is a worksheet table that builds up these calculations.
 ![Binomial Probability Calculations](binomial1.jpg)
 
+</div>
+<br>
+
 ## What does a graph of the binomial look like?
 
 ```{r, echo = FALSE}
-require(ggplot2)
+library(ggplot2)
+library(plotly)
 x <- 0:10
 n <- max(x)
 p <- c(0.2,0.5,0.8)
-x1 <- dbinom(x, n, p)
-plot(dbinom(0:10, 10, .2), xlab = "Occurrences", ylab = "Probability", main = "Binomial Densities", col = "green")
-points(dbinom(0:10, 10, .5), col = "red")
-points(dbinom(0:10, 10, .8), col = "blue")
+y <- tibble(low = dbinom(x, n, 0.20), medium = dbinom(x, n, 0.5), high = dbinom(x, n, 0.80))
+plt <- ggplot(y, aes(x = x, y = y$low)) +
+  geom_line() +
+  geom_line(aes(x = x, y = y$medium), color = "red") +
+  geom_line(aes(x = x, y = y$high), color = "blue") +
+  ggtitle("Binomial highs and loss")
+ggplotly(plt)
 ```
 
 ## Binomial statistics
+
+Here we need just the mean and standard deviation.
 
 - Mean of a binomial distribution
 \[
@@ -303,10 +576,15 @@ points(dbinom(0:10, 10, .8), col = "blue")
 \sigma = (n p (1-p))^{1/2}
 \]
 
-## Try this
-What are the mean and standard deviation of the sensor problem above?
+### Try this
 
-### Result
+Use the data from the last example above. What are the mean and standard deviation of the sensor problem?
+
+<br>
+<button onclick="showText('myDIV10')">show / hide</button>
+<div id="myDIV10" style="display:none;"><br>
+
+
 We calculate for $n = 10$ and $p = 0.20$
 
 Mean of the sensor binomial distribution
@@ -320,6 +598,9 @@ Standard deviation of the sensor binomial distribution
 \sigma = (n p (1-p))^{1/2} = ((10)(0.20)(0.80))
 \]
 1.26, or rounding down, 1 defective sensor.
+
+</div>
+<br>
 
 ## Short exercises
 
