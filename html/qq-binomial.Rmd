@@ -256,7 +256,7 @@ $$
 Prob(s(2, ud) \cup S(2, du)) = Prob(S(2, ud)) + Prob(S(2, du)) = 0.24 + 0.24 = 2(0.24) = 0.48
 $$
 
-Thus the complete answer is that 48\% of the time we might experience a stock price.
+Thus the complete answer is that 48\% of the time we might experience a stock price that jump up one day and down another.
 
 </div>
 <br>
@@ -619,3 +619,15 @@ _Answer_: a little over 20\%
 4. A manufacturer of metal pistons finds that, on the average, 12\% of the pistons are rejected by customers because they are either oversize or undersize. What is the probability that a batch of 10 pistons will contain no more than 2 rejects?
 
 _Answer_: 89\%
+
+## Binomial barrels
+
+You own a small refinery. Inputs are barrels of crude products. Outputs are barrels of refined products. Your corporate policy is to allow shipments where no more than 3 sampled barrels of unacceptable quality (non-compliant) are discovered in a sample of 10 barrels. However, because of the nature of the production process and the quality of inputs, it is 20\% of time that bad barrels occur.
+
+Use this [Excel workbook (binomial.xlsx)](xlsx/binomial.xlsx) to perform these tasks and answer the questions below:
+
+1. Sample 30 barrels from the population.
+2. Set up the spreadsheet model for probabilities (p) of a non-compliant barrel equal to 20%, 50%, and 80%.
+3. What is the probability that 5 or fewer barrels will likely be found?
+4. What is the probability that 15 or greater barrels will be found?
+5. How probable is it that between 5 and 15 barrels will found exclusive of 5 or 15?
