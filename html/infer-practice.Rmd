@@ -1,0 +1,346 @@
+---
+title: "Final Examination Review"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+options(digits = 4, scipen = 9999999)
+```
+
+<script>
+function showText(y) {
+    var x = document.getElementById(y);
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
+
+## Contingency table. 
+
+For the following table that has frequencies from counties and their health outcomes, find the probability of a bad health outcome if you were to live in a rural county. 
+
+bad	good	
+rural	501	68	
+urban	103	391	
+
+<br>
+
+<button onclick="showText('myDIV1')">show / hide</button>
+<div id="myDIV1" style="display:none;">
+
+<br>
+
+```{r table}
+
+rural <- c(501, 68)
+p_b_r <- rural[1] / sum(rural)
+urban <- c(103, 391)
+all <- sum(urban)+sum(rural)
+p_r <- sum(rural) / all
+p_b_intersect_r <- rural[1] / all
+```
+
+Use the rural only row. $P(B|R)$ is the probability that bad outcomes occur in rural counties. Add up the cells to get `r all` counties in the sample with `r sum(rural)` rural counties.
+
+$$
+P(B|R) = \frac{P(B \cap R)}{P(R)} = \frac{`r rural[1] / all`}{`r sum(rural) / all`} = `r p_b_r`
+$$
+
+<br>
+</div>
+
+## Binomial probability. 
+
+About 2% of the time you would expect to succumb to an infection that keeps you from going to work in any given week. What is the probability of being out due to this event exactly once in a 10 week period?
+
+<br>
+
+<button onclick="showText('myDIV2')">show / hide</button>
+<div id="myDIV2" style="display:none;">
+
+<br>
+
+```{r binomial}
+n <- 10; p <- 0.02; k = 1
+p_path <- p^k*(1-p)^(n-k) 
+paths <- choose(n, k) 
+p_k <- paths * p_path
+```
+
+For this problem $n=`r n`$, $k=`r k`$, $p=`r p`$. The probability of a single path is 
+
+$$
+p^k(1-p)^{n-k} = (`r p^k`)*(`r (1-p)^(n-k)` = `r p_path`
+$$
+
+The number of possible paths that have this probability is
+
+$$
+\frac{n!}{(n-k)!\,\,k!} = \frac{`r n`!}{(`r n`-`r k`)!\,\,`r k`!} = paths
+$$
+
+The probability is then the number of paths times the probability of a path, that is,
+
+$$
+P(k=`r k`| n=`r n`, p = `r p`) = \frac{n!}{(n-k)!\,\,k!}p^k(1-p)^{n-k}=(`r paths`)(`r p_path`) = `r p_k`
+$$
+<br>
+</div>
+
+## Uniform distribution. 
+
+You have no idea about the shape of the distribution of your stock portfolio. You do know that it can range from 10,000 to 15,000 dollars in a 52 week period. What is mean and standard deviation you can expect if you repeatedly (and maybe even annoyingly!) sampled the  opinions of 5 expert portfolio managers?
+
+<button onclick="showText('myDIV3')">show / hide</button>
+<div id="myDIV3" style="display:none;">
+
+<br>
+
+```{r uniform}
+
+a <- 10000 ; b <- 15000 ; n <- 5
+mu <- (a + b) / 2
+sig <- (b - a) / 12^0.5
+s_xbar <- sig / sqrt(n)
+
+#mu
+#sig
+#s_xbar
+
+```
+
+We use the iniform distribution to model our diffuse beliefs. We also sample several portfolio managers (repeatedly!). For this problem $a = `r a`$, $b = `r b`$, and the number od samples $n = `r n`$. We let $X$ be the samples of portfolio values.
+
+The population mean of the uniform distribution is
+
+$$
+\mu = \frac{(a+b)}{2} = \frac{`r a` + `r b`}{2} = `r mu`
+$$
+The mean of the many sampled means is also equal, as the number of samplings gets ever larger, to the population mean $\mu = `r mu`$.
+
+The population standard deviation is 
+
+$$
+\sigma = \frac{(b-a)}{\sqrt{12}} = \frac{(`r b` - `r a`)}{`r sqrt(12)`} = `r sig`
+$$
+
+The standard deviation of the sampled means is then, given we know the population variance,
+
+$$
+\sigma_{\bar X} = \frac{\sigma}{\sqrt{n}}= \frac{`r sig`}{\sqrt{`r n`}} = `r s_xbar`
+$$
+
+<br>
+</div>
+
+```{r normal}
+mu <- 74 ; sig <- 7 ; upper <- 0.05
+cut_a <- mu + qnorm(1-upper, 0, 1) * sig
+#cut_a
+```
+
+## Normal distribution  
+
+Mid-term grades averaged `r mu` with a standard deviation of `r sig`. It was such a hard exam that the professor strongly felt that `r upper*100`\% of the students should get an A for their heroic efforts. What is the cut off grade for A's?
+
+<button onclick="showText('myDIV4')">show / hide</button>
+<div id="myDIV4" style="display:none;">
+
+<br>
+
+We use the $z$ score to solve this problem. We know that the $z$ score for 95\% cumulative probability (leaving 5\% of students in the upper tail of the normal distribution) is `r qnorm(1-upper, 0, 1)`. Then with the $z$ transform of the A cutoff grade $X$ with mean $\mu = `r mu`$ and standard deviation $\sigma = `r sig`$ we have
+
+$$
+z  = `r qnorm(1-upper, 0, 1)` =  \frac{X-\mu}{\sigma} =  \frac{X-`r mu`}{`r sig`}
+$$
+
+We solve this equation for $X$, the A cut-off grade as
+
+$$
+X = `r mu` + (`r qnorm(1-upper, 0, 1)`)(`r sig`) = `r cut_a`
+$$
+</div>
+<br>
+
+
+```{r ci-known}
+
+x_bar <- 60;  n <- 100 ; p_bar <- x_bar / n ; sig_p_bar <- sqrt(p*(1-p)/n) ; upper <- 0.025; z <- qnorm(1-upper, 0, 1)
+p_low <- p_bar - z * sig_p_bar
+p_high <- p_bar + z * sig_p_bar
+#p_low
+#p_high
+```
+
+
+## Confidence Interval -- known population variance. 
+
+You sample `r n` workers in a warehouse that employs 2,000 workers. You find that `r x_bar` prefer to form a collective bargaining unit (that is, join a labor union). What is the `r (1-2*upper)*100`\% confidence interval for the proportion of all workers in the warehouse who prefer to form a collective bargaining unit?
+
+<button onclick="showText('myDIV5')">show / hide</button>
+<div id="myDIV5" style="display:none;">
+
+<br>
+We are looking for the confidence interval of average proportions $\bar p = \bar X / n = `r p_bar`$. The population variance of the binomially distributed number of workers that vote for a union is
+
+$$
+\sigma_X^2 = np(1-p)
+$$
+
+The population variance of $\bar X / n = \bar p$ (standard deviatyion squared) is then
+
+$$
+\sigma_{\bar p}^2 = \frac{np(1-p)}{n^2} = \frac{p(1-p)}{n} = \frac{(`r p_bar`)(1- `r p_bar`)}{`r n`} = `r sig_p_bar^2`
+$$
+
+so that the population standard deviation for the $n$ sample mean proportion is 
+
+$$
+\sigma_{\bar p} = \sqrt{`r sig_p_bar^2`} = `r sig_p_bar`
+$$
+
+The confidence interval with upper tail $z = `r z`$ has lower bound $LB$ 
+
+$$
+LB = \bar p - z\,\sigma_{\bar p} = `r p_bar` - (`r z`)(`r sig_p_bar`) = `r p_low`
+$$
+and upper bound $UB$
+
+$$
+UB = \bar p + z\,\sigma_{\bar p} = `r p_bar` + (`r z`)(`r sig_p_bar`) = `r p_high`
+$$
+
+<br>
+</div>
+
+```{r ci-unknown}
+n <- 9; mu <- 3000; sig <- 450; sig_xbar <- sig / sqrt(n); t <- abs(qt(0.025, n-1))
+x_low <- mu - t * sig_xbar
+x_high <- mu + t * sig_xbar
+#x_low
+#x_high
+```
+
+## Confidence interval -- sampled variance.  
+
+A random sample of 9 application specific integrated circuit (ASIC) chips for inventory control were found to have a mean life of 3,000 operating hours with a standard deviation of 450 hours. The typical ASIC chip standard deviation has never been reported by the manufacturer. What is the confidence interval for the mean life of the entire shipment? 
+
+<br>
+<button onclick="showText('myDIV6')">show / hide</button>
+<div id="myDIV6" style="display:none;">
+
+<br>
+
+Here we need to use the student-t distribution with an unknown populatino standard deviation. We have sample size $n-`r n`$, mean life $\bar X = `r mu`$, sample standard deviation $s = `r sig`$. Upper and lower bounds of the comparable $t$ scores for $dr = n - 1 = `r n-1`$ degrees of freedom are $+`r t`$ and $-`r t`$, respectively.
+
+The confidence interval with upper tail $t = `r t`$ has lower bound $LB$ 
+
+$$
+LB = \bar X - t\,\sigma_{\bar X} = `r mu` - (`r t`)(`r sig_xbar`) = `r x_low`
+$$
+and upper bound $UB$
+
+$$
+UB = \bar X + t\,\sigma_{\bar X} = `r mu` + (`r t`)(`r sig_xbar`) = `r x_high`
+$$
+
+</div>
+<br>
+
+```{r ht-known}
+mu_0 <- 35 ; xbar <- 40; sig <- 4; n <- 9; zstar <- qnorm(0.95, 0,1)
+zstar
+z <- (xbar - mu_0) / (sig/sqrt(n))
+z
+```
+
+## Hypothesis testing -- known population variance. 
+
+You purchase 9 cans of so-called salt-free tomato sauce to test the manufacturer's claim that there is no more than 35 grams of sodium in each can. The manufacturer also claims that there is a standard deviation of 4 grams for all cans shipped during the past 12 months. Your analysis indicates that there is a mean  of 40 grams in your sample. Should you accept the manufacturer's claim at the 95% level?  
+
+<br>
+<button onclick="showText('myDIV7')">show / hide</button>
+<div id="myDIV7" style="display:none;">
+
+<br>
+
+We know the population standard deviation of $\sigma = `r sig`$ and with sample size $n=`r n`$, the standard deviation of sampled means is $\sigma / \sqrt{n} = `r sig` / `r n` = `r (sig/sqrt(n))`$. 
+
+The null hypothesis $H_0$ is that the mean equals the manufacturer's claim $\mu = \mu_0 = `r mu_0`$. The alternative hypothesis is that $\mu > `r mu_0`$. With an upper tail test like this we find the critical $z$ score to be the $z$ associated with a 95\% cumulative probability under the normal distribution curve so that $z^* = `r zstar`$. If our sample mean $z$ score exceeds this number then we reject the null hypothesis in favor of accepting the alternative hypothesis, with a probability of being wrong about the rejection 5\% of the time.
+
+Our calculation is
+
+$$
+z = \frac{\bar X - \mu_0}{\sigma_{\bar X}} = \frac{`r mu` - `r mu_0`}{`r sig/sqrt(n)`} = `r z`
+$$
+
+Since $z = `r z`$ exceeds the critical $z^* = `r zstar`$ we reject the manufacturer's claim.
+
+</div>
+<br>
+
+```{r ht-unknown}
+mu_0 <- 35 ; xbar <- 40; sig <- 7; n <- 9; tstar <- qt(0.95, n-1)
+tstar
+t <- (xbar - mu_0) / (sig/sqrt(n))
+t
+```
+
+## Hypothesis testing -- sampled variance. 
+
+You purchase 9 cans of so-called salt-free tomato sauce to test the manufacturer's claim that there is no more than 35 grams of sodium in each can. Your analysis indicates that there is a mean  of 40 grams with a standard deviation of 7 grams of sodium in your sample. You do not believe the manufacture's claim that there is only a standard deviation of 4 grams in the so-called population.of all cans produced. Should you accept the manufacturer's claim at the 95% level? (Use =T.INV() in Excel to compute the critical t-score).
+
+
+<br>
+<button onclick="showText('myDIV8')">show / hide</button>
+<div id="myDIV8" style="display:none;">
+
+<br>
+
+Now we call the manufacturer's standard deviation into question and use the sample standard deviation. We thus need to use the student-t distribution.
+
+We calculate standard deviation $s = `r sig`$ and with sample size $n=`r n`$, the sample standard deviation of sampled means is $s / \sqrt{n} = `r sig` / `r n` = `r (sig/sqrt(n))`$. 
+
+The null hypothesis $H_0$ is that the mean equals the manufacturer's claim $\mu = \mu_0 = `r mu_0`$. The alternative hypothesis is that $\mu > `r mu_0`$. With an upper tail test like this we find the critical $t$ score to be the $t$ associated with a 95\% cumulative probability under the normal distribution curve so that $t^* = `r tstar`$. If our sample mean $t$ score exceeds this number then we reject the null hypothesis in favor of accepting the alternative hypothesis, with a probability of being wrong about the rejection 5\% of the time.
+
+Our calculation is
+
+$$
+t = \frac{\bar X - \mu_0}{s_{\bar X}} = \frac{`r mu` - `r mu_0`}{`r sig/sqrt(n)`} = `r t`
+$$
+
+Since $t = `r t`$ exceeds the critical $t^* = `r tstar`$ we reject the manufacturer's claim.
+
+</div>
+<br>
+
+Regression -- slope confidence interval. What is the 95% range of sampled elasticities of the influence of lot size on Bronx housing prices if the sampled mean of slopes is 0.53 with a standard deviation of 0.39? There are 14 observations of prices and lot sizes. (Use =T.INV() in Excel to compute the critical t-score). 
+
+<br>
+<button onclick="showText('myDIV9')">show / hide</button>
+<div id="myDIV9" style="display:none;">
+
+<br>
+
+
+
+</div>
+<br>
+
+
+Regression -- slope hypothesis test. Is the sampled elasticity of the influence of lot size on Bronx housing prices meaningful? That is, is the sampled mean elasticity significantly different from zero?  The sampled mean of slopes is 0.53 with a standard deviation of 0.39. There are 14 observations of prices and lot sizes. (Use =T.INV() in Excel to compute the critical t-score). 
+
+<br>
+<button onclick="showText('myDIV10')">show / hide</button>
+<div id="myDIV10" style="display:none;">
+
+<br>
+
+
+
+</div>
+<br>
