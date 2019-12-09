@@ -473,20 +473,20 @@ show / hide
 <p><span class="math display">\[
 \sigma_X^2 = np(1-p)
 \]</span></p>
-<p>The population variance of <span class="math inline">\(\bar X / n = \bar p\)</span> (standard deviatyion squared) is then</p>
+<p>The population variance of <span class="math inline">\(\bar X / n = \bar p\)</span> (standard deviation squared) is then</p>
 <p><span class="math display">\[
-\sigma_{\bar p}^2 = \frac{np(1-p)}{n^2} = \frac{p(1-p)}{n} = \frac{(0.6)(1- 0.6)}{100} = 0.0002
+\sigma_{\bar p}^2 = \frac{np(1-p)}{n^2} = \frac{p(1-p)}{n} = \frac{(0.6)(1- 0.6)}{100} = 0.0024
 \]</span></p>
 <p>so that the population standard deviation for the <span class="math inline">\(n\)</span> sample mean proportion is</p>
 <p><span class="math display">\[
-\sigma_{\bar p} = \sqrt{0.0002} = 0.014
+\sigma_{\bar p} = \sqrt{0.0024} = 0.049
 \]</span></p>
 <p>The confidence interval with upper tail <span class="math inline">\(z = 1.96\)</span> has lower bound <span class="math inline">\(LB\)</span></p>
 <p><span class="math display">\[
-LB = \bar p - z\,\sigma_{\bar p} = 0.6 - (1.96)(0.014) = 0.5726
+LB = \bar p - z\,\sigma_{\bar p} = 0.6 - (1.96)(0.049) = 0.504
 \]</span> and upper bound <span class="math inline">\(UB\)</span></p>
 <p><span class="math display">\[
-UB = \bar p + z\,\sigma_{\bar p} = 0.6 + (1.96)(0.014) = 0.6274
+UB = \bar p + z\,\sigma_{\bar p} = 0.6 + (1.96)(0.049) = 0.696
 \]</span></p>
 <p><br></p>
 </div>
@@ -507,8 +507,6 @@ UB = \bar X + t\,\sigma_{\bar X} = 3000 + (2.306)(150) = 3345.9006
 \]</span></p>
 </div>
 <p><br></p>
-<pre><code>## [1] 1.645</code></pre>
-<pre><code>## [1] 3.75</code></pre>
 </div>
 <div id="hypothesis-testing-known-population-variance." class="section level2">
 <h2>Hypothesis testing – known population variance.</h2>
@@ -525,8 +523,6 @@ z = \frac{\bar X - \mu_0}{\sigma_{\bar X}} = \frac{3000 - 35}{1.3333} = 3.75
 <p>Since <span class="math inline">\(z = 3.75\)</span> exceeds the critical <span class="math inline">\(z^* = 1.6449\)</span> we reject the manufacturer’s claim.</p>
 </div>
 <p><br></p>
-<pre><code>## [1] 1.86</code></pre>
-<pre><code>## [1] 2.143</code></pre>
 </div>
 <div id="hypothesis-testing-sampled-variance." class="section level2">
 <h2>Hypothesis testing – sampled variance.</h2>
@@ -544,16 +540,20 @@ t = \frac{\bar X - \mu_0}{s_{\bar X}} = \frac{3000 - 35}{2.3333} = 2.1429
 <p>Since <span class="math inline">\(t = 2.1429\)</span> exceeds the critical <span class="math inline">\(t^* = 1.8595\)</span> we reject the manufacturer’s claim.</p>
 </div>
 <p><br></p>
+</div>
+<div id="regression-inference" class="section level2">
+<h2>Regression – inference</h2>
 <p>Regression – slope confidence interval. What is the 95% range of sampled elasticities of the influence of lot size on Bronx housing prices if the sampled mean of slopes is 0.53 with a standard deviation of 0.39? There are 14 observations of prices and lot sizes. (Use =T.INV() in Excel to compute the critical t-score).</p>
 <br> <button onclick="showText(&#39;myDIV9&#39;)">show / hide</button>
 <div id="myDIV9" style="display:none;">
 <p><br></p>
+<p>UNDER CONSTRUCTION</p>
 </div>
 <p><br></p>
 <p>Regression – slope hypothesis test. Is the sampled elasticity of the influence of lot size on Bronx housing prices meaningful? That is, is the sampled mean elasticity significantly different from zero? The sampled mean of slopes is 0.53 with a standard deviation of 0.39. There are 14 observations of prices and lot sizes. (Use =T.INV() in Excel to compute the critical t-score).</p>
 <br> <button onclick="showText(&#39;myDIV10&#39;)">show / hide</button>
 <div id="myDIV10" style="display:none;">
-<p><br></p>
+<p>UNDER CONSTRUCTION <br></p>
 </div>
 <p><br></p>
 </div>

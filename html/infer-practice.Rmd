@@ -169,7 +169,8 @@ $$
 
 ```{r ci-known}
 
-x_bar <- 60;  n <- 100 ; p_bar <- x_bar / n ; sig_p_bar <- sqrt(p*(1-p)/n) ; upper <- 0.025; z <- qnorm(1-upper, 0, 1)
+x_bar <- 60; n <- 100
+p_bar <- x_bar / n ; sig_p_bar <- sqrt(p_bar*(1-p_bar)/n) ; upper <- 0.025; z <- qnorm(1-upper, 0, 1)
 p_low <- p_bar - z * sig_p_bar
 p_high <- p_bar + z * sig_p_bar
 #p_low
@@ -191,7 +192,7 @@ $$
 \sigma_X^2 = np(1-p)
 $$
 
-The population variance of $\bar X / n = \bar p$ (standard deviatyion squared) is then
+The population variance of $\bar X / n = \bar p$ (standard deviation squared) is then
 
 $$
 \sigma_{\bar p}^2 = \frac{np(1-p)}{n^2} = \frac{p(1-p)}{n} = \frac{(`r p_bar`)(1- `r p_bar`)}{`r n`} = `r sig_p_bar^2`
@@ -253,9 +254,9 @@ $$
 
 ```{r ht-known}
 mu_0 <- 35 ; xbar <- 40; sig <- 4; n <- 9; zstar <- qnorm(0.95, 0,1)
-zstar
+#zstar
 z <- (xbar - mu_0) / (sig/sqrt(n))
-z
+#z
 ```
 
 ## Hypothesis testing -- known population variance. 
@@ -285,9 +286,9 @@ Since $z = `r z`$ exceeds the critical $z^* = `r zstar`$ we reject the manufactu
 
 ```{r ht-unknown}
 mu_0 <- 35 ; xbar <- 40; sig <- 7; n <- 9; tstar <- qt(0.95, n-1)
-tstar
+#tstar
 t <- (xbar - mu_0) / (sig/sqrt(n))
-t
+#t
 ```
 
 ## Hypothesis testing -- sampled variance. 
@@ -318,6 +319,8 @@ Since $t = `r t`$ exceeds the critical $t^* = `r tstar`$ we reject the manufactu
 </div>
 <br>
 
+## Regression -- inference
+
 Regression -- slope confidence interval. What is the 95% range of sampled elasticities of the influence of lot size on Bronx housing prices if the sampled mean of slopes is 0.53 with a standard deviation of 0.39? There are 14 observations of prices and lot sizes. (Use =T.INV() in Excel to compute the critical t-score). 
 
 <br>
@@ -326,7 +329,7 @@ Regression -- slope confidence interval. What is the 95% range of sampled elasti
 
 <br>
 
-
+UNDER CONSTRUCTION
 
 </div>
 <br>
@@ -338,6 +341,7 @@ Regression -- slope hypothesis test. Is the sampled elasticity of the influence 
 <button onclick="showText('myDIV10')">show / hide</button>
 <div id="myDIV10" style="display:none;">
 
+UNDER CONSTRUCTION
 <br>
 
 
