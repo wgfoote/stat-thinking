@@ -1,7 +1,7 @@
 ---
 title: "Interpreting Logistic Risk Analysis: A Discrete Choice Optimization Approach "
 author: "Bill Foote"
-date: "September 11, 2019"
+date: "`r Sys.Date()`"
 output: 
   html_document:
     toc: true
