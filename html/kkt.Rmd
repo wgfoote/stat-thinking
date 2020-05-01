@@ -1,0 +1,255 @@
+---
+title: "Non-linear Optimization in Business Analytics: An Introduction to KKT"
+author: "Bill Foote"
+date: "1/23/2020"
+output: bookdown::html_document2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Some motivation
+
+Many models in operations, finance, marketing, and economics are naturally formulated as optimization problems with inequality constraints. For example, we can consider a consumer's choice problem. Should the consume spend all her income? Should she consume all of her wealth? To allow her not to spend it all, we can formulate her optimization problem with inequality constraints in this way.
+
+$$
+\begin{align}
+max_x \, u(x) & \\ 
+subject \,\,  to & \\
+p·x \leq w \,\, & and \,\, x \geq 0.
+\end{align}
+$$
+
+Here $u(x)$ is a twice differentiable convex function that expresses preference for consumption of quantities $x$ Depending on the character of the function $u(x)$ and the values of $p$ and $w$, we may have $p·x < w$ or $p·x = w$ at a solution $x_0$ of this problem.
+
+Do either or both (or neither) of these two conditions have a solution $x_0$ that maximizes $u(x)$? While we start with a problem that has one constraint, multiple constraints such choices of labor and leisure with wealth and 24 hour time constraints, will make this simple approach difficult if not impossible at times to conclude that we can use the shape of $u(x)$ to get a maximal solution. In any case let's start with the one constraint case to get a feel for a way to solve this problem.
+
+$$
+\begin{align}
+max_x \, f(x) & \\ 
+subject \,\,  to & \\
+g(x) & \leq c \\ 
+x & \geq 0.
+\end{align}
+$$
+
+There are two possibilities for the solution of this problem. In the following figures, the blue closed curves are contours of $f$; values of the function increase in the direction shown by the blue arrows. The downward-sloping black line is the set of points x satisfying $g(x) = c$. The set of points $x$ satisfying $g(x) \leq c$ is the green shaded set below and to the left of the line.
+
+```{r}
+library(ggplot2)
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+    x <- xc + r*cos(seq(0, pi, length.out=100))
+    ymax <- yc + r*sin(seq(0, pi, length.out=100))
+    ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+    annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+yx <- 0.7 - (5/7) * (0:1)
+p <- ggplot(data.frame(x=0:1, y=0:1), aes(x=x, y=y)) +
+  gg_circle(r=0.25, xc=0.5, yc=0.5, color="blue", fill="grey", alpha=0.3) +
+  gg_circle(r=0.15, xc=0.5, yc=0.5, color="blue", fill="grey", alpha=0.2) +
+  gg_circle(r=0.10, xc=0.5, yc=0.5, color="blue", fill="grey", alpha=0.1) +
+  geom_line(aes(x = 0:1, y = yx)) +
+  geom_ribbon(aes(x = 0:1, ymin = 0,ymax = yx, alpha = 0.3, fill = 'green'))
+p
+```
+define the Lagrangean function L by
+
+$$
+L(x) = f(x) − \lambda(g(x) − c).
+$$
+
+1. If $g(x*) = c$ (as in the first figure) and the constraint satisfies a regularity condition, then $L'i(x*) = 0$ for all $i$.
+
+1. If $g(x*) < c$ (as in the second figure), then $f_i'(x*)=0$ for all $i$.
+
+In the first case $g(x*) = c$ so that $\lambda \geq 0$. To sketch a proof, suppose, to the contrary, that $\lambda < 0$. Then we know that a small decrease in $c$ raises the maximal value of $f$. That is, moving $x*$ inside the constraint raises the value of $f$, contradicting the fact that $x*$ is the solution of the problem.
+
+In the second case, the value of $\lambda$ does not even enter the conditions. This allows us to choose any value for it. Let's be a bit coy and set $\lambda = 0$. Under this assumption we have $f_i'(x) = L_i'(x)$ for all $x$, so that $L_i'(x*) = 0$ for all $i$. 
+
+Thus in both cases we have $L_i'(x*) = 0$ for all $i$, $\lambda \geq 0$, and $g(x*) \leq c$. In the first case we have $g(x*) = c$, with non-negative $\lambda$ and in the second case $\lambda = 0$.
+
+We may combine the two cases by writing the conditions as
+
+$$
+L_i'(x*)	 = 	0 
+$$
+
+for $j = 1, ..., n$, 
+
+$$
+\lambda \geq 0, \, g(x*) \leq c
+$$ 
+
+and either 
+
+$$
+\lambda  = 0 \,\, or \,\, g(x*) − c = 0.
+$$
+
+For this last expression, the product of two numbers is zero if and only if at least one of them is zero, so we can alternatively write these conditions as
+
+$$
+L'i(x*)	 = 	0 
+$$
+
+for $j = 1, ..., n$, 
+
+$$
+\lambda \geq 0, \,\, g(x*) \leq 	c\,,
+$$
+
+and 
+$$
+\lambda(g(x*) − c) = 0 \, .
+$$
+
+This sketch suggests that if $x*$ solves the problem and the constraint satisfies a regularity condition, then $x*$ must satisfy these conditions.
+Let's be careful and realize that the conditions do not rule out the possibility that both $\lambda = 0$ and $g(x*) = c$! They are thus necessary but not sufficient.
+
+The condition that either (i) $\lambda = 0$ and $g(x*) \leq c$ or (ii) $\lambda \geq 0$ and $g(x*) = c$ is called a **complementary slackness condition**.
+
+For a problem with many constraints, we introduce one multiplier for each constraint and obtain the Karush-Kuhn-Tucker conditions, defined as follows.
+
+```{theorem, name = "Karush-Kuhn-Tucker Conditions"}
+Let $f$ and $g_j$ for $j = 1, ..., m$ be differentiable functions of $n$ variables and let $c_j$ for $j = 1, ..., m$ be constants on the real number line.
+
+Define the function $L$ of $n$ variables by
+
+$$
+L(x)	 = 	f(x) − \Sigma_{j=1}^m \lambda_j(g_j(x) − c_j)
+$$
+
+for all $x$.
+
+The Karush-Kuhn-Tucker conditions for the problem
+$$
+max_x f(x)
+$$ 
+subject to 
+$$
+g_j(x) \leq c_j
+$$ 
+for $j = 1, ..., m$ constraints
+are
+
+$$
+L_i'(x) = 0
+$$ 
+
+for $i = 1, ..., n$
+
+$$
+\lambda_j \geq 0,\,\, g_j(x) \leq c_j\,\, and\,\, \lambda_j[g_j(x) − c_j] = 0
+$$
+
+for $j = 1, ..., m$.
+```
+
+These conditions were originally named for Harold W. Kuhn (1925–2014) and Albert W. Tucker (1905–1995), who formulated and studied them. It turns out that William Karush formulated these conditions in a masters thesis in 1939 that predates the Kuhn-Tucker research.
+
+The following example illustrates the conditions for a specific problem.
+
+```{example}
+Consider the problem
+$max_{x_1, x_2} \,\, [−(x_1 − 4)^2 − (x_2 − 4)^2]$
+subject to 
+$x_1 + x_2 \leq 4$
+and 
+$x_1 + 3x_2 \leq 9$,
+illustrated in the following figure.
+We have
+
+$$
+L(x_1, x_2)	 = 	−(x_1 − 4)^2 − (x_2 − 4)^2 − \lambda_1(x_1 + x_2 − 4) − \lambda_2(x_1 + 3x_2 − 9)
+$$
+  
+The Karush-Kuhn-Tucker conditions are
+
+$$
+\begin{array}
+−2(x_1 − 4) − \lambda_1 − \lambda_2 & = 0 \\
+−2(x_2 − 4) − \lambda_1 − 3\lambda_2 & = 0 \\
+x_1 + x_2 \leq 4, \, & \lambda_1 \geq 0, \,\, and \lambda_1(x_1 + x_2 − 4) = 0 \\
+x_1 + 3x_2 \leq 9, \, & \lambda_2 \geq 0, and \,\, \lambda_2(x_1 + 3x_2 − 9) = 0
+\end{array}
+$$
+
+  What are the solutions of these conditions? Start by looking at the two conditions $\lambda_1(x_1 + x_2 − 4) = 0$ and $\lambda_2(x_1 + 3x_2 − 9) = 0$. These two conditions yield the following four cases.
+
+**Case 1:** $x_1 + x_2 = 4$ and $x_1 + 3x_2 = 9$. In this case we have $x_1 = 3/2$ and $x_2 = 5/2$. Then the first two equations are
+
+$$
+\begin{align}
+5 − \lambda_1 − \lambda_2	 &= 0 \\
+3 − \lambda_1 − 3\lambda_2 &= 0
+\end{align}
+$$
+  
+which imply that $\lambda_1 = 6$ and $\lambda_2 = −1$. But this violates the condition $\lambda_2 ≥ 0$.
+
+**Case 2:** $x_1 + x_2 = 4$ and $x_1 + 3x_2 < 9$, so that $\lambda_2 = 0$.
+
+The first two equations imply $x_1 = x_2 = 2$ and $\lambda_1 = 4$. All the conditions are satisfied, so $(x_1, x_2, \lambda_1, \lambda_2) = (2, 2, 4, 0)$ is a solution.
+
+**Case 3:** $x_1 + x_2 < 4$ and $x_1 + 3x_2 = 9$, so that $\lambda_1 = 0$.
+
+Then the first two equations imply $x_1 = 33/10$ and $x_2 = 19/10$, violating $x_1 + x_2 < 4$.
+
+**Case 4:** $x_1 + x_2 < 4$ and $x_1 + 3x_2 < 9$, so that $\lambda_1 = \lambda_2 = 0$. 
+
+Then the first two equations imply $x_1 = x_2 = 4$, violating $x_1 + x_2 < 4$.
+
+So (x_1, x_2, \lambda_1, \lambda_2) = (2, 2, 4, 0) is the single solution of the Karush-Kuhn-Tucker conditions. Thus the unique solution is $(x_1, x_2) = (2, 2)$.  
+```
+
+```{example}
+Here is a completely worked example where both objective function $f(x_1, x_2)$
+
+$max f(x_1, x_2) = 4x_1 + 3x_2$ subject to $g(x_1, x$2) = 2x_1 + x_2 \leq 10$ and $x_1,\,\, x_2 \geq 0$. 
+
+We first form the Lagrangian:
+
+$$
+L = 4x_1 + 3x_2 + \lambda(10 − 2x_1 − x_2)
+$$
+
+The necessary conditions for a point to be an extremum are:
+
+$$
+\begin{align}  
+L_{x_1} = 4 − 2\lambda \leq 0,  \,\, x_1 & \geq 0, \,\, x_1(4 − 2\lambda) = 0 \\
+L_{x_2} = 3 − \lambda \leq 0, \,\, x_2 & \geq 0, \,\, x_2(3 − \lambda) = 0 \\
+2x_1 + x_2 − 10 \leq 0, \,\, \lambda & \geq 0, \, \lambda(10 − 2x_1 − x_2) = 0
+\end{align}
+$$
+
+We solve this set of inequalities and equations to find points which may be extrema. 
+
+Start with $x_1(4 − 2\lambda) = 0 $ which implies $x_1 = 0$ or $\lambda = 2$
+
+We then suppose $\lambda = 2$. 
+
+Then we go to $3 − \lambda \leq 0$ which implies $1 \leq 0$ which is clearly false. Thus, $x_1 = 0$. 
+
+Now we confront $x_2(3 − \lambda) = 0$ which implies $x_2 = 0$ or $\lambda = 3$
+
+We can see that, if $x_2 = 0$ (together with $x_1 = 0$) that $10\lambda = 0$ which implies $\lambda = 0$ But this contradicts $4 − 2\lambda \leq 0$. So, we end up with $x_1 = 0$ and $\lambda = 3$. 
+
+Finally: $3(10 − x_2) = 0$ which implies $x_2 = 10$.
+
+We have solved the system and found the only solution, which is x_1 = 0, x_2 = 10, \lambda = 3 and thus the maximized $f(x_1, x_2) = 30$. 
+```
+
+<br>
+
+As with equality constraints, $\lambda$ measures the increase in the maximized objective function value $f(x_1, x_2)$ for a small change in the constraint's righthand-side value.
+
+But do we have a maximized value of $f(x_1, x_2)$? We do if $g(x_1, x_2)$ is convex and $f(x_1, x_2)$ is concave. Since $g(x_1, x_2)$ is linear it is also convex and concave, so certainly convex. The hessian matrix of $f(x_1, x_2)$ is
+
+$$
+H = \left[
+\begin{align}
+\end{align}
+\right]
+$$
